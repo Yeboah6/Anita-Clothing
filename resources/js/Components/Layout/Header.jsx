@@ -151,18 +151,7 @@ function useCart() {
 
 // ─── Icons (inline SVG replacing lucide-react) ───────────────────────────────
 const IconShoppingBag = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.75"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
     <line x1="3" y1="6" x2="21" y2="6" />
     <path d="M16 10a4 4 0 0 1-8 0" />
@@ -170,18 +159,7 @@ const IconShoppingBag = () => (
 );
 
 const IconMenu = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.75"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="3" y1="6" x2="21" y2="6" />
     <line x1="3" y1="12" x2="21" y2="12" />
     <line x1="3" y1="18" x2="21" y2="18" />
@@ -189,20 +167,16 @@ const IconMenu = () => (
 );
 
 const IconX = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.75"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const IconUser = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
@@ -276,7 +250,7 @@ const navLinks = [
   { name: "About", path: "/about" },
 ];
 
-const NavLink = ({ href, children, onClick }) => {
+const NavLink = ({ href, children, onClick, style: extraStyle }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <a
@@ -289,6 +263,7 @@ const NavLink = ({ href, children, onClick }) => {
         textDecoration: "none",
         color: hovered ? tokens.foreground : tokens.mutedForeground,
         transition: "color 0.15s ease",
+        ...extraStyle,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -301,6 +276,11 @@ const NavLink = ({ href, children, onClick }) => {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuBtnHovered, setMenuBtnHovered] = useState(false);
+  const [registerHovered, setRegisterHovered] = useState(false);
+  const [loginHovered, setLoginHovered] = useState(false);
+  const [accountHovered, setAccountHovered] = useState(false);
+
+  const isLoggedIn = false;
 
   useEffect(() => { injectFonts(); }, []);
 
@@ -319,7 +299,6 @@ const Header = () => {
       }}
     >
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1rem" }}>
-
         {/* Main row */}
         <div
           style={{
@@ -347,15 +326,8 @@ const Header = () => {
             </span>
           </a>
 
-          {/* Desktop nav */}
-          <nav
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "2rem",
-            }}
-            className="anita-desktop-nav"
-          >
+          {/* Desktop nav — NO inline display style, controlled by CSS class only */}
+          <nav className="anita-desktop-nav">
             {navLinks.map((link) => (
               <NavLink key={link.name} href={link.path}>
                 {link.name}
@@ -365,19 +337,87 @@ const Header = () => {
 
           {/* Right controls */}
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            {/* Desktop auth links — NO inline display style */}
+            <div className="anita-desktop-auth">
+              {isLoggedIn ? (
+                <a
+                  href="/account"
+                  aria-label="My account"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    textDecoration: "none",
+                    color: accountHovered ? tokens.foreground : tokens.mutedForeground,
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    fontFamily: tokens.fontBody,
+                    transition: "color 0.15s ease",
+                  }}
+                  onMouseEnter={() => setAccountHovered(true)}
+                  onMouseLeave={() => setAccountHovered(false)}
+                >
+                  <IconUser />
+                  <span>Account</span>
+                </a>
+              ) : (
+                <>
+                  <a
+                    href="/register"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      padding: "0.375rem 0.875rem",
+                      fontSize: "0.8125rem",
+                      fontWeight: 500,
+                      fontFamily: tokens.fontBody,
+                      textDecoration: "none",
+                      borderRadius: tokens.radius,
+                      border: "none",
+                      backgroundColor: tokens.foreground,
+                      color: tokens.background,
+                      opacity: registerHovered ? 0.9 : 1,
+                      transition: "opacity 0.2s ease",
+                      whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={() => setRegisterHovered(true)}
+                    onMouseLeave={() => setRegisterHovered(false)}
+                  >
+                    Register
+                  </a>
+                  <a
+                    href="/login"
+                    style={{
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                      fontFamily: tokens.fontBody,
+                      textDecoration: "none",
+                      color: loginHovered ? tokens.foreground : tokens.mutedForeground,
+                      transition: "color 0.15s ease",
+                      whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={() => setLoginHovered(true)}
+                    onMouseLeave={() => setLoginHovered(false)}
+                  >
+                    Sign In
+                  </a>
+                </>
+              )}
+            </div>
+
             <CartButton />
 
-            {/* Hamburger — visible on mobile only via inline media trick */}
+            {/* Hamburger — visible on mobile only */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
+              className="anita-mobile-menu-btn"
               style={{
                 ...ghostIconBtn,
                 backgroundColor: menuBtnHovered ? tokens.border : "transparent",
               }}
               onMouseEnter={() => setMenuBtnHovered(true)}
               onMouseLeave={() => setMenuBtnHovered(false)}
-              className="anita-mobile-menu-btn"
             >
               {isMenuOpen ? <IconX /> : <IconMenu />}
             </button>
@@ -387,6 +427,7 @@ const Header = () => {
         {/* Mobile nav */}
         {isMenuOpen && (
           <nav
+            className="anita-mobile-nav"
             style={{
               borderTop: `1px solid ${tokens.border}`,
               padding: "1rem 0",
@@ -394,7 +435,6 @@ const Header = () => {
               flexDirection: "column",
               gap: "1rem",
             }}
-            className="anita-mobile-nav"
           >
             {navLinks.map((link) => (
               <NavLink
@@ -405,19 +445,63 @@ const Header = () => {
                 {link.name}
               </NavLink>
             ))}
+
+            {/* Mobile auth divider */}
+            <div style={{ height: "1px", backgroundColor: tokens.border, margin: "0.25rem 0" }} />
+
+            {/* Mobile auth links */}
+            {isLoggedIn ? (
+              <NavLink
+                href="/account"
+                onClick={() => setIsMenuOpen(false)}
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <IconUser />
+                My Account
+              </NavLink>
+            ) : (
+              <>
+                <NavLink href="/register" onClick={() => setIsMenuOpen(false)}>
+                  Create Account
+                </NavLink>
+                <NavLink href="/login" onClick={() => setIsMenuOpen(false)}>
+                  Sign In
+                </NavLink>
+              </>
+            )}
           </nav>
         )}
       </div>
 
       {/* Responsive rules */}
       <style>{`
-        .anita-desktop-nav { display: none; }
-        .anita-mobile-menu-btn { display: inline-flex; }
-        .anita-mobile-nav { display: flex; }
+        /* Default (mobile): hide desktop nav and auth, show mobile menu button */
+        .anita-desktop-nav {
+          display: none;
+        }
+        .anita-desktop-auth {
+          display: none;
+        }
+        .anita-mobile-menu-btn {
+          display: inline-flex;
+        }
+
+        /* Desktop (≥768px): show desktop nav and auth, hide mobile menu button */
         @media (min-width: 768px) {
-          .anita-desktop-nav { display: flex; }
-          .anita-mobile-menu-btn { display: none; }
-          .anita-mobile-nav { display: none; }
+          .anita-desktop-nav {
+            display: flex !important;
+            align-items: center;
+            gap: 2rem;
+          }
+          .anita-desktop-auth {
+            display: flex !important;
+            align-items: center;
+            gap: 0.75rem;
+            margin-right: 0.5rem;
+          }
+          .anita-mobile-menu-btn {
+            display: none !important;
+          }
         }
       `}</style>
     </header>
