@@ -8,6 +8,6 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     public function Index() {
-        return inertia('Admin/Products');
+        return inertia('Admin/AdminProducts');
     }
 }

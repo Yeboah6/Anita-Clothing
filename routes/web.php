@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin\OrderController;
 
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\WishlistController;
-use App\Http\Controllers\Account\OrderController;
+use App\Http\Controllers\Account\CustomerOrderController;
 use App\Http\Controllers\Account\AddressController;
 
 
@@ -52,6 +52,6 @@ Route::get('/admin/customers', [CustomerController::class, 'Index']);
 
 // Customer & Account Routes
 Route::get('/account/profile', [AccountController::class, 'Index']);
-Route::get('/account/orders', [OrderController::class, 'Index']);
+Route::get('/account/orders', [CustomerOrderController::class, 'Index']);
 Route::get('/account/wishlist', [WishlistController::class, 'Index']);
 Route::get('/account/addresses', [AddressController::class, 'Index']);
