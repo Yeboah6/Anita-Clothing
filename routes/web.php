@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\CustomerController;
 
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\WishlistController;
@@ -51,7 +52,7 @@ Route::get('/admin/customers', [CustomerController::class, 'Index']);
 
 
 // Customer & Account Routes
-Route::get('/account/profile', [AccountController::class, 'Index']);
+Route::get('/account/profile', [ProfileController::class, 'Index']);
 Route::get('/account/orders', [CustomerOrderController::class, 'Index']);
 Route::get('/account/wishlist', [WishlistController::class, 'Index']);
 Route::get('/account/addresses', [AddressController::class, 'Index']);

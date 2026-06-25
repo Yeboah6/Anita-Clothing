@@ -8,6 +8,6 @@ use Illuminate\Http\Request;
 class CustomerOrderController extends Controller
 {
     public function Index() {
-        return inertia('Customer/AccountOrder')
+        return inertia('Customer/AccountOrder');
     }
 }

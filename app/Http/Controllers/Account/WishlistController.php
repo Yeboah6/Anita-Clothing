@@ -8,6 +8,6 @@ use Illuminate\Http\Request;
 class WishlistController extends Controller
 {
     public function Index() {
-        return inertia('Customer/AccountWishlist')
+        return inertia('Customer/AccountWishlist');
     }
 }
