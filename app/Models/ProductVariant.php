@@ -8,8 +8,11 @@ use App\Models\Product;
 
 class ProductVariant extends Model
 {
-    protected $table = 'product_variants';
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
+    protected $table = 'product_variants';
     protected $fillable = [
         'product_variant_id',
         'product_id',

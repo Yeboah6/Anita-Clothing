@@ -8,8 +8,10 @@ use App\Models\Product;
 
 class Category extends Model
 {
-    protected $table = 'categories';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
+    protected $table = 'categories';
     protected $fillable = [
         'category_id',
         'slug',

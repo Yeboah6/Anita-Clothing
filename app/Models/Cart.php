@@ -9,8 +9,10 @@ use App\Models\Product;
 
 class Cart extends Model
 {
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
     protected $table = 'carts';
-
     protected $fillable = [
         'cart_id',
         'user_id',

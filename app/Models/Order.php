@@ -10,10 +10,12 @@ use App\Models\Payment;
 
 class Order extends Model
 {
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
     protected $table = 'orders';
-
     protected $fillable = [
-        'order_id',
+        // 'order_id',
         'user_id',
         'order_number',
         'total_number',
