@@ -8,7 +8,7 @@ use App\Models\Product;
 
 class ProductVariant extends Model
 {
-    protected $table = 'product_variants';
+    // protected $table = 'product_variants';
 
     protected $fillable = [
         'product_variant_id',

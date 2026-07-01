@@ -1,5 +1,6 @@
 // ─── AccountSidebar.jsx ──────────────────────────────────────────────────────
 import React, { useState } from "react";
+import { useForm } from "@inertiajs/react";
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const tokens = {
@@ -11,6 +12,7 @@ const tokens = {
   secondary: "#f5f5f5",
   border: "#e6e6e6",
   radius: "4px",
+  destructive: "#ef4444",
 };
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
@@ -64,10 +66,9 @@ const AccountNavLink = ({ href, isActive, icon: Icon, label, onClick }) => {
 
   const handleClick = (e) => {
     if (onClick) {
-      // e.preventDefault();
+      e.preventDefault();
       onClick(href);
     }
-    // If no onClick, browser navigates naturally via href
   };
 
   return (
@@ -84,10 +85,11 @@ const AccountNavLink = ({ href, isActive, icon: Icon, label, onClick }) => {
         fontWeight: isActive ? 500 : 400,
         textDecoration: "none",
         color: isActive ? tokens.foreground : tokens.mutedForeground,
-        backgroundColor: isActive ? tokens.background : hovered ? tokens.background : "transparent",
+        backgroundColor: isActive ? tokens.secondary : hovered ? tokens.secondary : "transparent",
         borderBottom: "2px solid transparent",
         borderLeft: "2px solid transparent",
         borderBottomColor: isActive ? tokens.foreground : "transparent",
+        borderRadius: tokens.radius,
         transition: "background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease",
         whiteSpace: "nowrap",
         flexShrink: 0,
@@ -100,8 +102,58 @@ const AccountNavLink = ({ href, isActive, icon: Icon, label, onClick }) => {
       <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
         <Icon />
       </span>
-      {label}
+      <span className="account-sidebar-label">{label}</span>
     </a>
+  );
+};
+
+// ─── LogoutButton Component ──────────────────────────────────────────────────
+const LogoutButton = () => {
+  const { post, processing } = useForm();
+  const [hovered, setHovered] = useState(false);
+
+  const handleLogout = (e) => {
+    e.preventDefault();
+    post('/logout');
+  };
+
+  return (
+    <button
+      onClick={handleLogout}
+      disabled={processing}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.75rem",
+        width: "100%",
+        padding: "0.75rem 1rem",
+        fontSize: "0.875rem",
+        fontFamily: tokens.fontBody,
+        fontWeight: 400,
+        textDecoration: "none",
+        color: hovered ? tokens.destructive : tokens.mutedForeground,
+        backgroundColor: hovered ? tokens.secondary : "transparent",
+        border: "none",
+        borderLeft: "2px solid transparent",
+        borderRadius: tokens.radius,
+        cursor: processing ? "not-allowed" : "pointer",
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+        opacity: processing ? 0.5 : 1,
+        transition: "background-color 0.15s ease, color 0.15s ease",
+        marginTop: "1rem",
+      }}
+      className="account-sidebar-link account-sidebar-signout"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+        <IconLogOut />
+      </span>
+      <span className="account-sidebar-label">
+        {processing ? "Signing out…" : "Sign out"}
+      </span>
+    </button>
   );
 };
 
@@ -110,7 +162,6 @@ const AccountSidebar = ({
   activePath = "/account",
   onNavigate,
   showSignOut = true,
-  signOutHref = "/",
   className = "",
 }) => {
   const checkIsActive = (item) => {
@@ -129,6 +180,7 @@ const AccountSidebar = ({
           gap: "0.25rem",
           overflowX: "auto",
           WebkitOverflowScrolling: "touch",
+          padding: "0.5rem 0",
         }}
         className="account-sidebar-nav"
       >
@@ -143,41 +195,7 @@ const AccountSidebar = ({
           />
         ))}
 
-        {showSignOut && (
-          <a
-            href={signOutHref}
-            onClick={(e) => {
-              if (onNavigate) {
-                e.preventDefault();
-                onNavigate(signOutHref);
-              }
-            }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem",
-              padding: "0.75rem 1rem",
-              fontSize: "0.875rem",
-              fontFamily: tokens.fontBody,
-              textDecoration: "none",
-              color: tokens.mutedForeground,
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-              borderBottom: "2px solid transparent",
-              borderLeft: "2px solid transparent",
-              transition: "color 0.15s ease",
-              marginTop: 0,
-            }}
-            className="account-sidebar-link account-sidebar-signout"
-            onMouseEnter={(e) => (e.currentTarget.style.color = tokens.foreground)}
-            onMouseLeave={(e) => (e.currentTarget.style.color = tokens.mutedForeground)}
-          >
-            <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-              <IconLogOut />
-            </span>
-            Sign out
-          </a>
-        )}
+        {showSignOut && <LogoutButton />}
       </nav>
 
       {/* Responsive styles */}
@@ -199,25 +217,29 @@ const AccountSidebar = ({
           border-bottom: 2px solid transparent;
           border-left: 2px solid transparent;
         }
+        .account-sidebar-label {
+          display: inline;
+        }
         
         /* Desktop: vertical sidebar */
         @media (min-width: 768px) {
           .account-sidebar-nav {
             flex-direction: column !important;
             overflow-x: visible;
+            padding: 0;
           }
           .account-sidebar-link {
             border-bottom: none !important;
-            border-left: 2px solid transparent;
-          }
-          /* Move active indicator from bottom to left */
-          .account-sidebar-link[style*="border-bottom-color: rgb(20, 20, 20)"] {
+            border-left: 2px solid transparent !important;
             border-bottom-color: transparent !important;
-            border-left-color: rgb(20, 20, 20) !important;
           }
-          /* Add margin-top to sign out on desktop */
+          /* Active state on desktop - left border instead of bottom */
+          .account-sidebar-link[aria-current="page"] {
+            border-left-color: ${tokens.foreground} !important;
+            border-bottom-color: transparent !important;
+          }
           .account-sidebar-signout {
-            margin-top: 1rem !important;
+            margin-top: 1.5rem !important;
           }
         }
       `}</style>

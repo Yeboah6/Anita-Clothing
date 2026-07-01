@@ -39,20 +39,41 @@ Route::get('/checkout', function () {
 });
 
 // Auth Routes
-Route::get('/register', [AuthController::class, 'Register']);
-Route::get('/login', [AuthController::class, 'Login']);
+// Guest routes (only accessible when not logged in)
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/register', [AuthController::class, 'store']);
+
+    Route::get('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'storeLogin']);
+});
+
 Route::get('/forgot-password', [AuthController::class, 'ForgotPassword']);
 
+Route::middleware('auth')->group(function () {
+    // Logout
+    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
-// Admin Routes
-Route::get('/admin', [DashboardController::class, 'Index']);
-Route::get('/admin/products', [ProductController::class, 'Index']);
-Route::get('/admin/orders', [OrderController::class, 'Index']);
-Route::get('/admin/customers', [CustomerController::class, 'Index']);
+    // Customer & Account Routes
+    Route::middleware('role:customer')->group(function () {
+        Route::get('/account/profile', [ProfileController::class, 'Index']);
+        Route::get('/account/orders', [CustomerOrderController::class, 'Index']);
+        Route::get('/account/wishlist', [WishlistController::class, 'Index']);
+        Route::get('/account/addresses', [AddressController::class, 'Index']);
+    });
+
+    // Admin Routes
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/admin', [DashboardController::class, 'Index']);
+
+        Route::get('/admin/products', [ProductController::class, 'Index']);
+        Route::get('/admin/products/add', [ProductController::class, 'create']);
+
+        Route::get('/admin/orders', [OrderController::class, 'Index']);
+        Route::get('/admin/customers', [CustomerController::class, 'Index']);
+    });
+
+});
 
 
-// Customer & Account Routes
-Route::get('/account/profile', [ProfileController::class, 'Index']);
-Route::get('/account/orders', [CustomerOrderController::class, 'Index']);
-Route::get('/account/wishlist', [WishlistController::class, 'Index']);
-Route::get('/account/addresses', [AddressController::class, 'Index']);
+

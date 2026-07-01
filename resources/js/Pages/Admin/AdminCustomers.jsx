@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "@/Components/Admin/AdminSidebar";
+import { usePage } from "@inertiajs/react";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -27,17 +28,6 @@ const tokens = {
   green: "#16a34a",
   orange: "#f59e0b",
 };
-
-// ─── Data ────────────────────────────────────────────────────────────────────
-const mockCustomers = [
-  { id: "CUS-201", name: "Emma Laurent", email: "emma.l@example.com", joined: "2025-08-12", orders: 7, spent: 2140, status: "active" },
-  { id: "CUS-202", name: "Sofia Marchetti", email: "sofia.m@example.com", joined: "2025-09-03", orders: 4, spent: 1289, status: "active" },
-  { id: "CUS-203", name: "Olivia Chen", email: "olivia.c@example.com", joined: "2025-06-18", orders: 12, spent: 4320, status: "active" },
-  { id: "CUS-204", name: "Amelia Wright", email: "amelia.w@example.com", joined: "2025-11-22", orders: 2, spent: 330, status: "active" },
-  { id: "CUS-205", name: "Isabella Romano", email: "isabella.r@example.com", joined: "2025-05-09", orders: 8, spent: 2895, status: "active" },
-  { id: "CUS-206", name: "Charlotte Dubois", email: "charlotte.d@example.com", joined: "2025-10-30", orders: 3, spent: 740, status: "inactive" },
-  { id: "CUS-207", name: "Mia Andersson", email: "mia.a@example.com", joined: "2026-01-15", orders: 1, spent: 125, status: "active" },
-];
 
 const getInitials = (name) =>
   name
@@ -101,6 +91,28 @@ const getStatusStyle = (status) => {
 
 // ─── AdminCustomers Page ─────────────────────────────────────────────────────
 const AdminCustomers = () => {
+
+  const { customers: rawCustomers = [], stats = {} } = usePage().props;
+
+  const Customers = rawCustomers.map(customer => ({
+    id: `CUS-${customer.id}`,
+    name: customer.name,
+    email: customer.email,
+    joined: customer.joined,
+    orders: customer.orders_count,
+    spent: customer.total_spent,
+    status: customer.status,
+    phone: customer.phone,
+    lastOrder: customer.last_order_at,
+  }));
+
+  const customerStats = {
+    totalCustomers: stats.total_customers || Customers.length,
+    activeCustomers: stats.active_customers || Customers.filter(c => c.status === "active").length,
+    totalRevenue: stats.total_revenue || Customers.reduce((sum, c) => sum + c.spent, 0),
+    averageOrderValue: stats.average_order_value || 0,
+  };
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -133,14 +145,14 @@ const AdminCustomers = () => {
   };
 
   // Filter customers by search query
-  const filteredCustomers = mockCustomers.filter(
+  const filteredCustomers = Customers.filter(
     (c) =>
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const activeCount = mockCustomers.filter((c) => c.status === "active").length;
+  const activeCount = Customers.filter((c) => c.status === "active").length;
 
   // Generate consistent avatar colors based on name
   const getAvatarColor = (name) => {
@@ -159,6 +171,10 @@ const AdminCustomers = () => {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
     return colors[Math.abs(hash) % colors.length];
+  };
+
+  const handleEmailCustomer = (email) => {
+    window.location.href = `mailto:${email}`;
   };
 
   return (
@@ -314,8 +330,24 @@ const AdminCustomers = () => {
             Customers
           </h1>
           <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
-            {mockCustomers.length} customers — {activeCount} active
+            {customerStats.totalCustomers} customers — {customerStats.activeCustomers} active
           </p>
+
+          {/* Quick stats */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginTop: "1.5rem" }}>
+            <div style={{ padding: "1rem", backgroundColor: tokens.secondary, borderRadius: tokens.radius }}>
+              <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: "0 0 0.25rem" }}>Total Revenue</p>
+              <p style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>
+                ${customerStats.totalRevenue.toLocaleString()}
+              </p>
+            </div>
+            <div style={{ padding: "1rem", backgroundColor: tokens.secondary, borderRadius: tokens.radius }}>
+              <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: "0 0 0.25rem" }}>Average Order Value</p>
+              <p style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>
+                ${customerStats.averageOrderValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Page content */}
@@ -369,7 +401,11 @@ const AdminCustomers = () => {
                   {filteredCustomers.length === 0 ? (
                     <tr>
                       <td colSpan={6} style={{ padding: "3rem 1.5rem", textAlign: "center", color: tokens.mutedForeground }}>
-                        No customers found matching "{searchQuery}"
+                        {searchQuery ? (
+                          <>No customers found matching "{searchQuery}"</>
+                        ) : (
+                          <>No customers yet</>
+                        )}
                       </td>
                     </tr>
                   ) : (
@@ -381,7 +417,6 @@ const AdminCustomers = () => {
                         <tr key={customer.id} style={{ borderBottom: `1px solid ${tokens.border}` }}>
                           <td style={{ padding: "0.75rem 1.5rem" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                              {/* Avatar */}
                               <div
                                 style={{
                                   width: "36px",
@@ -400,7 +435,6 @@ const AdminCustomers = () => {
                               >
                                 {getInitials(customer.name)}
                               </div>
-                              {/* Name + Email */}
                               <div>
                                 <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: 0 }}>
                                   {customer.name}
@@ -437,6 +471,7 @@ const AdminCustomers = () => {
                           </td>
                           <td style={{ padding: "0.75rem 1.5rem", textAlign: "right" }}>
                             <button
+                              onClick={() => handleEmailCustomer(customer.email)}
                               aria-label={`Email ${customer.name}`}
                               style={{
                                 display: "inline-flex",

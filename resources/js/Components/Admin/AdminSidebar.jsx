@@ -1,5 +1,6 @@
 // ─── AdminSidebar.jsx ────────────────────────────────────────────────────────
 import React, { useState } from "react";
+import { useForm } from "@inertiajs/react";
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const tokens = {
@@ -57,6 +58,14 @@ const IconArrowLeft = () => (
   </svg>
 );
 
+const IconLogOut = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+
 // ─── Navigation items ────────────────────────────────────────────────────────
 const navItems = [
   { title: "Overview", url: "/admin", icon: IconLayoutDashboard },
@@ -111,11 +120,62 @@ const NavLink = ({ item, isActive, collapsed, onClick }) => {
   );
 };
 
+// ─── LogoutButton Component ──────────────────────────────────────────────────
+const LogoutButton = () => {
+  const { post, processing } = useForm();
+  const [hovered, setHovered] = useState(false);
+
+  const handleLogout = (e) => {
+    e.preventDefault();
+    post('/logout');
+  };
+
+  return (
+    <button
+      onClick={handleLogout}
+      disabled={processing}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.75rem",
+        width: "100%",
+        padding: "0.75rem 1rem",
+        fontSize: "0.875rem",
+        fontFamily: tokens.fontBody,
+        fontWeight: 400,
+        textDecoration: "none",
+        color: hovered ? tokens.destructive : tokens.mutedForeground,
+        backgroundColor: hovered ? tokens.secondary : "transparent",
+        border: "none",
+        borderLeft: "2px solid transparent",
+        borderRadius: tokens.radius,
+        cursor: processing ? "not-allowed" : "pointer",
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+        opacity: processing ? 0.5 : 1,
+        transition: "background-color 0.15s ease, color 0.15s ease",
+        marginTop: "1rem",
+      }}
+      className="account-sidebar-link account-sidebar-signout"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+        <IconLogOut />
+      </span>
+      <span className="account-sidebar-label">
+        {processing ? "Signing out…" : "Sign out"}
+      </span>
+    </button>
+  );
+};
+
 // ─── AdminSidebar Component ──────────────────────────────────────────────────
 const AdminSidebar = ({
   collapsed = false,
   isMobile = false,
   isOpen = true,
+  showSignOut = true,
   onNavigate,
   activeUrl = "/admin",
 }) => {
@@ -250,6 +310,7 @@ const AdminSidebar = ({
             />
           );
         })}
+        {showSignOut && <LogoutButton />} 
       </nav>
 
       {/* Sidebar Footer */}

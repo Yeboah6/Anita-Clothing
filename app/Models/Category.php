@@ -8,7 +8,7 @@ use App\Models\Product;
 
 class Category extends Model
 {
-    protected $table = 'categories';
+    // protected $table = 'categories';
 
     protected $fillable = [
         'category_id',

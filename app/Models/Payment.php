@@ -8,7 +8,7 @@ use App\Models\Order;
 
 class Payment extends Model
 {
-    protected $table = 'payments';
+    // protected $table = 'payments';
 
     protected $fillable = [
         'payment_id',

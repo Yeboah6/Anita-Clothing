@@ -13,16 +13,15 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('product_id');
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('slug');
-            $table->string('price');
-            $table->string('discount_amount');
-            $table->string('stock_quantity');
-            $table->string('sku');
-            $table->boolean('featured');
-            $table->string('status');
+            $table->string('slug')->unique();
+            $table->decimal('price', 10, 2);
+            $table->decimal('discount_amount', 10, 2)->default(0);
+            $table->integer('stock_quantity')->default(0);
+            $table->string('sku')->unique();
+            $table->boolean('featured')->default(false);
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }

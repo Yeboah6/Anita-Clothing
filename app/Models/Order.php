@@ -10,13 +10,13 @@ use App\Models\Payment;
 
 class Order extends Model
 {
-    protected $table = 'orders';
+    // protected $table = 'orders';
 
     protected $fillable = [
         'order_id',
         'user_id',
         'order_number',
-        'total_number',
+        'total_amount',
         'payment_status',
         'order_status',
         'shipping_address'
@@ -35,5 +35,10 @@ class Order extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class, 'order_id');
+    }
+
+    public function getFormattedTotalAttribute(): string
+    {
+        return '$' . number_format($this->total_amount, 2);
     }
 }

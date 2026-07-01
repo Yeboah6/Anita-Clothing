@@ -317,7 +317,8 @@ const AdminProducts = () => {
                 Manage your product catalog — {products.length} items
               </p>
             </div>
-            <button
+            <a
+              href="/admin/products/add"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -334,13 +335,14 @@ const AdminProducts = () => {
                 opacity: addBtnHovered ? 0.9 : 1,
                 transition: "opacity 0.2s ease",
                 whiteSpace: "nowrap",
+                textDecoration: "none",
               }}
               onMouseEnter={() => setAddBtnHovered(true)}
               onMouseLeave={() => setAddBtnHovered(false)}
             >
               <IconPlus />
               Add Product
-            </button>
+            </a>
           </div>
 
           {/* Search bar for mobile */}

@@ -10,4 +10,8 @@ class ProductController extends Controller
     public function Index() {
         return inertia('Admin/AdminProducts');
     }
+
+    public function create() {
+        return inertia('Admin/Product/AddProduct');
+    }
 }

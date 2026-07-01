@@ -8,7 +8,7 @@ use App\Models\Product;
 
 class ProductImage extends Model
 {
-    protected $table = 'product_images';
+    // protected $table = 'product_images';
 
     protected $fillable = [
         'product_image_id',
