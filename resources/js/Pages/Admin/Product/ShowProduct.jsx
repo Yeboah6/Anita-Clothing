@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AdminSidebar from "./AdminSidebar";
+import AdminSidebar from "@/Components/Admin/AdminSidebar";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -28,43 +28,23 @@ const tokens = {
   destructive: "#ef4444",
 };
 
-// ─── Mock Product Data ───────────────────────────────────────────────────────
-const mockProduct = {
-  id: "1",
-  name: "Silk Midi Dress",
-  slug: "silk-midi-dress",
-  description:
-    "A timeless silk midi dress featuring a flattering A-line silhouette. Perfect for both day and evening occasions. The luxurious fabric drapes beautifully and feels incredible against the skin.",
-  price: 289,
-  discountAmount: 0,
-  stockQuantity: 34,
-  sku: "DRESS-001",
-  featured: true,
-  status: "active",
-  category: { id: "1", name: "Dresses", slug: "dresses" },
-  images: [
-    "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&q=80",
-    "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=600&q=80",
-    "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=600&q=80",
-  ],
-  variants: [
-    { id: "v1", size: "XS", color: "Champagne", stockQuantity: 8, colorHex: "#F7E7CE" },
-    { id: "v2", size: "S", color: "Champagne", stockQuantity: 12, colorHex: "#F7E7CE" },
-    { id: "v3", size: "M", color: "Champagne", stockQuantity: 10, colorHex: "#F7E7CE" },
-    { id: "v4", size: "S", color: "Black", stockQuantity: 15, colorHex: "#1a1a1a" },
-    { id: "v5", size: "M", color: "Black", stockQuantity: 20, colorHex: "#1a1a1a" },
-    { id: "v6", size: "L", color: "Sage", stockQuantity: 6, colorHex: "#9CAF88" },
-  ],
-  createdAt: "2025-06-15",
-  updatedAt: "2026-01-20",
-};
+// Palette used to render a color swatch next to each variant row.
+// The DB only stores the color name (e.g. "Black"), so we resolve the hex
+// value locally rather than persisting a redundant column.
+const availableColors = [
+  { name: "Black", hex: "#1a1a1a" },
+  { name: "White", hex: "#FFFFFF" },
+  { name: "Navy", hex: "#000080" },
+  { name: "Camel", hex: "#C19A6B" },
+  { name: "Champagne", hex: "#F7E7CE" },
+  { name: "Olive", hex: "#808000" },
+  { name: "Burgundy", hex: "#800020" },
+  { name: "Sage", hex: "#9CAF88" },
+  { name: "Blush", hex: "#DE5D83" },
+];
 
-// ─── Get slug from URL ───────────────────────────────────────────────────────
-const getProductIdFromURL = () => {
-  const path = window.location.pathname;
-  const match = path.match(/\/admin\/products\/([^/]+)/);
-  return match ? match[1] : "1";
-};
+const getColorHex = (colorName) =>
+  availableColors.find((c) => c.name?.toLowerCase() === (colorName || "").toLowerCase())?.hex || null;
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const IconBell = () => (
@@ -140,8 +120,20 @@ const IconDollarSign = () => (
   </svg>
 );
 
+const IconImageOff = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
+  </svg>
+);
+
 // ─── ShowProduct Page ──────────────────────────────────────────────────────
-const ShowProduct = () => {
+// Expects an Inertia prop:
+//   product: { id, name, sku, description, price, discount_amount, stock_quantity,
+//              featured, status, created_at, category: { id, name },
+//              images: [{ id, image, url }], variants: [{ id, size, color, stock_quantity }] }
+const ShowProduct = ({ product }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -149,9 +141,6 @@ const ShowProduct = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [editBtnHovered, setEditBtnHovered] = useState(false);
   const [backBtnHovered, setBackBtnHovered] = useState(false);
-
-  const productId = getProductIdFromURL();
-  const product = mockProduct; // In real app: fetch product by ID
 
   useEffect(() => {
     injectFonts();
@@ -186,7 +175,17 @@ const ShowProduct = () => {
     return styles[status] || styles.active;
   };
 
-  const finalPrice = product.price - (product.discountAmount || 0);
+  // Eloquent decimal columns serialize as strings — normalize before doing math.
+  const price = parseFloat(product.price) || 0;
+  const discountAmount = parseFloat(product.discount_amount) || 0;
+  const finalPrice = (price - discountAmount).toFixed(2);
+
+  const images = product.images ?? [];
+  const variants = product.variants ?? [];
+
+  const formattedCreatedAt = product.created_at
+    ? new Date(product.created_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+    : "—";
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: tokens.fontBody, backgroundColor: "rgba(245,245,245,0.6)" }}>
@@ -268,20 +267,26 @@ const ShowProduct = () => {
               {/* Main image */}
               <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, overflow: "hidden" }}>
                 <div style={{ paddingBottom: "100%", position: "relative", backgroundColor: tokens.secondary }}>
-                  <img
-                    src={product.images[selectedImage]}
-                    alt={product.name}
-                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                  />
+                  {images.length > 0 ? (
+                    <img
+                      src={images[selectedImage]?.url}
+                      alt={product.name}
+                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: tokens.mutedForeground }}>
+                      <IconImageOff />
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Thumbnail gallery */}
-              {product.images.length > 1 && (
+              {images.length > 1 && (
                 <div style={{ display: "flex", gap: "0.75rem", overflowX: "auto" }}>
-                  {product.images.map((img, index) => (
+                  {images.map((img, index) => (
                     <button
-                      key={index}
+                      key={img.id ?? index}
                       onClick={() => setSelectedImage(index)}
                       style={{
                         width: "80px", height: "80px", flexShrink: 0,
@@ -291,7 +296,7 @@ const ShowProduct = () => {
                         transition: "border-color 0.15s ease", opacity: selectedImage === index ? 1 : 0.6,
                       }}
                     >
-                      <img src={img} alt={`${product.name} ${index + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img src={img.url} alt={`${product.name} ${index + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     </button>
                   ))}
                 </div>
@@ -314,9 +319,9 @@ const ShowProduct = () => {
                       <span style={{ fontFamily: tokens.fontDisplay, fontSize: "2rem", fontWeight: 500, color: tokens.foreground }}>
                         ${finalPrice}
                       </span>
-                      {product.discountAmount > 0 && (
+                      {discountAmount > 0 && (
                         <span style={{ fontSize: "1.125rem", color: tokens.mutedForeground, textDecoration: "line-through" }}>
-                          ${product.price}
+                          ${price.toFixed(2)}
                         </span>
                       )}
                     </div>
@@ -325,9 +330,9 @@ const ShowProduct = () => {
                     </span>
                   </div>
 
-                  {product.discountAmount > 0 && (
+                  {discountAmount > 0 && (
                     <div style={{ padding: "0.5rem 0.75rem", borderRadius: tokens.radius, backgroundColor: "#fef3c7", border: "1px solid #fcd34d", fontSize: "0.8125rem", color: "#92400e" }}>
-                      Discount: ${product.discountAmount} off
+                      Discount: ${discountAmount.toFixed(2)} off
                     </div>
                   )}
 
@@ -344,7 +349,7 @@ const ShowProduct = () => {
                       <span style={{ color: tokens.mutedForeground, marginTop: "2px" }}><IconTag /></span>
                       <div>
                         <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: 0 }}>Category</p>
-                        <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>{product.category.name}</p>
+                        <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>{product.category?.name ?? "—"}</p>
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
@@ -358,14 +363,14 @@ const ShowProduct = () => {
                       <span style={{ color: tokens.mutedForeground, marginTop: "2px" }}><IconPackage /></span>
                       <div>
                         <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: 0 }}>Stock</p>
-                        <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>{product.stockQuantity} units</p>
+                        <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>{product.stock_quantity} units</p>
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
                       <span style={{ color: tokens.mutedForeground, marginTop: "2px" }}><IconCalendar /></span>
                       <div>
                         <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: 0 }}>Created</p>
-                        <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>{product.createdAt}</p>
+                        <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>{formattedCreatedAt}</p>
                       </div>
                     </div>
                   </div>
@@ -384,45 +389,54 @@ const ShowProduct = () => {
               <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, overflow: "hidden" }}>
                 <div style={{ padding: "1.25rem 1.5rem", borderBottom: `1px solid ${tokens.border}` }}>
                   <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>
-                    Variants ({product.variants.length})
+                    Variants ({variants.length})
                   </h3>
                 </div>
                 <div style={{ padding: "1.5rem" }}>
-                  <div style={{ overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
-                      <thead>
-                        <tr style={{ borderBottom: `1px solid ${tokens.border}` }}>
-                          <th style={{ textAlign: "left", padding: "0.5rem 0.75rem", fontWeight: 500, color: tokens.mutedForeground, whiteSpace: "nowrap" }}>Size</th>
-                          <th style={{ textAlign: "left", padding: "0.5rem 0.75rem", fontWeight: 500, color: tokens.mutedForeground, whiteSpace: "nowrap" }}>Color</th>
-                          <th style={{ textAlign: "right", padding: "0.5rem 0.75rem", fontWeight: 500, color: tokens.mutedForeground, whiteSpace: "nowrap" }}>Stock</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {product.variants.map((variant) => (
-                          <tr key={variant.id} style={{ borderBottom: `1px solid ${tokens.border}` }}>
-                            <td style={{ padding: "0.5rem 0.75rem", color: tokens.foreground }}>{variant.size || "—"}</td>
-                            <td style={{ padding: "0.5rem 0.75rem" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                {variant.colorHex && (
-                                  <span style={{ width: "16px", height: "16px", borderRadius: "50%", backgroundColor: variant.colorHex, border: "1px solid rgba(0,0,0,0.2)", flexShrink: 0 }} />
-                                )}
-                                <span style={{ color: tokens.foreground }}>{variant.color || "—"}</span>
-                              </div>
-                            </td>
-                            <td style={{ padding: "0.5rem 0.75rem", textAlign: "right" }}>
-                              <span style={{
-                                display: "inline-block", padding: "0.125rem 0.5rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 500,
-                                backgroundColor: variant.stockQuantity > 10 ? "#dcfce7" : variant.stockQuantity > 0 ? "#fef3c7" : "#fee2e2",
-                                color: variant.stockQuantity > 10 ? "#166534" : variant.stockQuantity > 0 ? "#92400e" : "#991b1b",
-                              }}>
-                                {variant.stockQuantity}
-                              </span>
-                            </td>
+                  {variants.length > 0 ? (
+                    <div style={{ overflowX: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
+                        <thead>
+                          <tr style={{ borderBottom: `1px solid ${tokens.border}` }}>
+                            <th style={{ textAlign: "left", padding: "0.5rem 0.75rem", fontWeight: 500, color: tokens.mutedForeground, whiteSpace: "nowrap" }}>Size</th>
+                            <th style={{ textAlign: "left", padding: "0.5rem 0.75rem", fontWeight: 500, color: tokens.mutedForeground, whiteSpace: "nowrap" }}>Color</th>
+                            <th style={{ textAlign: "right", padding: "0.5rem 0.75rem", fontWeight: 500, color: tokens.mutedForeground, whiteSpace: "nowrap" }}>Stock</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {variants.map((variant) => {
+                            const colorHex = getColorHex(variant.color);
+                            return (
+                              <tr key={variant.id} style={{ borderBottom: `1px solid ${tokens.border}` }}>
+                                <td style={{ padding: "0.5rem 0.75rem", color: tokens.foreground }}>{variant.size || "—"}</td>
+                                <td style={{ padding: "0.5rem 0.75rem" }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                    {colorHex && (
+                                      <span style={{ width: "16px", height: "16px", borderRadius: "50%", backgroundColor: colorHex, border: "1px solid rgba(0,0,0,0.2)", flexShrink: 0 }} />
+                                    )}
+                                    <span style={{ color: tokens.foreground }}>{variant.color || "—"}</span>
+                                  </div>
+                                </td>
+                                <td style={{ padding: "0.5rem 0.75rem", textAlign: "right" }}>
+                                  <span style={{
+                                    display: "inline-block", padding: "0.125rem 0.5rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 500,
+                                    backgroundColor: variant.stock_quantity > 10 ? "#dcfce7" : variant.stock_quantity > 0 ? "#fef3c7" : "#fee2e2",
+                                    color: variant.stock_quantity > 10 ? "#166534" : variant.stock_quantity > 0 ? "#92400e" : "#991b1b",
+                                  }}>
+                                    {variant.stock_quantity}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, textAlign: "center", padding: "1rem 0", margin: 0 }}>
+                      No variants for this product.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

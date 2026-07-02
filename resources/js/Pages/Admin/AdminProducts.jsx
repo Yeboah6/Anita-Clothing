@@ -204,6 +204,28 @@ const ProductRow = ({ product, onDelete }) => {
       <td style={{ padding: "0.75rem 1.5rem", textAlign: "right" }}>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.25rem" }}>
           <a
+            href={`/admin/products/${product.id}`}
+            aria-label="View"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "36px",
+              height: "36px",
+              borderRadius: tokens.radius,
+              border: "none",
+              background: editHovered ? tokens.secondary : "transparent",
+              cursor: "pointer",
+              color: tokens.foreground,
+              transition: "background-color 0.15s ease",
+              textDecoration: "none",
+            }}
+            onMouseEnter={() => setEditHovered(true)}
+            onMouseLeave={() => setEditHovered(false)}
+          >
+            <IconPencil />
+          </a>
+          <a
             href={`/admin/products/${product.id}/edit`}
             aria-label="Edit"
             style={{

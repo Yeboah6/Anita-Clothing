@@ -173,4 +173,13 @@ class ProductController extends Controller
             ->with('success', "Product \"{$product->name}\" updated successfully.");
     }
 
+    public function show($id)
+    {
+        $product = Product::with(['category', 'images', 'variants'])->findOrFail($id);
+    
+        return inertia('Admin/Product/ShowProduct', [
+            'product' => $product,
+        ]);
+    }
+
 }
