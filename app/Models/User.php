@@ -18,14 +18,15 @@ class User extends Authenticatable
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $table = 'users';
+    // protected $table = 'users';
     protected $fillable = [
         'user_id',
         'name',
         'email',
         'phone',
         'role',
-        'password'
+        'password',
+        'status'
     ];
 
     /**
@@ -36,8 +37,45 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            // 'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is customer
+     */
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
+    }
+
+    /**
+     * Get the user's orders
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    public function getTotalSpentAttribute(): float
+    {
+        return $this->orders()
+            ->where('payment_status', 'paid')
+            ->sum('total_amount');
     }
 }

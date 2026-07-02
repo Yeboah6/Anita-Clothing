@@ -20,13 +20,12 @@ class DatabaseSeeder extends Seeder
     {
 
         User::create([
-            // 'user_id' => Str::uuid(),
-            'user_id' => IdGenerator::userId(),
             'name' => 'Anita',
             'email' => 'anita@clothing.com',
             'role' => 'admin',
             'phone' => '0576760647',
-            'password' => Hash::make('Anita123')
+            'password' => Hash::make('Anita123'),
+            'status' => "active"
         ]);
     }
 }

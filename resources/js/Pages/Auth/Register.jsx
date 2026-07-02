@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useForm } from "@inertiajs/react";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
 
@@ -30,29 +31,6 @@ const tokens = {
 };
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
-const IconShoppingBag = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <path d="M16 10a4 4 0 0 1-8 0" />
-  </svg>
-);
-
-const IconMenu = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <line x1="3" y1="12" x2="21" y2="12" />
-    <line x1="3" y1="18" x2="21" y2="18" />
-  </svg>
-);
-
-const IconX = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
 const IconEye = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -71,27 +49,6 @@ const IconEyeOff = () => (
 const IconCheck = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <polyline points="20 6 9 17 4 12" />
-  </svg>
-);
-
-const InstagramIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-  </svg>
-);
-
-const FacebookIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
-
-const MailIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="4" width="20" height="16" rx="2" />
-    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
   </svg>
 );
 
@@ -120,7 +77,7 @@ const labelStyle = {
   display: "block",
 };
 
-// ─── Password requirement check ──────────────────────────────────────────────
+// ─── Password requirement check (client-side UI hints only) ─────────────────
 const passwordRequirements = [
   { label: "At least 8 characters", test: (v) => v.length >= 8 },
   { label: "One uppercase letter", test: (v) => /[A-Z]/.test(v) },
@@ -134,20 +91,25 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [termsTouched, setTermsTouched] = useState(false);
   const [createBtnHovered, setCreateBtnHovered] = useState(false);
   const [googleBtnHovered, setGoogleBtnHovered] = useState(false);
   const [signInHovered, setSignInHovered] = useState(false);
 
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
+  // Inertia form: handles data, submission, loading state, and server-side errors
+  const { data, setData, post, processing, errors, reset } = useForm({
+    first_name: "",
+    last_name: "",
     email: "",
+    phone: "",
     password: "",
-    confirmPassword: "",
+    password_confirmation: "",
+    agree_terms: false,
   });
 
   const [touched, setTouched] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+  // For errors that aren't tied to a specific field (e.g. expired session, server error)
+  const [generalError, setGeneralError] = useState(null);
 
   useEffect(() => {
     injectFonts();
@@ -159,7 +121,7 @@ const Register = () => {
   }, []);
 
   const handleChange = (field) => (e) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    setData(field, e.target.value);
     if (!touched[field]) {
       setTouched((prev) => ({ ...prev, [field]: true }));
     }
@@ -177,37 +139,65 @@ const Register = () => {
     return { width: 100, color: tokens.green };
   };
 
-  const errors = {};
-  if (touched.firstName && !form.firstName.trim()) errors.firstName = "First name is required";
-  if (touched.lastName && !form.lastName.trim()) errors.lastName = "Last name is required";
-  if (touched.email && !form.email.trim()) errors.email = "Email is required";
-  if (touched.email && form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = "Please enter a valid email";
-  if (touched.password && !form.password) errors.password = "Password is required";
-  if (touched.password && form.password.length < 8) errors.password = "Password must be at least 8 characters";
-  if (touched.confirmPassword && !form.confirmPassword) errors.confirmPassword = "Please confirm your password";
-  if (touched.confirmPassword && form.password !== form.confirmPassword) errors.confirmPassword = "Passwords do not match";
+  // Client-side hints (fast feedback). Server-side `errors` always take precedence on submit.
+  const clientErrors = {};
+  if (touched.first_name && !data.first_name.trim()) clientErrors.first_name = "First name is required";
+  if (touched.last_name && !data.last_name.trim()) clientErrors.last_name = "Last name is required";
+  if (touched.email && !data.email.trim()) clientErrors.email = "Email is required";
+  if (touched.email && data.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) clientErrors.email = "Please enter a valid email";
+  if (touched.phone && !data.phone.trim()) clientErrors.phone = "Phone number is required";
+  if (touched.phone && data.phone.trim() && !/^[0-9+\-\s()]+$/.test(data.phone)) clientErrors.phone = "Please enter a valid phone number";
+  if (touched.password && !data.password) clientErrors.password = "Password is required";
+  if (touched.password && data.password && data.password.length < 8) clientErrors.password = "Password must be at least 8 characters";
+  if (touched.password_confirmation && !data.password_confirmation) clientErrors.password_confirmation = "Please confirm your password";
+  if (touched.password_confirmation && data.password_confirmation && data.password !== data.password_confirmation) clientErrors.password_confirmation = "Passwords do not match";
+  if (termsTouched && !data.agree_terms) clientErrors.agree_terms = "Please agree to the terms";
+
+  // Merge: server errors win once present (they reflect the actual submit attempt)
+  const fieldError = (field) => errors[field] || clientErrors[field];
 
   const isValid =
-    form.firstName.trim() &&
-    form.lastName.trim() &&
-    form.email.trim() &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) &&
-    form.password.length >= 8 &&
-    form.password === form.confirmPassword &&
+    data.first_name.trim() &&
+    data.last_name.trim() &&
+    data.email.trim() &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email) &&
+    data.phone.trim() &&
+    /^[0-9+\-\s()]+$/.test(data.phone) &&
+    data.password.length >= 8 &&
+    data.password === data.password_confirmation &&
     agreedToTerms;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTouched({ firstName: true, lastName: true, email: true, password: true, confirmPassword: true });
+    setTouched({ 
+      first_name: true, 
+      last_name: true, 
+      email: true, 
+      phone: true, 
+      password: true, 
+      password_confirmation: true 
+    });
+    setTermsTouched(true);
+    setGeneralError(null);
 
-    if (isValid) {
-      console.log("Register:", form);
-      // Handle registration
-    }
+    post("/register", {
+      onSuccess: () => {
+        setTouched({});
+        setTermsTouched(false);
+      },
+      onError: (errors) => {
+        if (!Object.keys(errors).length) {
+          setGeneralError("Something went wrong creating your account. Please try again.");
+        }
+      },
+      onFinish: () => {
+        reset("password", "password_confirmation");
+        setTouched((prev) => ({ ...prev, password: false, password_confirmation: false }));
+      },
+    });
   };
 
-  const passwordStrength = getPasswordStrength(form.password);
+  const passwordStrength = getPasswordStrength(data.password);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
@@ -239,95 +229,67 @@ const Register = () => {
             </p>
           </div>
 
-          {/* Google Sign Up */}
-          <button
-            style={{
-              width: "100%",
-              height: "44px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.75rem",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-              fontFamily: tokens.fontBody,
-              borderRadius: tokens.radius,
-              border: `1px solid ${tokens.border}`,
-              backgroundColor: googleBtnHovered ? tokens.secondary : tokens.background,
-              color: tokens.foreground,
-              cursor: "pointer",
-              transition: "background-color 0.2s ease",
-              marginBottom: "1.5rem",
-            }}
-            onMouseEnter={() => setGoogleBtnHovered(true)}
-            onMouseLeave={() => setGoogleBtnHovered(false)}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-            </svg>
-            Continue with Google
-          </button>
-
-          {/* Divider */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
-            <div style={{ flex: 1, height: "1px", backgroundColor: tokens.border }} />
-            <span style={{ fontSize: "0.75rem", color: tokens.mutedForeground, textTransform: "uppercase", letterSpacing: "0.05em" }}>or</span>
-            <div style={{ flex: 1, height: "1px", backgroundColor: tokens.border }} />
-          </div>
+          {/* General error banner (non-field-specific failures) */}
+          {generalError && (
+            <div
+              style={{
+                marginBottom: "1rem",
+                padding: "0.75rem 1rem",
+                borderRadius: tokens.radius,
+                border: `1px solid ${tokens.destructive}`,
+                backgroundColor: "#fef2f2",
+                color: tokens.destructive,
+                fontSize: "0.8125rem",
+              }}
+            >
+              {generalError}
+            </div>
+          )}
 
           {/* Registration Form */}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {/* Name row */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
               <div>
-                <label htmlFor="firstName" style={labelStyle}>First Name</label>
+                <label htmlFor="first_name" style={labelStyle}>First Name</label>
                 <input
-                  id="firstName"
+                  id="first_name"
                   type="text"
-                  value={form.firstName}
-                  onChange={handleChange("firstName")}
-                  onBlur={handleBlur("firstName")}
+                  value={data.first_name}
+                  onChange={handleChange("first_name")}
+                  onBlur={handleBlur("first_name")}
                   placeholder="First name"
                   style={{
                     ...inputStyle,
-                    borderColor: errors.firstName ? tokens.destructive : tokens.border,
+                    borderColor: fieldError("first_name") ? tokens.destructive : tokens.border,
                   }}
                   onFocus={(e) => {
-                    if (!errors.firstName) e.target.style.borderColor = tokens.foreground;
-                  }}
-                  onBlur={(e) => {
-                    if (!errors.firstName) e.target.style.borderColor = tokens.border;
+                    if (!fieldError("first_name")) e.target.style.borderColor = tokens.foreground;
                   }}
                 />
-                {errors.firstName && (
-                  <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.firstName}</p>
+                {fieldError("first_name") && (
+                  <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{fieldError("first_name")}</p>
                 )}
               </div>
               <div>
-                <label htmlFor="lastName" style={labelStyle}>Last Name</label>
+                <label htmlFor="last_name" style={labelStyle}>Last Name</label>
                 <input
-                  id="lastName"
+                  id="last_name"
                   type="text"
-                  value={form.lastName}
-                  onChange={handleChange("lastName")}
-                  onBlur={handleBlur("lastName")}
+                  value={data.last_name}
+                  onChange={handleChange("last_name")}
+                  onBlur={handleBlur("last_name")}
                   placeholder="Last name"
                   style={{
                     ...inputStyle,
-                    borderColor: errors.lastName ? tokens.destructive : tokens.border,
+                    borderColor: fieldError("last_name") ? tokens.destructive : tokens.border,
                   }}
                   onFocus={(e) => {
-                    if (!errors.lastName) e.target.style.borderColor = tokens.foreground;
-                  }}
-                  onBlur={(e) => {
-                    if (!errors.lastName) e.target.style.borderColor = tokens.border;
+                    if (!fieldError("last_name")) e.target.style.borderColor = tokens.foreground;
                   }}
                 />
-                {errors.lastName && (
-                  <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.lastName}</p>
+                {fieldError("last_name") && (
+                  <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{fieldError("last_name")}</p>
                 )}
               </div>
             </div>
@@ -338,24 +300,45 @@ const Register = () => {
               <input
                 id="email"
                 type="email"
-                value={form.email}
+                value={data.email}
                 onChange={handleChange("email")}
                 onBlur={handleBlur("email")}
                 placeholder="your@email.com"
                 autoComplete="email"
                 style={{
                   ...inputStyle,
-                  borderColor: errors.email ? tokens.destructive : tokens.border,
+                  borderColor: fieldError("email") ? tokens.destructive : tokens.border,
                 }}
                 onFocus={(e) => {
-                  if (!errors.email) e.target.style.borderColor = tokens.foreground;
-                }}
-                onBlur={(e) => {
-                  if (!errors.email) e.target.style.borderColor = tokens.border;
+                  if (!fieldError("email")) e.target.style.borderColor = tokens.foreground;
                 }}
               />
-              {errors.email && (
-                <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.email}</p>
+              {fieldError("email") && (
+                <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{fieldError("email")}</p>
+              )}
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label htmlFor="phone" style={labelStyle}>Phone Number</label>
+              <input
+                id="phone"
+                type="tel"
+                value={data.phone}
+                onChange={handleChange("phone")}
+                onBlur={handleBlur("phone")}
+                placeholder="+233 (123) 456-7890"
+                autoComplete="tel"
+                style={{
+                  ...inputStyle,
+                  borderColor: fieldError("phone") ? tokens.destructive : tokens.border,
+                }}
+                onFocus={(e) => {
+                  if (!fieldError("phone")) e.target.style.borderColor = tokens.foreground;
+                }}
+              />
+              {fieldError("phone") && (
+                <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{fieldError("phone")}</p>
               )}
             </div>
 
@@ -366,7 +349,7 @@ const Register = () => {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  value={form.password}
+                  value={data.password}
                   onChange={handleChange("password")}
                   onBlur={handleBlur("password")}
                   placeholder="Create a password"
@@ -374,13 +357,10 @@ const Register = () => {
                   style={{
                     ...inputStyle,
                     paddingRight: "2.5rem",
-                    borderColor: errors.password ? tokens.destructive : tokens.border,
+                    borderColor: fieldError("password") ? tokens.destructive : tokens.border,
                   }}
                   onFocus={(e) => {
-                    if (!errors.password) e.target.style.borderColor = tokens.foreground;
-                  }}
-                  onBlur={(e) => {
-                    if (!errors.password) e.target.style.borderColor = tokens.border;
+                    if (!fieldError("password")) e.target.style.borderColor = tokens.foreground;
                   }}
                 />
                 <button
@@ -404,12 +384,12 @@ const Register = () => {
                   {showPassword ? <IconEyeOff /> : <IconEye />}
                 </button>
               </div>
-              {errors.password && (
-                <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.password}</p>
+              {fieldError("password") && (
+                <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{fieldError("password")}</p>
               )}
 
               {/* Password strength bar */}
-              {form.password.length > 0 && (
+              {data.password.length > 0 && (
                 <div style={{ marginTop: "0.5rem" }}>
                   <div
                     style={{
@@ -435,7 +415,7 @@ const Register = () => {
               {/* Password requirements */}
               <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
                 {passwordRequirements.map((req, i) => {
-                  const met = req.test(form.password);
+                  const met = req.test(data.password);
                   return (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.75rem" }}>
                       <span
@@ -465,26 +445,23 @@ const Register = () => {
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" style={labelStyle}>Confirm Password</label>
+              <label htmlFor="password_confirmation" style={labelStyle}>Confirm Password</label>
               <div style={{ position: "relative" }}>
                 <input
-                  id="confirmPassword"
+                  id="password_confirmation"
                   type={showConfirm ? "text" : "password"}
-                  value={form.confirmPassword}
-                  onChange={handleChange("confirmPassword")}
-                  onBlur={handleBlur("confirmPassword")}
+                  value={data.password_confirmation}
+                  onChange={handleChange("password_confirmation")}
+                  onBlur={handleBlur("password_confirmation")}
                   placeholder="Confirm your password"
                   autoComplete="new-password"
                   style={{
                     ...inputStyle,
                     paddingRight: "2.5rem",
-                    borderColor: errors.confirmPassword ? tokens.destructive : tokens.border,
+                    borderColor: fieldError("password_confirmation") ? tokens.destructive : tokens.border,
                   }}
                   onFocus={(e) => {
-                    if (!errors.confirmPassword) e.target.style.borderColor = tokens.foreground;
-                  }}
-                  onBlur={(e) => {
-                    if (!errors.confirmPassword) e.target.style.borderColor = tokens.border;
+                    if (!fieldError("password_confirmation")) e.target.style.borderColor = tokens.foreground;
                   }}
                 />
                 <button
@@ -508,10 +485,10 @@ const Register = () => {
                   {showConfirm ? <IconEyeOff /> : <IconEye />}
                 </button>
               </div>
-              {errors.confirmPassword && (
-                <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.confirmPassword}</p>
+              {fieldError("password_confirmation") && (
+                <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{fieldError("password_confirmation")}</p>
               )}
-              {form.confirmPassword && !errors.confirmPassword && (
+              {data.password_confirmation && !fieldError("password_confirmation") && (
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem", fontSize: "0.75rem" }}>
                   <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "14px", height: "14px", borderRadius: "50%", border: `1px solid ${tokens.green}`, backgroundColor: tokens.green, color: "#ffffff" }}>
                     <IconCheck />
@@ -535,13 +512,20 @@ const Register = () => {
                 }}
               >
                 <div
-                  onClick={() => setAgreedToTerms(!agreedToTerms)}
+                  onClick={() => {
+                    setData('agree_terms', !data.agree_terms);
+                    setTermsTouched(true);
+                  }}
                   style={{
                     width: "18px",
                     height: "18px",
                     borderRadius: "3px",
-                    border: agreedToTerms ? `1px solid ${tokens.foreground}` : `1px solid ${tokens.border}`,
-                    backgroundColor: agreedToTerms ? tokens.foreground : "transparent",
+                    border: data.agree_terms 
+                      ? `1px solid ${tokens.foreground}` 
+                      : fieldError("agree_terms") 
+                        ? `1px solid ${tokens.destructive}` 
+                        : `1px solid ${tokens.border}`,
+                    backgroundColor: data.agree_terms ? tokens.foreground : "transparent",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -551,9 +535,7 @@ const Register = () => {
                     transition: "all 0.15s ease",
                   }}
                 >
-                  {agreedToTerms && (
-                    <IconCheck />
-                  )}
+                  {data.agree_terms && <IconCheck />}
                 </div>
                 <span>
                   I agree to the{" "}
@@ -562,9 +544,9 @@ const Register = () => {
                   <a href="/privacy" style={{ color: tokens.foreground, textDecoration: "underline" }}>Privacy Policy</a>
                 </span>
               </label>
-              {submitted && !agreedToTerms && (
+              {fieldError("agree_terms") && (
                 <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0 28px" }}>
-                  Please agree to the terms
+                  {fieldError("agree_terms")}
                 </p>
               )}
             </div>
@@ -572,7 +554,7 @@ const Register = () => {
             {/* Submit */}
             <button
               type="submit"
-              disabled={submitted && !isValid}
+              disabled={processing}
               style={{
                 width: "100%",
                 height: "48px",
@@ -584,14 +566,14 @@ const Register = () => {
                 border: "none",
                 backgroundColor: tokens.foreground,
                 color: tokens.background,
-                cursor: submitted && !isValid ? "not-allowed" : "pointer",
-                opacity: submitted && !isValid ? 0.5 : createBtnHovered ? 0.9 : 1,
+                cursor: processing ? "not-allowed" : "pointer",
+                opacity: processing ? 0.5 : createBtnHovered ? 0.9 : 1,
                 transition: "opacity 0.2s ease",
               }}
               onMouseEnter={() => setCreateBtnHovered(true)}
               onMouseLeave={() => setCreateBtnHovered(false)}
             >
-              Create Account
+              {processing ? "Creating account…" : "Create Account"}
             </button>
           </form>
 
@@ -599,9 +581,9 @@ const Register = () => {
           <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
             Already have an account?{" "}
             <a
-              href="/sign-in"
+              href="/login"
               style={{
-                color: signInHovered ? tokens.foreground : tokens.foreground,
+                color: tokens.foreground,
                 fontWeight: 500,
                 textDecoration: "underline",
                 textUnderlineOffset: "2px",

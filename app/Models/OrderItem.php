@@ -9,12 +9,10 @@ use App\Models\Order;
 
 class OrderItem extends Model
 {
-    public $incrementing = false;
-    protected $keyType = 'string';
-    
-    protected $table = 'order_items';
+    // protected $table = 'order_items';
+
     protected $fillable = [
-        // 'order_items_id',
+        'order_item_id',
         'order_id',
         'product_id',
         'quantity',

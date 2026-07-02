@@ -8,18 +8,14 @@ use App\Models\Product;
 
 class Category extends Model
 {
-    public $incrementing = false;
-    protected $keyType = 'string';
-
-    protected $table = 'categories';
     protected $fillable = [
         'category_id',
         'slug',
         'name',
     ];
 
-    public function product()
+    public function products()
     {
-        return $this->hasMany(Product::class, 'category_id');
+        return $this->hasMany(Product::class);
     }
 }

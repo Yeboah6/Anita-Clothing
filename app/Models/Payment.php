@@ -8,6 +8,7 @@ use App\Models\Order;
 
 class Payment extends Model
 {
+    // protected $table = 'payments';
 
     public $incrementing = false;
     protected $keyType = 'string';

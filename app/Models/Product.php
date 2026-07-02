@@ -3,17 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
-
-    public $incrementing = false;
-    protected $keyType = 'string';
-
-    protected $table = 'products';
-
     protected $fillable = [
-        'product_id',
         'category_id',
         'name',
         'slug',
@@ -22,7 +16,15 @@ class Product extends Model
         'stock_quantity',
         'sku',
         'featured',
-        'status'
+        'status',
+        'description',
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'stock_quantity' => 'integer',
+        'featured' => 'boolean',
     ];
 
     public function category() 
@@ -48,6 +50,20 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class, 'product_id');
+    }
+
+    public static function generateUniqueSlug(string $name): string
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $i = 2;
+
+        while (self::where('slug', $slug)->exists()) {
+            $slug = "{$base}-{$i}";
+            $i++;
+        }
+
+        return $slug;
     }
 
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { router } from "@inertiajs/react";
 import AdminSidebar from "@/Components/Admin/AdminSidebar";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
@@ -28,33 +29,10 @@ const tokens = {
   destructive: "#ef4444",
 };
 
-// ─── Data ────────────────────────────────────────────────────────────────────
-const categories = [
-  { id: "1", name: "Dresses", slug: "dresses", description: "Elegant dresses for every occasion", image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80", productCount: 24 },
-  { id: "2", name: "Tops", slug: "tops", description: "Sophisticated tops and blouses", image: "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=800&q=80", productCount: 32 },
-  { id: "3", name: "Bottoms", slug: "bottoms", description: "Refined pants, skirts, and shorts", image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80", productCount: 18 },
-  { id: "4", name: "Outerwear", slug: "outerwear", description: "Timeless coats and jackets", image: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80", productCount: 12 },
-  { id: "5", name: "Accessories", slug: "accessories", description: "Finishing touches for your look", image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80", productCount: 28 },
-];
+const PLACEHOLDER_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23bbbbbb' stroke-width='1.5'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpolyline points='21 15 16 10 5 21'/%3E%3C/svg%3E";
 
-const products = [
-  { id: "1", name: "Silk Midi Dress", price: 289, images: ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=200&q=80"], category: "dresses", isNewArrival: true },
-  { id: "2", name: "Cashmere Wrap Coat", price: 495, images: ["https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=200&q=80"], category: "outerwear", isNewArrival: true },
-  { id: "3", name: "Linen Palazzo Pants", price: 165, images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=200&q=80"], category: "bottoms", isNewArrival: true },
-  { id: "4", name: "Silk Camisole", price: 125, images: ["https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=200&q=80"], category: "tops", isNewArrival: true },
-  { id: "5", name: "Leather Crossbody Bag", price: 245, images: ["https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=200&q=80"], category: "accessories", isNewArrival: true },
-  { id: "6", name: "Tailored Wool Blazer", price: 345, images: ["https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=200&q=80"], category: "outerwear", isNewArrival: false },
-  { id: "7", name: "Pleated Maxi Skirt", price: 195, images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=200&q=80"], category: "bottoms", isNewArrival: true },
-  { id: "8", name: "Oversized Cotton Shirt", price: 145, images: ["https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=200&q=80"], category: "tops", isNewArrival: false },
-];
-
-const getCategoryName = (slug) => categories.find((c) => c.slug === slug)?.name || slug;
-
-// Seed for consistent random stock
-const getStock = (id) => {
-  const stocks = { "1": 34, "2": 18, "3": 45, "4": 52, "5": 28, "6": 12, "7": 38, "8": 41 };
-  return stocks[id] || Math.floor(Math.random() * 50) + 5;
-};
+const LOW_STOCK_THRESHOLD = 20;
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const IconBell = () => (
@@ -109,8 +87,173 @@ const IconTrash2 = () => (
   </svg>
 );
 
+const IconPackage = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+    <line x1="12" y1="22.08" x2="12" y2="12" />
+  </svg>
+);
+
+const IconTag = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2z" />
+    <path d="M7 7h.01" />
+  </svg>
+);
+
+const IconStar = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+
+const IconAlertCircle = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+// ─── Product Row (its own component so each row can hold its own hover state) ─
+const ProductRow = ({ product, onDelete }) => {
+  const [editHovered, setEditHovered] = useState(false);
+  const [deleteHovered, setDeleteHovered] = useState(false);
+
+  const thumbnail = product.images?.[0] || PLACEHOLDER_IMAGE;
+  const isLowStock = product.stock_quantity < LOW_STOCK_THRESHOLD;
+
+  const statusBadge = () => {
+    if (product.status === "archived") {
+      return { label: "Archived", bg: "transparent", color: tokens.mutedForeground };
+    }
+    if (product.status === "draft") {
+      return { label: "Draft", bg: tokens.secondary, color: tokens.mutedForeground };
+    }
+    return { label: "Active", bg: "transparent", color: tokens.foreground };
+  };
+  const badge = statusBadge();
+
+  return (
+    <tr style={{ borderBottom: `1px solid ${tokens.border}` }}>
+      <td style={{ padding: "0.75rem 1.5rem" }}>
+        <div style={{ width: "48px", height: "48px", overflow: "hidden", backgroundColor: tokens.secondary, borderRadius: tokens.radius, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <img
+            src={thumbnail}
+            alt={product.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>
+        {product.name}
+        {product.featured && (
+          <span style={{ marginLeft: "0.5rem", fontSize: "0.7rem", color: tokens.mutedForeground, fontWeight: 400 }}>
+            ★ Featured
+          </span>
+        )}
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem", color: tokens.mutedForeground }}>
+        {product.category}
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem", color: tokens.foreground }}>
+        ${Number(product.price).toFixed(2)}
+        {product.discount_amount > 0 && (
+          <span style={{ marginLeft: "0.375rem", fontSize: "0.75rem", color: tokens.mutedForeground, textDecoration: "line-through" }}>
+            ${(Number(product.price) + Number(product.discount_amount)).toFixed(2)}
+          </span>
+        )}
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem" }}>
+        <span
+          style={{
+            display: "inline-block",
+            padding: "0.125rem 0.625rem",
+            borderRadius: "9999px",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+            backgroundColor: badge.bg,
+            color: badge.color,
+            border: `1px solid ${tokens.border}`,
+          }}
+        >
+          {badge.label}
+        </span>
+        {product.is_new_arrival && (
+          <span
+            style={{
+              display: "inline-block",
+              marginLeft: "0.375rem",
+              padding: "0.125rem 0.625rem",
+              borderRadius: "9999px",
+              fontSize: "0.75rem",
+              fontWeight: 500,
+              backgroundColor: tokens.secondary,
+              color: tokens.foreground,
+              border: `1px solid ${tokens.border}`,
+            }}
+          >
+            New
+          </span>
+        )}
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem", color: isLowStock ? tokens.destructive : tokens.mutedForeground, fontWeight: isLowStock ? 600 : 400 }}>
+        {product.stock_quantity}
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem", textAlign: "right" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.25rem" }}>
+          <a
+            href={`/admin/products/${product.id}/edit`}
+            aria-label="Edit"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "36px",
+              height: "36px",
+              borderRadius: tokens.radius,
+              border: "none",
+              background: editHovered ? tokens.secondary : "transparent",
+              cursor: "pointer",
+              color: tokens.foreground,
+              transition: "background-color 0.15s ease",
+              textDecoration: "none",
+            }}
+            onMouseEnter={() => setEditHovered(true)}
+            onMouseLeave={() => setEditHovered(false)}
+          >
+            <IconPencil />
+          </a>
+          <button
+            aria-label="Delete"
+            onClick={() => onDelete(product)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "36px",
+              height: "36px",
+              borderRadius: tokens.radius,
+              border: "none",
+              background: deleteHovered ? "#fee2e2" : "transparent",
+              cursor: "pointer",
+              color: deleteHovered ? tokens.destructive : tokens.foreground,
+              transition: "background-color 0.15s ease, color 0.15s ease",
+            }}
+            onMouseEnter={() => setDeleteHovered(true)}
+            onMouseLeave={() => setDeleteHovered(false)}
+          >
+            <IconTrash2 />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+};
+
 // ─── AdminProducts Page ──────────────────────────────────────────────────────
-const AdminProducts = () => {
+const AdminProducts = ({ products = [], categories = [] }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -118,6 +261,7 @@ const AdminProducts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [addBtnHovered, setAddBtnHovered] = useState(false);
+  const [addCatBtnHovered, setAddCatBtnHovered] = useState(false);
 
   useEffect(() => {
     injectFonts();
@@ -143,12 +287,23 @@ const AdminProducts = () => {
     if (isMobile) setMobileSidebarOpen(false);
   };
 
-  // Filter products by search query
+  const handleDelete = (product) => {
+    if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
+    router.delete(`/admin/products/${product.id}`, { preserveScroll: true });
+  };
+
+  // Filter products by search query (name or category)
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      getCategoryName(p.category).toLowerCase().includes(searchQuery.toLowerCase())
+      (p.category || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // ─── Metrics (derived from real data) ───────────────────────────────────
+  const totalProducts = products.length;
+  const totalCategories = categories.length;
+  const newArrivals = products.filter((p) => p.is_new_arrival).length;
+  const lowStock = products.filter((p) => p.stock_quantity < LOW_STOCK_THRESHOLD).length;
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: tokens.fontBody, backgroundColor: "rgba(245,245,245,0.6)" }}>
@@ -237,6 +392,8 @@ const AdminProducts = () => {
             <input
               type="text"
               placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               style={{
                 width: "100%",
                 height: "36px",
@@ -314,33 +471,62 @@ const AdminProducts = () => {
                 Products
               </h1>
               <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
-                Manage your product catalog — {products.length} items
+                Manage your product catalog — {totalProducts} item{totalProducts === 1 ? "" : "s"}
               </p>
             </div>
-            <button
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.5rem 1rem",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-                fontFamily: tokens.fontBody,
-                borderRadius: tokens.radius,
-                border: "none",
-                backgroundColor: tokens.foreground,
-                color: tokens.background,
-                cursor: "pointer",
-                opacity: addBtnHovered ? 0.9 : 1,
-                transition: "opacity 0.2s ease",
-                whiteSpace: "nowrap",
-              }}
-              onMouseEnter={() => setAddBtnHovered(true)}
-              onMouseLeave={() => setAddBtnHovered(false)}
-            >
-              <IconPlus />
-              Add Product
-            </button>
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              <a
+                href="/admin/categories/add"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem 1rem",
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                  fontFamily: tokens.fontBody,
+                  borderRadius: tokens.radius,
+                  border: `1px solid ${tokens.border}`,
+                  backgroundColor: addCatBtnHovered ? tokens.secondary : "transparent",
+                  color: tokens.foreground,
+                  cursor: "pointer",
+                  transition: "background-color 0.2s ease",
+                  whiteSpace: "nowrap",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={() => setAddCatBtnHovered(true)}
+                onMouseLeave={() => setAddCatBtnHovered(false)}
+              >
+                <IconPlus />
+                Add Category
+              </a>
+              <a
+                href="/admin/products/add"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem 1rem",
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                  fontFamily: tokens.fontBody,
+                  borderRadius: tokens.radius,
+                  border: "none",
+                  backgroundColor: tokens.foreground,
+                  color: tokens.background,
+                  cursor: "pointer",
+                  opacity: addBtnHovered ? 0.9 : 1,
+                  transition: "opacity 0.2s ease",
+                  whiteSpace: "nowrap",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={() => setAddBtnHovered(true)}
+                onMouseLeave={() => setAddBtnHovered(false)}
+              >
+                <IconPlus />
+                Add Product
+              </a>
+            </div>
           </div>
 
           {/* Search bar for mobile */}
@@ -377,6 +563,26 @@ const AdminProducts = () => {
 
         {/* Page content */}
         <main style={{ flex: 1, padding: "1.5rem" }}>
+          {/* ─── Metric Cards ────────────────────────────────────────────── */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: "1rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <MetricCard icon={<IconPackage />} label="Total Products" value={totalProducts} color={tokens.foreground} />
+            <MetricCard icon={<IconTag />} label="Categories" value={totalCategories} color={tokens.foreground} />
+            <MetricCard icon={<IconStar />} label="New Arrivals" value={newArrivals} color={tokens.green} />
+            <MetricCard
+              icon={<IconAlertCircle />}
+              label="Low Stock"
+              value={lowStock}
+              color={lowStock > 0 ? tokens.destructive : tokens.mutedForeground}
+            />
+          </div>
+
           {/* Products table card */}
           <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, overflow: "hidden" }}>
             <div style={{ padding: "1.5rem", borderBottom: isMobile ? `1px solid ${tokens.border}` : "none" }}>
@@ -429,123 +635,69 @@ const AdminProducts = () => {
                   {filteredProducts.length === 0 ? (
                     <tr>
                       <td colSpan={7} style={{ padding: "3rem 1.5rem", textAlign: "center", color: tokens.mutedForeground }}>
-                        No products found matching "{searchQuery}"
+                        {products.length === 0
+                          ? "No products yet — click \"Add Product\" to create your first one."
+                          : `No products found matching "${searchQuery}"`}
                       </td>
                     </tr>
                   ) : (
-                    filteredProducts.map((product) => {
-                      const [editHovered, setEditHovered] = useState(false);
-                      const [deleteHovered, setDeleteHovered] = useState(false);
-
-                      return (
-                        <tr key={product.id} style={{ borderBottom: `1px solid ${tokens.border}` }}>
-                          <td style={{ padding: "0.75rem 1.5rem" }}>
-                            <div style={{ width: "48px", height: "48px", overflow: "hidden", backgroundColor: tokens.secondary, borderRadius: tokens.radius }}>
-                              <img
-                                src={product.images[0]}
-                                alt={product.name}
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                              />
-                            </div>
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>
-                            {product.name}
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem", color: tokens.mutedForeground }}>
-                            {getCategoryName(product.category)}
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem", color: tokens.foreground }}>
-                            ${product.price}
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem" }}>
-                            {product.isNewArrival ? (
-                              <span
-                                style={{
-                                  display: "inline-block",
-                                  padding: "0.125rem 0.625rem",
-                                  borderRadius: "9999px",
-                                  fontSize: "0.75rem",
-                                  fontWeight: 500,
-                                  backgroundColor: tokens.secondary,
-                                  color: tokens.foreground,
-                                  border: `1px solid ${tokens.border}`,
-                                }}
-                              >
-                                New
-                              </span>
-                            ) : (
-                              <span
-                                style={{
-                                  display: "inline-block",
-                                  padding: "0.125rem 0.625rem",
-                                  borderRadius: "9999px",
-                                  fontSize: "0.75rem",
-                                  fontWeight: 500,
-                                  backgroundColor: "transparent",
-                                  color: tokens.mutedForeground,
-                                  border: `1px solid ${tokens.border}`,
-                                }}
-                              >
-                                Active
-                              </span>
-                            )}
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem", color: tokens.mutedForeground }}>
-                            {getStock(product.id)}
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem", textAlign: "right" }}>
-                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.25rem" }}>
-                              <button
-                                aria-label="Edit"
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  width: "36px",
-                                  height: "36px",
-                                  borderRadius: tokens.radius,
-                                  border: "none",
-                                  background: editHovered ? tokens.secondary : "transparent",
-                                  cursor: "pointer",
-                                  color: tokens.foreground,
-                                  transition: "background-color 0.15s ease",
-                                }}
-                                onMouseEnter={() => setEditHovered(true)}
-                                onMouseLeave={() => setEditHovered(false)}
-                              >
-                                <IconPencil />
-                              </button>
-                              <button
-                                aria-label="Delete"
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  width: "36px",
-                                  height: "36px",
-                                  borderRadius: tokens.radius,
-                                  border: "none",
-                                  background: deleteHovered ? "#fee2e2" : "transparent",
-                                  cursor: "pointer",
-                                  color: deleteHovered ? tokens.destructive : tokens.foreground,
-                                  transition: "background-color 0.15s ease, color 0.15s ease",
-                                }}
-                                onMouseEnter={() => setDeleteHovered(true)}
-                                onMouseLeave={() => setDeleteHovered(false)}
-                              >
-                                <IconTrash2 />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
+                    filteredProducts.map((product) => (
+                      <ProductRow key={product.id} product={product} onDelete={handleDelete} />
+                    ))
                   )}
                 </tbody>
               </table>
             </div>
           </div>
         </main>
+      </div>
+    </div>
+  );
+};
+
+// ─── Metric Card Component ──────────────────────────────────────────────────
+const MetricCard = ({ icon, label, value, color }) => {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      style={{
+        backgroundColor: tokens.background,
+        border: `1px solid ${tokens.border}`,
+        borderRadius: tokens.radius,
+        padding: "1.25rem",
+        display: "flex",
+        alignItems: "center",
+        gap: "1rem",
+        transition: "box-shadow 0.2s ease, transform 0.2s ease",
+        boxShadow: hovered ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
+        transform: hovered ? "translateY(-2px)" : "none",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "40px",
+          height: "40px",
+          borderRadius: tokens.radius,
+          backgroundColor: tokens.secondary,
+          color: color,
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "0.75rem", fontWeight: 500, color: tokens.mutedForeground, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          {label}
+        </div>
+        <div style={{ fontSize: "1.5rem", fontWeight: 600, color: tokens.foreground, lineHeight: 1.2 }}>
+          {value}
+        </div>
       </div>
     </div>
   );

@@ -8,17 +8,19 @@ use App\Models\Product;
 
 class ProductVariant extends Model
 {
+    // public $incrementing = false;
+    // protected $keyType = 'string';
 
-    public $incrementing = false;
-    protected $keyType = 'string';
-    
-    protected $table = 'product_variants';
+    // protected $table = 'product_variants';
     protected $fillable = [
-        'product_variant_id',
         'product_id',
         'size',
         'color',
         'stock_quantity'
+    ];
+
+    protected $casts = [
+        'stock_quantity' => 'integer',
     ];
     
     public function product() 
