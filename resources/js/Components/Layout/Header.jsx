@@ -479,7 +479,7 @@ const CartButton = () => {
   const count = getCartCount();
 
   return (
-    <button
+    <a
       onClick={toggleCart}
       aria-label="Open shopping bag"
       style={{
@@ -513,7 +513,7 @@ const CartButton = () => {
           {count > 9 ? "9+" : count}
         </span>
       )}
-    </button>
+    </a>
   );
 };
 

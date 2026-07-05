@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import Header from '@/Components/Layout/Header';
+import Footer from '@/Components/Layout/Footer';
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -24,117 +26,6 @@ const tokens = {
   border: "#e6e6e6",
   radius: "4px",
 };
-
-// ─── Data ────────────────────────────────────────────────────────────────────
-const categories = [
-  {
-    id: "1",
-    name: "Dresses",
-    slug: "dresses",
-    description: "Elegant dresses for every occasion",
-    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80",
-    productCount: 24,
-  },
-  {
-    id: "2",
-    name: "Tops",
-    slug: "tops",
-    description: "Sophisticated tops and blouses",
-    image: "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=800&q=80",
-    productCount: 32,
-  },
-  {
-    id: "3",
-    name: "Bottoms",
-    slug: "bottoms",
-    description: "Refined pants, skirts, and shorts",
-    image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80",
-    productCount: 18,
-  },
-  {
-    id: "4",
-    name: "Outerwear",
-    slug: "outerwear",
-    description: "Timeless coats and jackets",
-    image: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80",
-    productCount: 12,
-  },
-  {
-    id: "5",
-    name: "Accessories",
-    slug: "accessories",
-    description: "Finishing touches for your look",
-    image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80",
-    productCount: 28,
-  },
-];
-
-const products = [
-  {
-    id: "1",
-    name: "Silk Midi Dress",
-    price: 289,
-    images: ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80"],
-    category: "dresses",
-    isNewArrival: true,
-  },
-  {
-    id: "2",
-    name: "Cashmere Wrap Coat",
-    price: 495,
-    images: ["https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80"],
-    category: "outerwear",
-    isNewArrival: true,
-  },
-  {
-    id: "3",
-    name: "Linen Palazzo Pants",
-    price: 165,
-    images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
-    category: "bottoms",
-    isNewArrival: true,
-  },
-  {
-    id: "4",
-    name: "Silk Camisole",
-    price: 125,
-    images: ["https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=800&q=80"],
-    category: "tops",
-    isNewArrival: true,
-  },
-  {
-    id: "5",
-    name: "Leather Crossbody Bag",
-    price: 245,
-    images: ["https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80"],
-    category: "accessories",
-    isNewArrival: true,
-  },
-  {
-    id: "6",
-    name: "Tailored Wool Blazer",
-    price: 345,
-    images: ["https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=800&q=80"],
-    category: "outerwear",
-    isNewArrival: false,
-  },
-  {
-    id: "7",
-    name: "Pleated Maxi Skirt",
-    price: 195,
-    images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
-    category: "bottoms",
-    isNewArrival: true,
-  },
-  {
-    id: "8",
-    name: "Oversized Cotton Shirt",
-    price: 145,
-    images: ["https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80"],
-    category: "tops",
-    isNewArrival: false,
-  },
-];
 
 const getCategoryBySlug = (slug) => categories.find((c) => c.slug === slug);
 const getProductsByCategory = (categorySlug) => products.filter((p) => p.category === categorySlug);
@@ -197,228 +88,35 @@ const MailIcon = () => (
   </svg>
 );
 
-// ─── Header ──────────────────────────────────────────────────────────────────
-const navLinks = [
-  { name: "Home", path: "/" },
-  { name: "Collections", path: "/collections" },
-  { name: "New Arrivals", path: "/new-arrivals" },
-  { name: "About", path: "/about" },
-];
-
-const NavLink = ({ href, children, onClick, scrolled }) => {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <a
-      href={href} onClick={onClick}
-      style={{
-        fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, textDecoration: "none",
-        color: hovered ? (scrolled ? tokens.foreground : "rgba(255,255,255,0.9)") : (scrolled ? tokens.mutedForeground : "rgba(255,255,255,0.7)"),
-        transition: "color 0.15s ease",
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {children}
-    </a>
-  );
-};
-
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [menuBtnHovered, setMenuBtnHovered] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [cartBtnHovered, setCartBtnHovered] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const ghostIconBtn = {
-    display: "inline-flex", alignItems: "center", justifyContent: "center",
-    width: "40px", height: "40px", borderRadius: tokens.radius, border: "none",
-    background: "transparent", cursor: "pointer", position: "relative", padding: 0,
-    transition: "background-color 0.15s ease, color 0.15s ease",
-  };
-
-  return (
-    <header
-      style={{
-        position: "sticky", top: 0, zIndex: 50, width: "100%",
-        borderBottom: scrolled ? `1px solid ${tokens.border}` : "1px solid transparent",
-        backgroundColor: scrolled ? "rgba(255,255,255,0.95)" : "rgba(20,20,20,0.3)",
-        backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-        fontFamily: tokens.fontBody,
-        transition: "background-color 0.3s ease, border-color 0.3s ease",
-      }}
-    >
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1rem" }}>
-        <div style={{ display: "flex", height: "64px", alignItems: "center", justifyContent: "space-between" }}>
-          <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
-            <span style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 600, letterSpacing: "0.08em", color: scrolled ? tokens.foreground : "#ffffff", transition: "color 0.3s ease" }}>
-              ANITA
-            </span>
-          </a>
-          <nav style={{ display: "flex", alignItems: "center", gap: "2rem" }} className="category-desktop-nav">
-            {navLinks.map((link) => (
-              <NavLink key={link.name} href={link.path} scrolled={scrolled}>{link.name}</NavLink>
-            ))}
-          </nav>
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <button
-              aria-label="Open shopping bag"
-              style={{ ...ghostIconBtn, backgroundColor: cartBtnHovered ? (scrolled ? tokens.border : "rgba(255,255,255,0.15)") : "transparent", color: scrolled ? tokens.foreground : "#ffffff" }}
-              onMouseEnter={() => setCartBtnHovered(true)}
-              onMouseLeave={() => setCartBtnHovered(false)}
-            >
-              <IconShoppingBag />
-            </button>
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu"
-              style={{ ...ghostIconBtn, backgroundColor: menuBtnHovered ? (scrolled ? tokens.border : "rgba(255,255,255,0.15)") : "transparent", color: scrolled ? tokens.foreground : "#ffffff" }}
-              onMouseEnter={() => setMenuBtnHovered(true)}
-              onMouseLeave={() => setMenuBtnHovered(false)}
-              className="category-mobile-menu-btn"
-            >
-              {isMenuOpen ? <IconX /> : <IconMenu />}
-            </button>
-          </div>
-        </div>
-        {isMenuOpen && (
-          <nav style={{ borderTop: `1px solid ${scrolled ? tokens.border : "rgba(255,255,255,0.2)"}`, padding: "1rem 0", display: "flex", flexDirection: "column", gap: "1rem", backgroundColor: scrolled ? tokens.background : "rgba(20,20,20,0.95)", transition: "background-color 0.3s ease, border-color 0.3s ease" }} className="category-mobile-nav">
-            {navLinks.map((link) => (
-              <NavLink key={link.name} href={link.path} onClick={() => setIsMenuOpen(false)} scrolled={scrolled}>{link.name}</NavLink>
-            ))}
-          </nav>
-        )}
-      </div>
-      <style>{`
-        .category-desktop-nav { display: none; }
-        .category-mobile-menu-btn { display: inline-flex; }
-        .category-mobile-nav { display: flex; }
-        @media (min-width: 768px) {
-          .category-desktop-nav { display: flex; }
-          .category-mobile-menu-btn { display: none; }
-          .category-mobile-nav { display: none; }
-        }
-      `}</style>
-    </header>
-  );
-};
-
-// ─── Footer ──────────────────────────────────────────────────────────────────
-const HoverLink = ({ href, target, rel, ariaLabel, children }) => {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <a
-      href={href} target={target} rel={rel} aria-label={ariaLabel}
-      style={{ textDecoration: "none", fontSize: "0.875rem", display: "flex", alignItems: "center", color: hovered ? tokens.foreground : tokens.mutedForeground, transition: "color 0.2s ease" }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {children}
-    </a>
-  );
-};
-
-const Footer = () => {
-  const [email, setEmail] = useState("");
-  const [btnHovered, setBtnHovered] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return (
-    <footer style={{ borderTop: `1px solid ${tokens.border}`, backgroundColor: tokens.secondary, fontFamily: tokens.fontBody }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "3rem 1rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "1fr 1fr 1fr 1fr" : "1fr 1fr", gap: "2rem" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <a href="/" style={{ display: "inline-block", textDecoration: "none", color: tokens.foreground }}>
-              <span style={{ fontFamily: tokens.fontDisplay, fontSize: "1.5rem", fontWeight: 600, letterSpacing: "0.05em" }}>ANITA</span>
-            </a>
-            <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, lineHeight: 1.6, margin: 0 }}>
-              Timeless elegance for the modern woman. Curated collections that celebrate understated luxury.
-            </p>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <h4 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>Quick Links</h4>
-            <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              <HoverLink href="/collections">All Collections</HoverLink>
-              <HoverLink href="/new-arrivals">New Arrivals</HoverLink>
-              <HoverLink href="/about">About Us</HoverLink>
-            </nav>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <h4 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>Contact</h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
-              <p style={{ margin: 0 }}>hello@anitaclothing.com</p>
-              <p style={{ margin: 0 }}>+1 (555) 123-4567</p>
-            </div>
-            <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
-              <HoverLink href="https://instagram.com" target="_blank" rel="noopener noreferrer" ariaLabel="Instagram"><InstagramIcon /></HoverLink>
-              <HoverLink href="https://facebook.com" target="_blank" rel="noopener noreferrer" ariaLabel="Facebook"><FacebookIcon /></HoverLink>
-              <HoverLink href="mailto:hello@anitaclothing.com" ariaLabel="Email"><MailIcon /></HoverLink>
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <h4 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>Stay Updated</h4>
-            <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, lineHeight: 1.6, margin: 0 }}>Subscribe for exclusive offers and new arrivals.</p>
-            <form onSubmit={(e) => { e.preventDefault(); setEmail(""); }} style={{ display: "flex", gap: "0.5rem" }}>
-              <input
-                type="email" placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                style={{ flex: 1, padding: "0.5rem 0.75rem", fontSize: "0.875rem", fontFamily: tokens.fontBody, backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, color: tokens.foreground, outline: "none", transition: "border-color 0.2s ease" }}
-                onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
-                onBlur={(e) => (e.target.style.borderColor = tokens.border)}
-              />
-              <button
-                type="submit"
-                style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, backgroundColor: tokens.foreground, color: "#ffffff", border: "none", borderRadius: tokens.radius, cursor: "pointer", opacity: btnHovered ? 0.9 : 1, transition: "opacity 0.2s ease" }}
-                onMouseEnter={() => setBtnHovered(true)}
-                onMouseLeave={() => setBtnHovered(false)}
-              >
-                Join
-              </button>
-            </form>
-          </div>
-        </div>
-        <div style={{ marginTop: "3rem", borderTop: `1px solid ${tokens.border}`, paddingTop: "2rem", textAlign: "center" }}>
-          <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0 }}>
-            © {new Date().getFullYear()} Anita Clothing. All rights reserved.
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-};
-
 // ─── ProductCard ─────────────────────────────────────────────────────────────
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
+  const image = product.images?.[0];
 
   return (
     <a
-      href={`/product/${product.id}`}
+      href={`/product/${product.slug ?? product.id}`}
       style={{ display: "block", textDecoration: "none", color: "inherit" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       <div style={{ overflow: "hidden", backgroundColor: tokens.secondary, position: "relative", paddingBottom: "133.33%" }}>
-        <img
-          src={product.images[0]}
-          alt={product.name}
-          loading="lazy"
-          style={{
-            position: "absolute", inset: 0, height: "100%", width: "100%",
-            objectFit: "cover", transition: "transform 500ms ease",
-            transform: hovered ? "scale(1.05)" : "scale(1)",
-          }}
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={product.name}
+            loading="lazy"
+            style={{
+              position: "absolute", inset: 0, height: "100%", width: "100%",
+              objectFit: "cover", transition: "transform 500ms ease",
+              transform: hovered ? "scale(1.05)" : "scale(1)",
+            }}
+          />
+        ) : (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: tokens.mutedForeground, fontSize: "0.75rem" }}>
+            No image
+          </div>
+        )}
       </div>
       <div style={{ marginTop: "1rem" }}>
         <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 500, margin: "0 0 4px", color: hovered ? tokens.mutedForeground : tokens.foreground, transition: "color 0.2s ease" }}>
@@ -433,10 +131,10 @@ const ProductCard = ({ product }) => {
 };
 
 // ─── Category Page ───────────────────────────────────────────────────────────
-const Category = () => {
+const Category = ({ category, products = [] }) => {
   const slug = getSlugFromURL();
-  const category = getCategoryBySlug(slug || "");
-  const categoryProducts = getProductsByCategory(slug || "");
+  // const category = getCategoryBySlug(slug || "");
+  // const categoryProducts = getProductsByCategory(slug || "");
   const [breadcrumbHomeHovered, setBreadcrumbHomeHovered] = useState(false);
   const [breadcrumbCollectionsHovered, setBreadcrumbCollectionsHovered] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -487,20 +185,19 @@ const Category = () => {
       <main style={{ flex: 1 }}>
         {/* Hero */}
         <section style={{ position: "relative", height: "40vh", minHeight: "300px", overflow: "hidden" }}>
-          <img
-            src={category.image}
-            alt={category.name}
-            style={{ height: "100%", width: "100%", objectFit: "cover", display: "block" }}
-          />
-          <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(20,20,20,0.4)" }} />
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", color: "#ffffff", padding: "0 1rem" }}>
-            <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(2.25rem, 5vw, 3.75rem)", fontWeight: 500, margin: 0 }}>
-              {category.name}
-            </h1>
-            <p style={{ marginTop: "1rem", fontSize: "1.125rem", opacity: 0.9, maxWidth: "36rem", lineHeight: 1.6 }}>
-              {category.description}
-            </p>
-          </div>
+          {category.image && (
+            <img
+              src={category.image}
+              alt={category.name}
+              style={{ height: "100%", width: "100%", objectFit: "cover", display: "block" }}
+            />
+          )}
+           <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(20,20,20,0.4)" }} />
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", color: "#ffffff", padding: "0 1rem" }}>
+              <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(2.25rem, 5vw, 3.75rem)", fontWeight: 500, margin: 0 }}>
+                {category.name}
+              </h1>
+            </div>
         </section>
 
         {/* Breadcrumb */}
@@ -534,11 +231,11 @@ const Category = () => {
         <section style={{ padding: isDesktop ? "4rem 0" : "3rem 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1rem" }}>
             <p style={{ marginBottom: "2rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
-              {categoryProducts.length} {categoryProducts.length === 1 ? "piece" : "pieces"}
+              {products.length} {products.length === 1 ? "piece" : "pieces"}
             </p>
-            {categoryProducts.length > 0 ? (
+            {products.length > 0 ? (
               <div style={{ display: "grid", gridTemplateColumns: getGridColumns(), gap: isDesktop ? "1.5rem" : "1rem" }}>
-                {categoryProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>

@@ -27,99 +27,8 @@ const tokens = {
   radius: "4px",
 };
 
-// ─── Data ────────────────────────────────────────────────────────────────────
-const products = [
-  {
-    id: "1",
-    name: "Silk Midi Dress",
-    price: 289,
-    images: ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80"],
-    category: "dresses",
-    isNewArrival: true,
-  },
-  {
-    id: "2",
-    name: "Cashmere Wrap Coat",
-    price: 495,
-    images: ["https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80"],
-    category: "outerwear",
-    isNewArrival: true,
-  },
-  {
-    id: "3",
-    name: "Linen Palazzo Pants",
-    price: 165,
-    images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
-    category: "bottoms",
-    isNewArrival: true,
-  },
-  {
-    id: "4",
-    name: "Silk Camisole",
-    price: 125,
-    images: ["https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=800&q=80"],
-    category: "tops",
-    isNewArrival: true,
-  },
-  {
-    id: "5",
-    name: "Leather Crossbody Bag",
-    price: 245,
-    images: ["https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80"],
-    category: "accessories",
-    isNewArrival: true,
-  },
-  {
-    id: "6",
-    name: "Wool Blend Blazer",
-    price: 350,
-    images: ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80"],
-    category: "outerwear",
-    isNewArrival: true,
-  },
-  {
-    id: "7",
-    name: "Pleated Maxi Skirt",
-    price: 195,
-    images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
-    category: "bottoms",
-    isNewArrival: true,
-  },
-  {
-    id: "8",
-    name: "Silk Scarf",
-    price: 85,
-    images: ["https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80"],
-    category: "accessories",
-    isNewArrival: true,
-  },
-];
 
-const getNewArrivals = () => products.filter((p) => p.isNewArrival);
-
-// ─── Icons ───────────────────────────────────────────────────────────────────
-const IconShoppingBag = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <path d="M16 10a4 4 0 0 1-8 0" />
-  </svg>
-);
-
-const IconMenu = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <line x1="3" y1="12" x2="21" y2="12" />
-    <line x1="3" y1="18" x2="21" y2="18" />
-  </svg>
-);
-
-const IconX = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
+// const getNewArrivals = () => products.filter((p) => p.isNewArrival);
 
 const ChevronRight = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -127,34 +36,14 @@ const ChevronRight = () => (
   </svg>
 );
 
-const InstagramIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-  </svg>
-);
-
-const FacebookIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
-
-const MailIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="4" width="20" height="16" rx="2" />
-    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-  </svg>
-);
-
 // ─── ProductCard ─────────────────────────────────────────────────────────────
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
+  const image = product.images?.[0];
 
   return (
     <a
-      href={`/product/${product.id}`}
+      href={`/product/${product.slug ?? product.id}`}
       style={{ display: "block", textDecoration: "none", color: "inherit" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -167,20 +56,26 @@ const ProductCard = ({ product }) => {
           paddingBottom: "133.33%",
         }}
       >
-        <img
-          src={product.images[0]}
-          alt={product.name}
-          loading="lazy"
-          style={{
-            position: "absolute",
-            inset: 0,
-            height: "100%",
-            width: "100%",
-            objectFit: "cover",
-            transition: "transform 500ms ease",
-            transform: hovered ? "scale(1.05)" : "scale(1)",
-          }}
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={product.name}
+            loading="lazy"
+            style={{
+              position: "absolute",
+              inset: 0,
+              height: "100%",
+              width: "100%",
+              objectFit: "cover",
+              transition: "transform 500ms ease",
+              transform: hovered ? "scale(1.05)" : "scale(1)",
+            }}
+          />
+        ) : (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: tokens.mutedForeground, fontSize: "0.75rem" }}>
+            No image
+          </div>
+        )}
       </div>
       <div style={{ marginTop: "1rem" }}>
         <h3
@@ -204,8 +99,8 @@ const ProductCard = ({ product }) => {
 };
 
 // ─── NewArrivalsPage ─────────────────────────────────────────────────────────
-const NewArrivalsPage = () => {
-  const newArrivals = getNewArrivals();
+const NewArrivalsPage = ({ products = [] }) => {
+  // const newArrivals = getNewArrivals();
   const [email, setEmail] = useState("");
   const [subscribeBtnHovered, setSubscribeBtnHovered] = useState(false);
   const [breadcrumbHomeHovered, setBreadcrumbHomeHovered] = useState(false);
@@ -276,7 +171,7 @@ const NewArrivalsPage = () => {
         {/* Products Grid */}
         <section style={{ paddingBottom: isDesktop ? "6rem" : "4rem" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1rem" }}>
-            {newArrivals.length > 0 ? (
+            {products.length > 0 ? (
               <div
                 style={{
                   display: "grid",
@@ -284,7 +179,7 @@ const NewArrivalsPage = () => {
                   gap: isDesktop ? "1.5rem" : "1rem",
                 }}
               >
-                {newArrivals.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>

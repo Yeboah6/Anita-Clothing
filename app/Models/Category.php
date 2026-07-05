@@ -9,7 +9,6 @@ use App\Models\Product;
 class Category extends Model
 {
     protected $fillable = [
-        'category_id',
         'slug',
         'name',
     ];

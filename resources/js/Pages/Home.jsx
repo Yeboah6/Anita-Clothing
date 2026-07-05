@@ -5,13 +5,13 @@ import AboutSection from '@/Components/Modules/Home/AboutSection';
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
 
-export default function Home() {
+export default function Home({ newArrivals, categories }) {
     return (
         <>
             <Header />
             <HeroSection />
-            <NewArrivals />
-            <CategoryPreview />
+            <NewArrivals products={newArrivals} />
+            <CategoryPreview categories={categories} />
             <AboutSection />
             <Footer />
         </>

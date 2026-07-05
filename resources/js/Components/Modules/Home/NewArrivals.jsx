@@ -25,66 +25,67 @@ const tokens = {
 };
 
 // ─── Data ────────────────────────────────────────────────────────────────────
-const products = [
-  {
-    id: "1",
-    name: "Silk Midi Dress",
-    price: 289,
-    images: ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80"],
-    category: "dresses",
-    isNewArrival: true,
-  },
-  {
-    id: "2",
-    name: "Cashmere Wrap Coat",
-    price: 495,
-    images: ["https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80"],
-    category: "outerwear",
-    isNewArrival: true,
-  },
-  {
-    id: "3",
-    name: "Linen Palazzo Pants",
-    price: 165,
-    images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
-    category: "bottoms",
-    isNewArrival: true,
-  },
-  {
-    id: "4",
-    name: "Silk Camisole",
-    price: 125,
-    images: ["https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=800&q=80"],
-    category: "tops",
-    isNewArrival: true,
-  },
-  {
-    id: "5",
-    name: "Leather Crossbody Bag",
-    price: 245,
-    images: ["https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80"],
-    category: "accessories",
-    isNewArrival: true,
-  },
-  {
-    id: "7",
-    name: "Pleated Maxi Skirt",
-    price: 195,
-    images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
-    category: "bottoms",
-    isNewArrival: true,
-  },
-];
+// const products = [
+//   {
+//     id: "1",
+//     name: "Silk Midi Dress",
+//     price: 289,
+//     images: ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80"],
+//     category: "dresses",
+//     isNewArrival: true,
+//   },
+//   {
+//     id: "2",
+//     name: "Cashmere Wrap Coat",
+//     price: 495,
+//     images: ["https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80"],
+//     category: "outerwear",
+//     isNewArrival: true,
+//   },
+//   {
+//     id: "3",
+//     name: "Linen Palazzo Pants",
+//     price: 165,
+//     images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
+//     category: "bottoms",
+//     isNewArrival: true,
+//   },
+//   {
+//     id: "4",
+//     name: "Silk Camisole",
+//     price: 125,
+//     images: ["https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=800&q=80"],
+//     category: "tops",
+//     isNewArrival: true,
+//   },
+//   {
+//     id: "5",
+//     name: "Leather Crossbody Bag",
+//     price: 245,
+//     images: ["https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80"],
+//     category: "accessories",
+//     isNewArrival: true,
+//   },
+//   {
+//     id: "7",
+//     name: "Pleated Maxi Skirt",
+//     price: 195,
+//     images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
+//     category: "bottoms",
+//     isNewArrival: true,
+//   },
+// ];
 
 const getNewArrivals = () => products.filter((p) => p.isNewArrival);
 
 // ─── ProductCard ─────────────────────────────────────────────────────────────
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
+  const image = product.images?.[0];
 
   return (
     <a
-      href={`/product/${product.id}`}
+      href={`/product/${product.slug ?? product.id}`}
       style={{ display: "block", textDecoration: "none", color: "inherit" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -98,20 +99,26 @@ const ProductCard = ({ product }) => {
           paddingBottom: "133.33%", // 4/3 * 100
         }}
       >
-        <img
-          src={product.images[0]}
-          alt={product.name}
-          loading="lazy"
-          style={{
-            position: "absolute",
-            inset: 0,
-            height: "100%",
-            width: "100%",
-            objectFit: "cover",
-            transition: "transform 500ms ease",
-            transform: hovered ? "scale(1.05)" : "scale(1)",
-          }}
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={product.name}
+            loading="lazy"
+            style={{
+              position: "absolute",
+              inset: 0,
+              height: "100%",
+              width: "100%",
+              objectFit: "cover",
+              transition: "transform 500ms ease",
+              transform: hovered ? "scale(1.05)" : "scale(1)",
+            }}
+          />
+        ) : (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: tokens.mutedForeground, fontSize: "0.75rem" }}>
+            No image
+          </div>
+        )}
       </div>
 
       {/* Info */}
@@ -144,11 +151,13 @@ const ProductCard = ({ product }) => {
 };
 
 // ─── NewArrivals ─────────────────────────────────────────────────────────────
-const NewArrivals = () => {
+const NewArrivals = ({ products = [] }) => {
   const [btnHovered, setBtnHovered] = useState(false);
-  const newArrivals = getNewArrivals().slice(0, 4);
+  // const newArrivals = getNewArrivals().slice(0, 4);
 
   useEffect(() => { injectFonts(); }, []);
+
+  if (products.length === 0) return null;
 
   return (
     <section
@@ -208,7 +217,7 @@ const NewArrivals = () => {
             gap: "1.5rem",
           }}
         >
-          {newArrivals.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

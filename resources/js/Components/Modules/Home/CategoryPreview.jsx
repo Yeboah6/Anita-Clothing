@@ -25,52 +25,6 @@ const tokens = {
   radius: "4px",
 };
 
-// ─── Data ────────────────────────────────────────────────────────────────────
-const categories = [
-  {
-    id: "1",
-    name: "Dresses",
-    slug: "dresses",
-    description: "Elegant dresses for every occasion",
-    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80",
-    productCount: 24,
-  },
-  {
-    id: "2",
-    name: "Tops",
-    slug: "tops",
-    description: "Sophisticated tops and blouses",
-    image: "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=800&q=80",
-    productCount: 32,
-  },
-  {
-    id: "3",
-    name: "Bottoms",
-    slug: "bottoms",
-    description: "Refined pants, skirts, and shorts",
-    image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80",
-    productCount: 18,
-  },
-  {
-    id: "4",
-    name: "Outerwear",
-    slug: "outerwear",
-    description: "Timeless coats and jackets",
-    image: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80",
-    productCount: 12,
-  },
-  {
-    id: "5",
-    name: "Accessories",
-    slug: "accessories",
-    description: "Finishing touches for your look",
-    image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80",
-    productCount: 28,
-  },
-];
-
-const featuredCategories = categories.slice(0, 4);
-
 // ─── CategoryCard ─────────────────────────────────────────────────────────────
 const CategoryCard = ({ category }) => {
   const [hovered, setHovered] = useState(false);
@@ -91,20 +45,24 @@ const CategoryCard = ({ category }) => {
           paddingBottom: "125%", // 5/4 * 100
         }}
       >
-        <img
-          src={category.image}
-          alt={category.name}
-          loading="lazy"
-          style={{
-            position: "absolute",
-            inset: 0,
-            height: "100%",
-            width: "100%",
-            objectFit: "cover",
-            transition: "transform 700ms ease",
-            transform: hovered ? "scale(1.05)" : "scale(1)",
-          }}
-        />
+        {category.image ? (
+          <img
+            src={category.image}
+            alt={category.name}
+            loading="lazy"
+            style={{
+              position: "absolute",
+              inset: 0,
+              height: "100%",
+              width: "100%",
+              objectFit: "cover",
+              transition: "transform 700ms ease",
+              transform: hovered ? "scale(1.05)" : "scale(1)",
+            }}
+          />
+        ) : (
+          <div style={{ position: "absolute", inset: 0, backgroundColor: tokens.secondary }} />
+        )}
         {/* Overlay */}
         <div
           style={{
@@ -145,7 +103,7 @@ const CategoryCard = ({ category }) => {
               fontFamily: tokens.fontBody,
             }}
           >
-            {category.productCount} pieces
+            {category.productCount} {category.productCount === 1 ? "piece" : "pieces"}
           </p>
         </div>
       </div>
@@ -154,12 +112,14 @@ const CategoryCard = ({ category }) => {
 };
 
 // ─── CategoryPreview ─────────────────────────────────────────────────────────
-const CategoryPreview = () => {
+const CategoryPreview = ({ categories = [] }) => {
   const [btnHovered, setBtnHovered] = useState(false);
 
   useEffect(() => {
     injectFonts();
   }, []);
+
+  if (categories.length === 0) return null;
 
   return (
     <section
@@ -219,7 +179,7 @@ const CategoryPreview = () => {
             gap: "1.5rem",
           }}
         >
-          {featuredCategories.map((category) => (
+          {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />
           ))}
         </div>

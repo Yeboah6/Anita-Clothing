@@ -259,7 +259,13 @@ const EditProduct = ({ product, categories }) => {
   const [activeUrl, setActiveUrl] = useState("/admin/products");
 
   // ─── Inertia form — everything that actually gets submitted ───────────────
-  const { data, setData, put, processing, errors, transform } = useForm({
+  // NOTE: Inertia can't send file uploads via put()/patch() — PHP doesn't parse
+  // multipart bodies on PUT requests, so the whole payload arrives empty and
+  // every "required" rule fails even though the fields are filled in. The fix
+  // is to submit via post() with a spoofed _method field, which Laravel reads
+  // and treats as a real PUT internally.
+  const { data, setData, post, processing, errors, transform } = useForm({
+    _method: "put",
     name: product.name ?? "",
     category_id: product.category_id ?? "",
     price: product.price != null ? String(product.price) : "",
@@ -270,6 +276,7 @@ const EditProduct = ({ product, categories }) => {
     featured: !!product.featured,
     status: product.status ?? "active",
     variants: (product.variants ?? []).map((v) => ({
+      id: v.id ?? null,
       size: v.size ?? "",
       color: v.color ?? "",
       stock_quantity: v.stock_quantity ?? 0,
@@ -287,15 +294,14 @@ const EditProduct = ({ product, categories }) => {
   );
   const [newImagePreviews, setNewImagePreviews] = useState([]);
   const [variantRows, setVariantRows] = useState(
-      (product.variants ?? []).map((v) => ({
-          id: v.id,            // <-- keep existing id
-          key: v.id ? `existing-${v.id}` : `new-${Date.now()}`,
-          size: v.size ?? '',
-          color: v.color ?? '',
-          stockQuantity: String(v.stock_quantity ?? 0),
-      }))
+    (product.variants ?? []).map((v, i) => ({
+      id: v.id,
+      key: v.id ? `existing-${v.id}` : `row-${i}`,
+      size: v.size ?? "",
+      color: v.color ?? "",
+      stockQuantity: String(v.stock_quantity ?? 0),
+    }))
   );
-
   const [newVariant, setNewVariant] = useState({ size: "", color: "", stockQuantity: "0" });
 
   const [touched, setTouched] = useState({});
@@ -377,7 +383,7 @@ const EditProduct = ({ product, categories }) => {
     setData(
       "variants",
       rows.map((r) => ({
-         id: r.id,
+        id: r.id ?? null,
         size: r.size,
         color: r.color,
         stock_quantity: parseInt(r.stockQuantity) || 0,
@@ -428,7 +434,9 @@ const EditProduct = ({ product, categories }) => {
 
     if (!isValid) return;
 
-    put("/admin/products/" + product.id, {
+    // post() + _method: "put" (set in useForm above) — see note above on why
+    // put()/patch() can't be used directly when the payload includes files.
+    post("/admin/products/" + product.id, {
       forceFormData: true,
       onSuccess: () => {
         setNewImagePreviews([]);

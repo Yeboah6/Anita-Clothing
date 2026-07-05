@@ -8,12 +8,6 @@ use App\Models\Order;
 
 class Payment extends Model
 {
-    // protected $table = 'payments';
-
-    public $incrementing = false;
-    protected $keyType = 'string';
-
-    protected $table = 'payments';
     protected $fillable = [
         'payment_id',
         'order_id',

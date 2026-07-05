@@ -9,8 +9,6 @@ use App\Models\Order;
 
 class OrderItem extends Model
 {
-    // protected $table = 'order_items';
-
     protected $fillable = [
         'order_item_id',
         'order_id',
