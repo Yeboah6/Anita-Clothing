@@ -77,6 +77,24 @@ const IconPencil = () => (
   </svg>
 );
 
+const IconEye = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
 const IconTrash2 = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M3 6h18" />
@@ -118,6 +136,7 @@ const IconAlertCircle = () => (
 
 // ─── Product Row (its own component so each row can hold its own hover state) ─
 const ProductRow = ({ product, onDelete }) => {
+  const [viewHovered, setViewHovered] = useState(false);
   const [editHovered, setEditHovered] = useState(false);
   const [deleteHovered, setDeleteHovered] = useState(false);
 
@@ -214,16 +233,16 @@ const ProductRow = ({ product, onDelete }) => {
               height: "36px",
               borderRadius: tokens.radius,
               border: "none",
-              background: editHovered ? tokens.secondary : "transparent",
+              background: viewHovered ? tokens.secondary : "transparent",
               cursor: "pointer",
               color: tokens.foreground,
               transition: "background-color 0.15s ease",
               textDecoration: "none",
             }}
-            onMouseEnter={() => setEditHovered(true)}
-            onMouseLeave={() => setEditHovered(false)}
+            onMouseEnter={() => setViewHovered(true)}
+            onMouseLeave={() => setViewHovered(false)}
           >
-            <IconPencil />
+            <IconEye />
           </a>
           <a
             href={`/admin/products/${product.id}/edit`}

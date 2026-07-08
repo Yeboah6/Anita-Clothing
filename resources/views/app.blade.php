@@ -4,7 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('app.name', 'Anita Clothing') }}</title>
+        <title>{{ config('app.name', 'CuteBloom') }}</title>
+        <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
         @viteReactRefresh
         @vite('resources/js/app.jsx')

@@ -217,9 +217,11 @@ const Register = () => {
           {/* Header */}
           <div style={{ textAlign: "center", marginBottom: "2rem" }}>
             <a href="/" style={{ textDecoration: "none", display: "inline-block", marginBottom: "1.5rem" }}>
-              <span style={{ fontFamily: tokens.fontDisplay, fontSize: "1.5rem", fontWeight: 600, letterSpacing: "0.08em", color: tokens.foreground }}>
-                ANITA
-              </span>
+              <img
+              src="images/logo.png"
+              alt="CuteBloom Logo"
+              style={{ width: "100%", maxWidth: "90px", borderRadius: tokens.radius, objectFit: "cover" }}
+            />
             </a>
             <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 500, margin: "0 0 0.5rem", color: tokens.foreground }}>
               Create your account

@@ -154,7 +154,7 @@ const About = () => {
               </div>
               <div style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden", backgroundColor: tokens.secondary }}>
                 <img
-                  src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&q=80"
+                  src="images/user.jpeg"
                   alt="Anita Clothing atelier"
                   loading="lazy"
                   style={{ height: "100%", width: "100%", objectFit: "cover", display: "block" }}

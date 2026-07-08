@@ -603,7 +603,12 @@ const Header = () => {
             href="/"
             style={{ textDecoration: "none", color: tokens.foreground, display: "flex", alignItems: "center" }}
           >
-            <span
+            <img
+              src="images/logo.png"
+              alt="CuteBloom Logo"
+              style={{ height: "55px", width: "auto", borderRadius: tokens.radius, objectFit: "cover" }}
+            />
+            {/* <span
               style={{
                 fontFamily: tokens.fontDisplay,
                 fontSize: "clamp(1.5rem, 3vw, 1.875rem)",
@@ -613,7 +618,7 @@ const Header = () => {
               }}
             >
               ANITA
-            </span>
+            </span> */}
           </a>
 
           {/* Desktop nav */}

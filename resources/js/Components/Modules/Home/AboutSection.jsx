@@ -63,7 +63,7 @@ const AboutSection = () => {
           {/* Image */}
           <div style={{ position: "relative" }}>
             <img
-              src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&q=80"
+              src="images/user.jpeg"
               alt="Anita Clothing atelier"
               loading="lazy"
               style={{
@@ -87,7 +87,7 @@ const AboutSection = () => {
                 color: tokens.foreground,
               }}
             >
-              About Anita Clothing
+              About CuteBloom
             </h2>
             <div
               style={{

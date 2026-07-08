@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { usePage } from "@inertiajs/react";
 import { CartProvider, useCart } from "@/Context/CartContext";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
@@ -46,131 +47,12 @@ const availableColors = [
 const getColorHex = (colorName) =>
   availableColors.find((c) => c.name?.toLowerCase() === (colorName || "").toLowerCase())?.hex || "#cccccc";
 
-// ─── Cart Context (unchanged) ────────────────────────────────────────────────
-// const CART_STORAGE_KEY = "anita-clothing-cart";
-
-// function cartReducer(state, action) {
-//   switch (action.type) {
-//     case "ADD_ITEM": {
-//       const existingIndex = state.items.findIndex(
-//         (item) =>
-//           item.productId === action.payload.productId &&
-//           item.size === action.payload.size &&
-//           item.color === action.payload.color
-//       );
-//       if (existingIndex > -1) {
-//         const updatedItems = [...state.items];
-//         updatedItems[existingIndex] = {
-//           ...updatedItems[existingIndex],
-//           quantity: updatedItems[existingIndex].quantity + action.payload.quantity,
-//         };
-//         return { ...state, items: updatedItems, isOpen: true };
-//       }
-//       return { ...state, items: [...state.items, action.payload], isOpen: true };
-//     }
-//     case "REMOVE_ITEM":
-//       return {
-//         ...state,
-//         items: state.items.filter(
-//           (item) =>
-//             !(
-//               item.productId === action.payload.productId &&
-//               item.size === action.payload.size &&
-//               item.color === action.payload.color
-//             )
-//         ),
-//       };
-//     case "UPDATE_QUANTITY":
-//       if (action.payload.quantity <= 0) {
-//         return {
-//           ...state,
-//           items: state.items.filter(
-//             (item) =>
-//               !(
-//                 item.productId === action.payload.productId &&
-//                 item.size === action.payload.size &&
-//                 item.color === action.payload.color
-//               )
-//           ),
-//         };
-//       }
-//       return {
-//         ...state,
-//         items: state.items.map((item) =>
-//           item.productId === action.payload.productId &&
-//           item.size === action.payload.size &&
-//           item.color === action.payload.color
-//             ? { ...item, quantity: action.payload.quantity }
-//             : item
-//         ),
-//       };
-//     case "CLEAR_CART":
-//       return { ...state, items: [] };
-//     case "TOGGLE_CART":
-//       return { ...state, isOpen: !state.isOpen };
-//     case "OPEN_CART":
-//       return { ...state, isOpen: true };
-//     case "CLOSE_CART":
-//       return { ...state, isOpen: false };
-//     case "LOAD_CART":
-//       return { ...state, items: action.payload };
-//     default:
-//       return state;
-//   }
-// }
-
-// const CartContext = React.createContext(undefined);
-
-// function CartProvider({ children }) {
-//   const [state, dispatch] = React.useReducer(cartReducer, { items: [], isOpen: false });
-
-//   useEffect(() => {
-//     const savedCart = localStorage.getItem(CART_STORAGE_KEY);
-//     if (savedCart) {
-//       try {
-//         dispatch({ type: "LOAD_CART", payload: JSON.parse(savedCart) });
-//       } catch (e) {
-//         console.error("Failed to load cart:", e);
-//       }
-//     }
-//   }, []);
-
-//   useEffect(() => {
-//     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items));
-//   }, [state.items]);
-
-//   const value = {
-//     state,
-//     addItem: (item) => dispatch({ type: "ADD_ITEM", payload: item }),
-//     removeItem: (productId, size, color) =>
-//       dispatch({ type: "REMOVE_ITEM", payload: { productId, size, color } }),
-//     updateQuantity: (productId, size, color, quantity) =>
-//       dispatch({ type: "UPDATE_QUANTITY", payload: { productId, size, color, quantity } }),
-//     clearCart: () => dispatch({ type: "CLEAR_CART" }),
-//     toggleCart: () => dispatch({ type: "TOGGLE_CART" }),
-//     openCart: () => dispatch({ type: "OPEN_CART" }),
-//     closeCart: () => dispatch({ type: "CLOSE_CART" }),
-//     getCartTotal: () =>
-//       state.items.reduce((total, item) => total + item.price * item.quantity, 0),
-//     getCartCount: () =>
-//       state.items.reduce((count, item) => count + item.quantity, 0),
-//   };
-
-//   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-// }
-
-// function useCart() {
-//   const context = React.useContext(CartContext);
-//   if (!context) throw new Error("useCart must be used within a CartProvider");
-//   return context;
-// }
-
-// // ─── Icons ───────────────────────────────────────────────────────────────────
-// const ChevronRight = () => (
-//   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-//     <polyline points="9 18 15 12 9 6" />
-//   </svg>
-// );
+// ─── Icons ───────────────────────────────────────────────────────────────────
+const ChevronRight = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+);
 
 // ─── ProductCard (for related products) ──────────────────────────────────────
 const ProductCard = ({ product }) => {
@@ -211,15 +93,10 @@ const Toast = ({ message, visible }) => {
 };
 
 // ─── ProductDetail Page ──────────────────────────────────────────────────────
-// Expects Inertia prop:
-//   product: {
-//     id, name, slug, price, description, images: [url],
-//     sizes: [string], colors: [string], isNewArrival: bool,
-//     category: { id, name, slug } | null,
-//     relatedProducts: [{ id, name, slug, price, images: [url], category_id }]
-//   } | null
 const ProductDetail = ({ product }) => {
   const { addItem } = useCart();
+  const { auth } = usePage().props;
+  const isAuthenticated = !!auth?.user;
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -419,6 +296,18 @@ const ProductDetail = ({ product }) => {
                               color: selectedColor,
                               quantity: 1,
                             });
+                          
+                            if (isAuthenticated) {
+                              axios.post(route("cart.store"), {
+                                product_id: product.id,
+                                size: selectedSize,
+                                color: selectedColor,
+                                quantity: 1,
+                              }).catch((error) => {
+                                console.error("Failed to sync cart to server:", error);
+                              });
+                            }
+                          
                             showToast(`${product.name} added to bag`);
                           }
                         }}

@@ -14,6 +14,7 @@ use App\Http\Controllers\Account\WishlistController;
 use App\Http\Controllers\Account\CustomerOrderController;
 use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\CartController;
 
 
 Route::get('/', [MainController::class, 'index'])->name('home');
@@ -47,6 +48,8 @@ Route::get('/forgot-password', [AuthController::class, 'ForgotPassword']);
 Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+
+    Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
 
     // Customer & Account Routes
     Route::middleware('role:customer')->group(function () {

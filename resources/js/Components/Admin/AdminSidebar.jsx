@@ -226,6 +226,7 @@ const AdminSidebar = ({
           padding: "1.25rem 1rem",
           borderBottom: `1px solid ${tokens.border}`,
           display: "flex",
+          justifyContent: "center",
           alignItems: "center",
           gap: "0.5rem",
         }}
@@ -241,37 +242,22 @@ const AdminSidebar = ({
           style={{
             textDecoration: "none",
             display: "flex",
+            justifyContent: "center",
             alignItems: "center",
             gap: "0.5rem",
             color: tokens.foreground,
           }}
         >
-          <span
-            style={{
-              fontFamily: tokens.fontDisplay,
-              fontSize: "1.25rem",
-              fontWeight: 600,
-              letterSpacing: "0.05em",
-              whiteSpace: "nowrap",
-            }}
-          >
-            ANITA
-          </span>
-          {!collapsed && (
-            <span
-              style={{
-                fontSize: "0.625rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.15em",
-                color: tokens.mutedForeground,
-                whiteSpace: "nowrap",
-                fontFamily: tokens.fontBody,
-              }}
-            >
-              Admin
-            </span>
-          )}
-        </a>
+        <img
+          src="/images/logo.png"
+          alt="CuteBloom Logo"
+          style={{
+            width: "80px",
+            height: "80px",
+            objectFit: "contain",
+          }}
+        />
+      </a>
       </div>
 
       {/* Sidebar Navigation */}
