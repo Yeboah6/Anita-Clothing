@@ -30,6 +30,7 @@ const tokens = {
   border: "#e6e6e6",
   radius: "4px",
   destructive: "#ef4444",
+  adminColor: "#7c3aed", // Purple color for admin indicators
 };
 
 // ─── Cart Context (keep existing) ─────────────────────────────────────────────
@@ -203,6 +204,21 @@ const IconSettings = () => (
   </svg>
 );
 
+const IconDashboard = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="3" width="7" height="7" />
+    <rect x="14" y="3" width="7" height="7" />
+    <rect x="14" y="14" width="7" height="7" />
+    <rect x="3" y="14" width="7" height="7" />
+  </svg>
+);
+
+const IconShield = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
 // ─── Ghost icon button base style ─────────────────────────────────────────────
 const ghostIconBtn = {
   display: "inline-flex",
@@ -261,7 +277,7 @@ const LogoutButton = () => {
 };
 
 // ─── User Dropdown Menu ───────────────────────────────────────────────────
-const UserDropdown = ({ userName, userEmail, isMobile = false }) => {
+const UserDropdown = ({ user, isAdmin = false, isMobile = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [btnHovered, setBtnHovered] = useState(false);
   const dropdownRef = React.useRef(null);
@@ -277,6 +293,10 @@ const UserDropdown = ({ userName, userEmail, isMobile = false }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const displayName = user?.name?.split(" ")[0] || "Account";
+  const userEmail = user?.email || "";
+  const role = user?.role || (isAdmin ? "admin" : "customer");
 
   if (isMobile) {
     return (
@@ -299,10 +319,51 @@ const UserDropdown = ({ userName, userEmail, isMobile = false }) => {
         >
           <IconUser />
           <div>
-            <div style={{ fontSize: "0.875rem", fontWeight: 500 }}>{userName}</div>
+            <div style={{ fontSize: "0.875rem", fontWeight: 500 }}>
+              {displayName}
+              {isAdmin && (
+                <span style={{
+                  marginLeft: "0.5rem",
+                  padding: "0.125rem 0.375rem",
+                  fontSize: "0.625rem",
+                  backgroundColor: tokens.adminColor,
+                  color: "white",
+                  borderRadius: "2px",
+                  textTransform: "uppercase",
+                  fontWeight: 600,
+                }}>
+                  Admin
+                </span>
+              )}
+            </div>
             <div style={{ fontSize: "0.75rem", color: tokens.mutedForeground }}>{userEmail}</div>
           </div>
         </a>
+        
+        {/* Admin-only links */}
+        {isAdmin && (
+          <>
+            <a
+              href="/admin"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.5rem 0.75rem",
+                textDecoration: "none",
+                color: tokens.adminColor,
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                fontFamily: tokens.fontBody,
+                borderRadius: tokens.radius,
+              }}
+            >
+              <IconDashboard />
+              Dashboard
+            </a>
+          </>
+        )}
+        
         <a
           href="/account/orders"
           style={{
@@ -355,19 +416,19 @@ const UserDropdown = ({ userName, userEmail, isMobile = false }) => {
           fontSize: "0.875rem",
           fontWeight: 500,
           fontFamily: tokens.fontBody,
-          border: "none",
+          border: isAdmin ? `1px solid ${tokens.adminColor}` : "none",
           background: btnHovered ? tokens.border : "transparent",
           borderRadius: tokens.radius,
           cursor: "pointer",
-          color: tokens.foreground,
+          color: isAdmin ? tokens.adminColor : tokens.foreground,
           transition: "background-color 0.15s ease",
         }}
         onMouseEnter={() => setBtnHovered(true)}
         onMouseLeave={() => setBtnHovered(false)}
       >
-        <IconUser />
+        {isAdmin ? <IconShield /> : <IconUser />}
         <span style={{ maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {userName}
+          {displayName}
         </span>
         <IconChevronDown />
       </button>
@@ -389,13 +450,55 @@ const UserDropdown = ({ userName, userEmail, isMobile = false }) => {
           }}
         >
           <div style={{ padding: "0.5rem 0.75rem", borderBottom: `1px solid ${tokens.border}`, marginBottom: "0.5rem" }}>
-            <div style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground }}>
-              {userName}
+            <div style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              {displayName}
+              {isAdmin && (
+                <span style={{
+                  padding: "0.125rem 0.375rem",
+                  fontSize: "0.625rem",
+                  backgroundColor: tokens.adminColor,
+                  color: "white",
+                  borderRadius: "2px",
+                  textTransform: "uppercase",
+                  fontWeight: 600,
+                }}>
+                  Admin
+                </span>
+              )}
             </div>
             <div style={{ fontSize: "0.75rem", color: tokens.mutedForeground, marginTop: "2px" }}>
               {userEmail}
             </div>
           </div>
+
+          {/* Admin-only links */}
+          {isAdmin && (
+            <>
+              <a
+                href="/admin"
+                onClick={() => setIsOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem 0.75rem",
+                  textDecoration: "none",
+                  color: tokens.adminColor,
+                  fontSize: "0.8125rem",
+                  fontWeight: 600,
+                  fontFamily: tokens.fontBody,
+                  borderRadius: tokens.radius,
+                  transition: "background-color 0.15s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = tokens.border}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                <IconDashboard />
+                Dashboard
+              </a>
+              <div style={{ borderTop: `1px solid ${tokens.border}`, margin: "0.5rem 0" }} />
+            </>
+          )}
 
           <a
             href="/account/profile"
@@ -474,17 +577,18 @@ const UserDropdown = ({ userName, userEmail, isMobile = false }) => {
 
 // ─── CartButton ───────────────────────────────────────────────────────────────
 const CartButton = () => {
-  const { toggleCart, getCartCount } = useCart();
+  const { getCartCount } = useCart();
   const [hovered, setHovered] = useState(false);
   const count = getCartCount();
 
   return (
     <a
-      onClick={toggleCart}
-      aria-label="Open shopping bag"
+      href="/cart"
+      aria-label="View shopping cart"
       style={{
         ...ghostIconBtn,
         backgroundColor: hovered ? tokens.border : "transparent",
+        textDecoration: "none",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -556,10 +660,13 @@ const Header = () => {
 
   // Pull the authenticated user from Inertia's shared props
   const { props } = usePage();
-  const authUser = props?.auth?.user ?? null;
-  const isLoggedIn = !!authUser;
-  const displayName = authUser?.name?.split(" ")[0] || "Account";
-  const userEmail = authUser?.email || "";
+  const customer = props?.auth?.customer ?? null;
+  const admin = props?.auth?.admin ?? null;
+  
+  // Determine user type and user data
+  const isLoggedIn = !!(customer || admin);
+  const isAdmin = !!admin;
+  const user = admin || customer; // Prefer admin data if available
 
   useEffect(() => { injectFonts(); }, []);
 
@@ -604,21 +711,10 @@ const Header = () => {
             style={{ textDecoration: "none", color: tokens.foreground, display: "flex", alignItems: "center" }}
           >
             <img
-              src="images/logo.png"
+              src="/images/logo.png"
               alt="CuteBloom Logo"
               style={{ height: "55px", width: "auto", borderRadius: tokens.radius, objectFit: "cover" }}
             />
-            {/* <span
-              style={{
-                fontFamily: tokens.fontDisplay,
-                fontSize: "clamp(1.5rem, 3vw, 1.875rem)",
-                fontWeight: 600,
-                letterSpacing: "0.08em",
-                color: tokens.foreground,
-              }}
-            >
-              ANITA
-            </span> */}
           </a>
 
           {/* Desktop nav */}
@@ -635,7 +731,7 @@ const Header = () => {
             {/* Desktop auth links */}
             <div className="anita-desktop-auth">
               {isLoggedIn ? (
-                <UserDropdown userName={displayName} userEmail={userEmail} />
+                <UserDropdown user={user} isAdmin={isAdmin} />
               ) : (
                 <>
                   <a
@@ -721,6 +817,18 @@ const Header = () => {
                 {link.name}
               </NavLink>
             ))}
+            
+            {/* Admin link in mobile nav for admin users */}
+            {isAdmin && (
+              <NavLink 
+                href="/admin" 
+                onClick={() => setIsMenuOpen(false)}
+                style={{ color: tokens.adminColor, fontWeight: 600 }}
+              >
+                <IconDashboard />
+                <span style={{ marginLeft: "0.5rem" }}>Dashboard</span>
+              </NavLink>
+            )}
 
             {/* Mobile auth divider */}
             <div style={{ height: "1px", backgroundColor: tokens.border, margin: "0.25rem 0" }} />
@@ -729,8 +837,8 @@ const Header = () => {
             {isLoggedIn ? (
               <div style={{ padding: "0 0.75rem" }}>
                 <UserDropdown 
-                  userName={authUser?.name || "Account"} 
-                  userEmail={userEmail}
+                  user={user}
+                  isAdmin={isAdmin}
                   isMobile={true}
                 />
               </div>

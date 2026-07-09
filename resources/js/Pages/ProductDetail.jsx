@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { usePage } from "@inertiajs/react";
 import { CartProvider, useCart } from "@/Context/CartContext";
 import Header from '@/Components/Layout/Header';
@@ -54,6 +55,93 @@ const ChevronRight = () => (
   </svg>
 );
 
+const IconMinus = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+const IconPlus = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+// ─── Quantity Selector Component ─────────────────────────────────────────────
+const QuantitySelector = ({ quantity, onIncrease, onDecrease, min = 1, max = 99 }) => {
+  return (
+    <div style={{ 
+      display: "flex", 
+      alignItems: "center", 
+      gap: "0", 
+      border: `1px solid ${tokens.border}`,
+      borderRadius: tokens.radius,
+      overflow: "hidden",
+      width: "fit-content"
+    }}>
+      <button
+        onClick={onDecrease}
+        disabled={quantity <= min}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "40px",
+          height: "40px",
+          border: "none",
+          backgroundColor: "transparent",
+          color: quantity <= min ? tokens.border : tokens.foreground,
+          cursor: quantity <= min ? "not-allowed" : "pointer",
+          transition: "all 0.15s ease",
+          opacity: quantity <= min ? 0.5 : 1,
+        }}
+        aria-label="Decrease quantity"
+      >
+        <IconMinus />
+      </button>
+      
+      <div style={{
+        width: "48px",
+        height: "40px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "0.9375rem",
+        fontWeight: 500,
+        fontFamily: tokens.fontBody,
+        color: tokens.foreground,
+        borderLeft: `1px solid ${tokens.border}`,
+        borderRight: `1px solid ${tokens.border}`,
+        userSelect: "none",
+      }}>
+        {quantity}
+      </div>
+      
+      <button
+        onClick={onIncrease}
+        disabled={quantity >= max}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "40px",
+          height: "40px",
+          border: "none",
+          backgroundColor: "transparent",
+          color: quantity >= max ? tokens.border : tokens.foreground,
+          cursor: quantity >= max ? "not-allowed" : "pointer",
+          transition: "all 0.15s ease",
+          opacity: quantity >= max ? 0.5 : 1,
+        }}
+        aria-label="Increase quantity"
+      >
+        <IconPlus />
+      </button>
+    </div>
+  );
+};
+
 // ─── ProductCard (for related products) ──────────────────────────────────────
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
@@ -78,12 +166,13 @@ const ProductCard = ({ product }) => {
 };
 
 // ─── Toast Component ─────────────────────────────────────────────────────────
-const Toast = ({ message, visible }) => {
+const Toast = ({ message, visible, type = "success" }) => {
   if (!visible) return null;
   return (
     <div style={{
       position: "fixed", bottom: "2rem", left: "50%", transform: "translateX(-50%)", zIndex: 100,
-      backgroundColor: tokens.foreground, color: tokens.background, padding: "0.75rem 1.5rem",
+      backgroundColor: type === "error" ? "#ef4444" : tokens.foreground, 
+      color: tokens.background, padding: "0.75rem 1.5rem",
       borderRadius: tokens.radius, fontFamily: tokens.fontBody, fontSize: "0.875rem",
       fontWeight: 500, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", animation: "slideUp 0.3s ease",
     }}>
@@ -96,14 +185,22 @@ const Toast = ({ message, visible }) => {
 const ProductDetail = ({ product }) => {
   const { addItem } = useCart();
   const { auth } = usePage().props;
-  const isAuthenticated = !!auth?.user;
+  
+  // Check for both customer and admin authentication
+  const customer = auth?.customer ?? null;
+  const admin = auth?.admin ?? null;
+  const isAuthenticated = !!(customer || admin);
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
+  const [quantity, setQuantity] = useState(1);
   const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
   const [toastVisible, setToastVisible] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [breadcrumbHover, setBreadcrumbHover] = useState({ home: false, collections: false, category: false });
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   useEffect(() => {
     injectFonts();
@@ -113,10 +210,24 @@ const ProductDetail = ({ product }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const showToast = (msg) => {
+  // Reset quantity when product changes
+  useEffect(() => {
+    setQuantity(1);
+  }, [product?.id]);
+
+  const showToast = (msg, type = "success") => {
     setToastMessage(msg);
+    setToastType(type);
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 3000);
+  };
+
+  const handleQuantityIncrease = () => {
+    setQuantity(prev => Math.min(prev + 1, 99));
+  };
+
+  const handleQuantityDecrease = () => {
+    setQuantity(prev => Math.max(prev - 1, 1));
   };
 
   if (!product) {
@@ -140,10 +251,64 @@ const ProductDetail = ({ product }) => {
 
   const { category, relatedProducts = [], images = [], sizes = [], colors = [] } = product;
 
+  const handleAddToBag = async () => {
+    const needsSize = sizes.length > 0;
+    const needsColor = colors.length > 0;
+    const canAdd = (!needsSize || selectedSize) && (!needsColor || selectedColor);
+
+    if (!canAdd || isAddingToCart) return;
+
+    setIsAddingToCart(true);
+
+    try {
+      // Add to local cart context (works for all users)
+      addItem({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        image: images[0] ?? null,
+        size: selectedSize,
+        color: selectedColor,
+        quantity: quantity,
+      });
+
+      // Sync to server database if user is authenticated
+      if (isAuthenticated) {
+        try {
+          await axios.post("/cart", {
+            product_id: product.id,
+            size: selectedSize || null,
+            color: selectedColor || null,
+            quantity: quantity,
+          });
+          console.log("Cart synced to server successfully");
+        } catch (error) {
+          console.error("Failed to sync cart to server:", error);
+          // Don't show error to user since item is already in local cart
+          // Only log it for debugging
+        }
+      }
+
+      showToast(`${quantity > 1 ? `${quantity}× ` : ''}${product.name} added to bag`);
+      
+      // Reset quantity after successful add
+      setQuantity(1);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      showToast("Failed to add item to cart. Please try again.", "error");
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const needsSize = sizes.length > 0;
+  const needsColor = colors.length > 0;
+  const canAdd = (!needsSize || selectedSize) && (!needsColor || selectedColor);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
       <Header />
-      <Toast message={toastMessage} visible={toastVisible} />
+      <Toast message={toastMessage} visible={toastVisible} type={toastType} />
       <main style={{ flex: 1 }}>
         {/* Breadcrumb */}
         <section style={{ borderBottom: `1px solid ${tokens.border}` }}>
@@ -276,62 +441,61 @@ const ProductDetail = ({ product }) => {
                   </div>
                 )}
 
-                {/* Add to Bag */}
-                {(() => {
-                  const needsSize = sizes.length > 0;
-                  const needsColor = colors.length > 0;
-                  const canAdd = (!needsSize || selectedSize) && (!needsColor || selectedColor);
+                {/* Quantity Selector */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: 0 }}>
+                    Quantity
+                  </p>
+                  <QuantitySelector
+                    quantity={quantity}
+                    onIncrease={handleQuantityIncrease}
+                    onDecrease={handleQuantityDecrease}
+                    min={1}
+                    max={99}
+                  />
+                </div>
 
-                  return (
-                    <>
-                      <button
-                        onClick={() => {
-                          if (canAdd) {
-                            addItem({
-                              productId: product.id,
-                              name: product.name,
-                              price: product.price,
-                              image: images[0] ?? null,
-                              size: selectedSize,
-                              color: selectedColor,
-                              quantity: 1,
-                            });
-                          
-                            if (isAuthenticated) {
-                              axios.post(route("cart.store"), {
-                                product_id: product.id,
-                                size: selectedSize,
-                                color: selectedColor,
-                                quantity: 1,
-                              }).catch((error) => {
-                                console.error("Failed to sync cart to server:", error);
-                              });
-                            }
-                          
-                            showToast(`${product.name} added to bag`);
-                          }
-                        }}
-                        disabled={!canAdd}
-                        style={{
-                          width: "100%", height: "48px", fontSize: "0.9375rem", fontWeight: 500,
-                          fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none",
-                          backgroundColor: tokens.foreground, color: tokens.background,
-                          cursor: !canAdd ? "not-allowed" : "pointer",
-                          opacity: !canAdd ? 0.5 : 1,
-                          transition: "opacity 0.2s ease",
-                          marginTop: "0.5rem",
-                        }}
-                      >
-                        {!canAdd ? "Select Options" : "Add to Bag"}
-                      </button>
-                      {!canAdd && (
-                        <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
-                          Please select {needsSize && !selectedSize ? "a size" : ""}{needsSize && !selectedSize && needsColor && !selectedColor ? " and " : ""}{needsColor && !selectedColor ? "a color" : ""} to add to bag
-                        </p>
-                      )}
-                    </>
-                  );
-                })()}
+                {/* Add to Bag */}
+                <button
+                  onClick={handleAddToBag}
+                  disabled={!canAdd || isAddingToCart}
+                  style={{
+                    width: "100%", height: "48px", fontSize: "0.9375rem", fontWeight: 500,
+                    fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none",
+                    backgroundColor: tokens.foreground, color: tokens.background,
+                    cursor: (!canAdd || isAddingToCart) ? "not-allowed" : "pointer",
+                    opacity: (!canAdd || isAddingToCart) ? 0.5 : 1,
+                    transition: "opacity 0.2s ease",
+                    position: "relative",
+                  }}
+                >
+                  {isAddingToCart ? (
+                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                      <span style={{
+                        width: "16px", height: "16px", border: "2px solid transparent",
+                        borderTop: `2px solid ${tokens.background}`, borderRadius: "50%",
+                        animation: "spin 0.6s linear infinite", display: "inline-block"
+                      }} />
+                      Adding...
+                    </span>
+                  ) : !canAdd ? (
+                    "Select Options"
+                  ) : (
+                    `Add to Bag${quantity > 1 ? ` — ${quantity} items` : ''}`
+                  )}
+                </button>
+                {!canAdd && !isAddingToCart && (
+                  <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
+                    Please select {needsSize && !selectedSize ? "a size" : ""}{needsSize && !selectedSize && needsColor && !selectedColor ? " and " : ""}{needsColor && !selectedColor ? "a color" : ""} to add to bag
+                  </p>
+                )}
+                
+                {/* Cart sync info for authenticated users */}
+                {isAuthenticated && !isAddingToCart && (
+                  <p style={{ textAlign: "center", fontSize: "0.75rem", color: tokens.green, margin: 0 }}>
+                    ✓ Your cart will be saved to your account
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -354,7 +518,16 @@ const ProductDetail = ({ product }) => {
         )}
       </main>
       <Footer />
-      <style>{`@keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }`}</style>
+      <style>{`
+        @keyframes slideUp { 
+          from { opacity: 0; transform: translateX(-50%) translateY(10px); } 
+          to { opacity: 1; transform: translateX(-50%) translateY(0); } 
+        }
+        @keyframes spin { 
+          from { transform: rotate(0deg); } 
+          to { transform: rotate(360deg); } 
+        }
+      `}</style>
     </div>
   );
 };

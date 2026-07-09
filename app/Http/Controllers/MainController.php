@@ -93,11 +93,6 @@ class MainController extends Controller
         ]);
     }
 
-    public function cart()
-    {
-        return inertia('Cart');
-    }
-
     public function category(string $slug)
     {
         $category = Category::where('slug', $slug)->first();

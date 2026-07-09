@@ -29,7 +29,7 @@ Route::get('/category/{slug}', [MainController::class, 'category'])->name('categ
 
 Route::get('/product/{slug}', [MainController::class, 'product'])->name('product');
 
-Route::get('/cart', [MainController::class, 'cart'])->name('cart');
+Route::get('/cart', [CartController::class, 'cart'])->name('cart');
 
 Route::get('/checkout', [MainController::class, 'checkout'])->name('checkout');
 
@@ -50,6 +50,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
+    Route::get('/cart/items', [CartController::class, 'getItems'])->name('cart.items');
+    Route::delete('/cart/{productId}', [CartController::class, 'destroy'])->name('cart.destroy');
+    Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
 
     // Customer & Account Routes
     Route::middleware('role:customer')->group(function () {
