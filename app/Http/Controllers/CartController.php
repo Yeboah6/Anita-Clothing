@@ -6,34 +6,81 @@ use App\Models\Cart;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class CartController extends Controller
 {
 
     public function cart()
     {
-        return inertia('Cart');
-    }
-
-    public function getItems()
-    {
-        $userId = Auth::id();
+        $items = [];
+        $count = 0;
+        $total = 0;
         
-        $cartItems = Cart::with(['product' => function($query) {
-            $query->select('id', 'category_id', 'name', 'slug', 'price', 'discount_amount', 'status')
-                  ->with(['images' => function($q) {
-                      $q->select('id', 'product_id', 'image_url', 'is_primary')
-                        ->orderBy('is_primary', 'desc')
-                        ->orderBy('id', 'asc')
-                        ->limit(1);
-                  }]);
-        }])
-        ->where('user_id', $userId)
-        ->get();
-
-        return response()->json([
-            'cart_items' => $cartItems,
-            'count' => $cartItems->sum('quantity'),
+        if (Auth::check()) {
+            $userId = Auth::id();
+            
+            // Get cart items with product
+            $cartItems = Cart::where('user_id', $userId)
+                ->with('product')
+                ->get();
+            
+            foreach ($cartItems as $cartItem) {
+                $product = $cartItem->product;
+                if (!$product) continue;
+                
+                $basePrice = floatval($product->price ?? 0);
+                $discountAmount = floatval($product->discount_amount ?? 0);
+                $finalPrice = $discountAmount > 0 ? $basePrice - $discountAmount : $basePrice;
+                
+                // Get first image - try different approaches
+                $imageUrl = null;
+                
+                // Try to get image from relationship
+                if (method_exists($product, 'images')) {
+                    $firstImage = $product->images()->first();
+                    if ($firstImage) {
+                        // Try different possible column names
+                        $imageUrl = $firstImage->image_url 
+                            ?? $firstImage->url 
+                            ?? $firstImage->path 
+                            ?? $firstImage->filename 
+                            ?? $firstImage->src 
+                            ?? null;
+                        
+                        // If it's just a filename, prepend the storage path
+                        if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL) && !str_starts_with($imageUrl, '/')) {
+                            $imageUrl = '/storage/' . $imageUrl;
+                        }
+                    }
+                }
+                
+                $itemData = [
+                    'id' => $cartItem->id,
+                    'product_id' => $cartItem->product_id,
+                    'name' => $product->name ?? 'Product',
+                    'slug' => $product->slug ?? null,
+                    'price' => $finalPrice,
+                    'original_price' => $basePrice,
+                    'discount_amount' => $discountAmount,
+                    'image' => $imageUrl,
+                    'size' => $cartItem->size,
+                    'color' => $cartItem->color,
+                    'quantity' => $cartItem->quantity,
+                ];
+                
+                $items[] = $itemData;
+                $count += $cartItem->quantity;
+                $total += $finalPrice * $cartItem->quantity;
+            }
+        }
+        
+        return Inertia::render('Cart', [
+            'serverCart' => [
+                'items' => $items,
+                'count' => $count,
+                'total' => round($total, 2),
+            ]
         ]);
     }
 

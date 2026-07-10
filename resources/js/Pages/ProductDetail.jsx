@@ -251,55 +251,57 @@ const ProductDetail = ({ product }) => {
 
   const { category, relatedProducts = [], images = [], sizes = [], colors = [] } = product;
 
-  const handleAddToBag = async () => {
-    const needsSize = sizes.length > 0;
-    const needsColor = colors.length > 0;
-    const canAdd = (!needsSize || selectedSize) && (!needsColor || selectedColor);
+const handleAddToBag = async () => {
+  const needsSize = sizes.length > 0;
+  const needsColor = colors.length > 0;
+  const canAdd = (!needsSize || selectedSize) && (!needsColor || selectedColor);
 
-    if (!canAdd || isAddingToCart) return;
+  if (!canAdd || isAddingToCart) return;
 
-    setIsAddingToCart(true);
+  // Require login before anything is added to the cart
+  if (!isAuthenticated) {
+    showToast("Please log in to add items to your bag", "error");
+    setTimeout(() => {
+      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+    }, 1200);
+    return;
+  }
 
+  setIsAddingToCart(true);
+
+  try {
+    // Add to local cart context
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      image: images[0] ?? null,
+      size: selectedSize,
+      color: selectedColor,
+      quantity: quantity,
+    });
+
+    // Sync to server database
     try {
-      // Add to local cart context (works for all users)
-      addItem({
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        image: images[0] ?? null,
-        size: selectedSize,
-        color: selectedColor,
+      await axios.post("/cart", {
+        product_id: product.id,
+        size: selectedSize || null,
+        color: selectedColor || null,
         quantity: quantity,
       });
-
-      // Sync to server database if user is authenticated
-      if (isAuthenticated) {
-        try {
-          await axios.post("/cart", {
-            product_id: product.id,
-            size: selectedSize || null,
-            color: selectedColor || null,
-            quantity: quantity,
-          });
-          console.log("Cart synced to server successfully");
-        } catch (error) {
-          console.error("Failed to sync cart to server:", error);
-          // Don't show error to user since item is already in local cart
-          // Only log it for debugging
-        }
-      }
-
-      showToast(`${quantity > 1 ? `${quantity}× ` : ''}${product.name} added to bag`);
-      
-      // Reset quantity after successful add
-      setQuantity(1);
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      showToast("Failed to add item to cart. Please try again.", "error");
-    } finally {
-      setIsAddingToCart(false);
+      console.error("Failed to sync cart to server:", error);
     }
-  };
+
+    showToast(`${quantity > 1 ? `${quantity}× ` : ''}${product.name} added to bag`);
+    setQuantity(1);
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    showToast("Failed to add item to cart. Please try again.", "error");
+  } finally {
+    setIsAddingToCart(false);
+  }
+};
 
   const needsSize = sizes.length > 0;
   const needsColor = colors.length > 0;
@@ -457,45 +459,47 @@ const ProductDetail = ({ product }) => {
 
                 {/* Add to Bag */}
                 <button
-                  onClick={handleAddToBag}
-                  disabled={!canAdd || isAddingToCart}
-                  style={{
-                    width: "100%", height: "48px", fontSize: "0.9375rem", fontWeight: 500,
-                    fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none",
-                    backgroundColor: tokens.foreground, color: tokens.background,
-                    cursor: (!canAdd || isAddingToCart) ? "not-allowed" : "pointer",
-                    opacity: (!canAdd || isAddingToCart) ? 0.5 : 1,
-                    transition: "opacity 0.2s ease",
-                    position: "relative",
-                  }}
-                >
-                  {isAddingToCart ? (
-                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-                      <span style={{
-                        width: "16px", height: "16px", border: "2px solid transparent",
-                        borderTop: `2px solid ${tokens.background}`, borderRadius: "50%",
-                        animation: "spin 0.6s linear infinite", display: "inline-block"
-                      }} />
-                      Adding...
-                    </span>
-                  ) : !canAdd ? (
-                    "Select Options"
-                  ) : (
-                    `Add to Bag${quantity > 1 ? ` — ${quantity} items` : ''}`
-                  )}
-                </button>
-                {!canAdd && !isAddingToCart && (
-                  <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
-                    Please select {needsSize && !selectedSize ? "a size" : ""}{needsSize && !selectedSize && needsColor && !selectedColor ? " and " : ""}{needsColor && !selectedColor ? "a color" : ""} to add to bag
-                  </p>
-                )}
-                
-                {/* Cart sync info for authenticated users */}
-                {isAuthenticated && !isAddingToCart && (
-                  <p style={{ textAlign: "center", fontSize: "0.75rem", color: tokens.green, margin: 0 }}>
-                    ✓ Your cart will be saved to your account
-                  </p>
-                )}
+  onClick={handleAddToBag}
+  disabled={(isAuthenticated && !canAdd) || isAddingToCart}
+  style={{
+    width: "100%", height: "48px", fontSize: "0.9375rem", fontWeight: 500,
+    fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none",
+    backgroundColor: tokens.foreground, color: tokens.background,
+    cursor: ((isAuthenticated && !canAdd) || isAddingToCart) ? "not-allowed" : "pointer",
+    opacity: ((isAuthenticated && !canAdd) || isAddingToCart) ? 0.5 : 1,
+    transition: "opacity 0.2s ease",
+    position: "relative",
+  }}
+>
+  {isAddingToCart ? (
+    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+      <span style={{
+        width: "16px", height: "16px", border: "2px solid transparent",
+        borderTop: `2px solid ${tokens.background}`, borderRadius: "50%",
+        animation: "spin 0.6s linear infinite", display: "inline-block"
+      }} />
+      Adding...
+    </span>
+  ) : !isAuthenticated ? (
+    "Log In to Add to Bag"
+  ) : !canAdd ? (
+    "Select Options"
+  ) : (
+    `Add to Bag${quantity > 1 ? ` — ${quantity} items` : ''}`
+  )}
+</button>
+{!canAdd && !isAddingToCart && isAuthenticated && (
+  <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
+    Please select {needsSize && !selectedSize ? "a size" : ""}{needsSize && !selectedSize && needsColor && !selectedColor ? " and " : ""}{needsColor && !selectedColor ? "a color" : ""} to add to bag
+  </p>
+)}
+{!isAuthenticated && !isAddingToCart && (
+  <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
+    <a href={`/login?redirect=${encodeURIComponent(typeof window !== "undefined" ? window.location.pathname : "")}`} style={{ color: tokens.foreground, textDecoration: "underline" }}>
+      Log in
+    </a>{" "}to purchase this item
+  </p>
+)}
               </div>
             </div>
           </div>

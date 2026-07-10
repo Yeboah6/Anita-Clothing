@@ -11,6 +11,7 @@ const colors = {
   whiteAlpha30: 'rgba(255,255,255,0.3)',
   black: '#000000',
   blackAlpha30: 'rgba(0,0,0,0.30)',
+  mainColor: '#ff6bb3', // Example main color, adjust as needed
 };
 
 const styles = {

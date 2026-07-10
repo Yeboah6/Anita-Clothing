@@ -1,5 +1,12 @@
-import React, { createContext, useContext, useEffect, useReducer } from "react";
+import React, {
+  useState,
+  useReducer,
+  useEffect,
+  useContext,
+  createContext,
+} from "react";
 
+// ─── Cart Context ─────────────────────────────────────────────────────────────
 const CART_STORAGE_KEY = "anita-clothing-cart";
 
 function cartReducer(state, action) {
@@ -100,6 +107,14 @@ export function CartProvider({ children }) {
     updateQuantity: (productId, size, color, quantity) =>
       dispatch({ type: "UPDATE_QUANTITY", payload: { productId, size, color, quantity } }),
     clearCart: () => dispatch({ type: "CLEAR_CART" }),
+    loadItems: (items) => {
+      // First clear existing items
+      dispatch({ type: "CLEAR_CART" });
+      // Then add all items one by one
+      items.forEach(item => {
+        dispatch({ type: "ADD_ITEM", payload: item });
+      });
+    },
     toggleCart: () => dispatch({ type: "TOGGLE_CART" }),
     openCart: () => dispatch({ type: "OPEN_CART" }),
     closeCart: () => dispatch({ type: "CLOSE_CART" }),
@@ -117,3 +132,5 @@ export function useCart() {
   if (!context) throw new Error("useCart must be used within a CartProvider");
   return context;
 }
+
+export default CartContext;

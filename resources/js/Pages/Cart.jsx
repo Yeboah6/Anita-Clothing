@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { usePage } from "@inertiajs/react";
 import { CartProvider, useCart } from "@/Context/CartContext";
@@ -58,19 +58,6 @@ const IconShoppingBag = () => (
     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
     <line x1="3" y1="6" x2="21" y2="6" />
     <path d="M16 10a4 4 0 0 1-8 0" />
-  </svg>
-);
-
-const IconLoader = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "spin 1s linear infinite" }}>
-    <line x1="12" y1="2" x2="12" y2="6" />
-    <line x1="12" y1="18" x2="12" y2="22" />
-    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" />
-    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07" />
-    <line x1="2" y1="12" x2="6" y2="12" />
-    <line x1="18" y1="12" x2="22" y2="12" />
-    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" />
-    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
   </svg>
 );
 
@@ -160,7 +147,7 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
             </p>
           </div>
           <button
-            onClick={() => onRemove(item.productId, item.size, item.color)}
+            onClick={() => onRemove(item.productId || item.product_id, item.size, item.color)}
             aria-label={`Remove ${item.name}`}
             style={{
               background: "none", 
@@ -193,7 +180,12 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
             borderRadius: tokens.radius 
           }}>
             <button
-              onClick={() => onUpdateQuantity(item.productId, item.size, item.color, item.quantity - 1)}
+              onClick={() => onUpdateQuantity(
+                item.productId || item.product_id, 
+                item.size, 
+                item.color, 
+                item.quantity - 1
+              )}
               disabled={item.quantity <= 1}
               aria-label="Decrease quantity"
               style={{ 
@@ -221,7 +213,12 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
               {item.quantity}
             </span>
             <button
-              onClick={() => onUpdateQuantity(item.productId, item.size, item.color, item.quantity + 1)}
+              onClick={() => onUpdateQuantity(
+                item.productId || item.product_id, 
+                item.size, 
+                item.color, 
+                item.quantity + 1
+              )}
               aria-label="Increase quantity"
               style={{ 
                 width: "32px", 
@@ -254,13 +251,11 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
 };
 
 // ─── CartContent ──────────────────────────────────────────────────────────────
-const CartContent = () => {
-  const { state, updateQuantity, removeItem, getCartTotal, clearCart, loadItems } = useCart();
+const CartContent = ({ serverCart }) => {
+  const { state, updateQuantity, removeItem, getCartTotal, clearCart, loadItems, addItem } = useCart();
   const { auth } = usePage().props;
   const [isDesktop, setIsDesktop] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const hasFetchedCart = useRef(false);
 
   // Check for authenticated user
   const customer = auth?.customer ?? null;
@@ -275,92 +270,25 @@ const CartContent = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Fetch cart from server for authenticated users
+  // Load cart data on mount
   useEffect(() => {
-    const fetchCart = async () => {
-      // Don't fetch if not authenticated or already fetched
-      if (!isAuthenticated || hasFetchedCart.current) {
-        return;
-      }
-
-      hasFetchedCart.current = true;
-
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        console.log('Fetching cart from server for authenticated user...');
-        const response = await axios.get('/cart/items');
-        console.log('Server response:', response.data);
-        
-        const serverCartItems = response.data.cart_items || [];
-        console.log('Server cart items count:', serverCartItems.length);
-        
-        if (serverCartItems.length > 0) {
-          // Transform server cart items to match local cart format
-          const transformedItems = serverCartItems.map(item => {
-            // Get the first image URL from the product's images relationship
-            const productImage = item.product?.images?.[0]?.image_url || null;
-            
-            // Calculate price (consider discount if available)
-            const basePrice = parseFloat(item.product?.price || 0);
-            const discountAmount = parseFloat(item.product?.discount_amount || 0);
-            const finalPrice = discountAmount > 0 ? basePrice - discountAmount : basePrice;
-            
-            console.log('Transforming item:', {
-              productId: item.product_id,
-              name: item.product?.name,
-              price: finalPrice,
-              image: productImage,
-            });
-            
-            return {
-              productId: item.product_id,
-              name: item.product?.name || 'Product',
-              price: finalPrice,
-              image: productImage,
-              slug: item.product?.slug || null,
-              size: item.size,
-              color: item.color,
-              quantity: item.quantity,
-            };
-          });
-          
-          console.log('Loading transformed items into cart:', transformedItems);
-          
-          // Load all items into the cart context
-          loadItems(transformedItems);
-        } else {
-          console.log('No items in server cart, clearing local cart');
-          clearCart();
-        }
-        
-      } catch (err) {
-        console.error('Failed to fetch cart:', err);
-        if (err.response) {
-          console.error('Error response:', err.response.data);
-          console.error('Error status:', err.response.status);
-          
-          if (err.response.status === 401) {
-            setError('Please log in to view your cart.');
-          } else if (err.response.status === 500) {
-            setError('Server error. Please try again later.');
-          } else {
-            setError('Failed to load your cart. Please try again.');
-          }
-        } else if (err.request) {
-          console.error('No response received:', err.request);
-          setError('Network error. Please check your connection.');
-        } else {
-          setError('Failed to load your cart. Please try again.');
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCart();
-  }, [isAuthenticated]);
+    if (isAuthenticated && serverCart?.items && serverCart.items.length > 0) {
+      // Map server cart items to the format expected by cart context
+      const cartItems = serverCart.items.map(item => ({
+        productId: item.product_id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        slug: item.slug,
+        size: item.size,
+        color: item.color,
+        quantity: item.quantity,
+      }));
+      
+      // Load all items into cart context
+      loadItems(cartItems);
+    }
+  }, []); // Run only once on mount
 
   const handleUpdateQuantity = async (productId, size, color, newQuantity) => {
     // Update local cart
@@ -374,7 +302,6 @@ const CartContent = () => {
           color,
           quantity: newQuantity
         });
-        console.log('Quantity updated on server');
       } catch (err) {
         console.error('Failed to sync cart update:', err);
         setError('Failed to update cart. Please try again.');
@@ -392,7 +319,6 @@ const CartContent = () => {
         await axios.delete(`/cart/${productId}`, {
           data: { size, color }
         });
-        console.log('Item removed from server cart');
       } catch (err) {
         console.error('Failed to sync cart removal:', err);
         setError('Failed to remove item. Please try again.');
@@ -408,7 +334,6 @@ const CartContent = () => {
     if (isAuthenticated) {
       try {
         await axios.delete('/cart/clear');
-        console.log('Cart cleared on server');
       } catch (err) {
         console.error('Failed to clear cart on server:', err);
         setError('Failed to clear cart. Please try again.');
@@ -419,24 +344,6 @@ const CartContent = () => {
   const subtotal = getCartTotal();
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
   const isEmpty = state.items.length === 0;
-
-  if (isLoading) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
-        <Header />
-        <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(245,245,245,0.4)" }}>
-          <div style={{ textAlign: "center" }}>
-            <IconLoader />
-            <p style={{ marginTop: "1rem", color: tokens.mutedForeground, fontSize: "0.875rem" }}>
-              Loading your cart...
-            </p>
-          </div>
-        </main>
-        <Footer />
-        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
@@ -589,7 +496,7 @@ const CartContent = () => {
               }}>
                 {state.items.map((item, index) => (
                   <CartLineItem
-                    key={`${item.productId}-${item.size}-${item.color}-${index}`}
+                    key={`${item.productId || item.product_id}-${item.size}-${item.color}-${index}`}
                     item={item}
                     onUpdateQuantity={handleUpdateQuantity}
                     onRemove={handleRemoveItem}
@@ -736,20 +643,14 @@ const CartContent = () => {
       </main>
 
       <Footer />
-      <style>{`
-        @keyframes spin { 
-          from { transform: rotate(0deg); } 
-          to { transform: rotate(360deg); } 
-        }
-      `}</style>
     </div>
   );
 };
 
 // ─── Export wrapped in CartProvider ──────────────────────────────────────────
-const Cart = () => (
+const Cart = ({ serverCart }) => (
   <CartProvider>
-    <CartContent />
+    <CartContent serverCart={serverCart} />
   </CartProvider>
 );
 
