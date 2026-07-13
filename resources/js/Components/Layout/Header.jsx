@@ -30,10 +30,10 @@ const tokens = {
   border: "#e6e6e6",
   radius: "4px",
   destructive: "#ef4444",
-  adminColor: "#7c3aed", // Purple color for admin indicators
+  adminColor: "#7c3aed",
 };
 
-// ─── Cart Context (keep existing) ─────────────────────────────────────────────
+// ─── Cart Context ─────────────────────────────────────────────────────────────
 const CART_STORAGE_KEY = "anita-clothing-cart";
 
 function cartReducer(state, action) {
@@ -134,6 +134,12 @@ export function CartProvider({ children }) {
     updateQuantity: (productId, size, color, quantity) =>
       dispatch({ type: "UPDATE_QUANTITY", payload: { productId, size, color, quantity } }),
     clearCart: () => dispatch({ type: "CLEAR_CART" }),
+    loadItems: (items) => {
+      dispatch({ type: "CLEAR_CART" });
+      items.forEach(item => {
+        dispatch({ type: "ADD_ITEM", payload: item });
+      });
+    },
     toggleCart: () => dispatch({ type: "TOGGLE_CART" }),
     openCart: () => dispatch({ type: "OPEN_CART" }),
     closeCart: () => dispatch({ type: "CLOSE_CART" }),
@@ -152,7 +158,7 @@ function useCart() {
   return context;
 }
 
-// ─── Icons (keep existing) ───────────────────────────────────────────────
+// ─── Icons ───────────────────────────────────────────────────────────────────
 const IconShoppingBag = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
@@ -277,7 +283,7 @@ const LogoutButton = () => {
 };
 
 // ─── User Dropdown Menu ───────────────────────────────────────────────────
-const UserDropdown = ({ user, isAdmin = false, isMobile = false }) => {
+const UserDropdown = ({ user, isAdmin = false, isMobile = false, isCustomer = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [btnHovered, setBtnHovered] = useState(false);
   const dropdownRef = React.useRef(null);
@@ -296,30 +302,21 @@ const UserDropdown = ({ user, isAdmin = false, isMobile = false }) => {
 
   const displayName = user?.name?.split(" ")[0] || "Account";
   const userEmail = user?.email || "";
-  const role = user?.role || (isAdmin ? "admin" : "customer");
 
   if (isMobile) {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <a
-          href="/account/profile"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            padding: "0.5rem 0.75rem",
-            textDecoration: "none",
-            color: tokens.foreground,
-            fontSize: "0.875rem",
-            fontWeight: 500,
-            fontFamily: tokens.fontBody,
-            borderRadius: tokens.radius,
-            transition: "background-color 0.15s ease",
-          }}
-        >
+        {/* User info header */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          padding: "0.5rem 0.75rem",
+          borderRadius: tokens.radius,
+        }}>
           <IconUser />
           <div>
-            <div style={{ fontSize: "0.875rem", fontWeight: 500 }}>
+            <div style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground }}>
               {displayName}
               {isAdmin && (
                 <span style={{
@@ -338,70 +335,98 @@ const UserDropdown = ({ user, isAdmin = false, isMobile = false }) => {
             </div>
             <div style={{ fontSize: "0.75rem", color: tokens.mutedForeground }}>{userEmail}</div>
           </div>
-        </a>
+        </div>
         
-        {/* Admin-only links */}
+        {/* Admin-only link */}
         {isAdmin && (
+          <a
+            href="/admin"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 0.75rem",
+              textDecoration: "none",
+              color: tokens.adminColor,
+              fontSize: "0.875rem",
+              fontWeight: 600,
+              fontFamily: tokens.fontBody,
+              borderRadius: tokens.radius,
+              transition: "background-color 0.15s ease",
+            }}
+          >
+            <IconDashboard />
+            Dashboard
+          </a>
+        )}
+        
+        {/* Customer links */}
+        {isCustomer && (
           <>
             <a
-              href="/admin"
+              href="/account/profile"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "0.5rem",
                 padding: "0.5rem 0.75rem",
                 textDecoration: "none",
-                color: tokens.adminColor,
+                color: tokens.foreground,
                 fontSize: "0.875rem",
-                fontWeight: 600,
+                fontWeight: 500,
                 fontFamily: tokens.fontBody,
                 borderRadius: tokens.radius,
+                transition: "background-color 0.15s ease",
               }}
             >
-              <IconDashboard />
-              Dashboard
+              <IconUser />
+              My Profile
+            </a>
+            <a
+              href="/account/orders"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.5rem 0.75rem",
+                textDecoration: "none",
+                color: tokens.foreground,
+                fontSize: "0.875rem",
+                fontFamily: tokens.fontBody,
+                borderRadius: tokens.radius,
+                transition: "background-color 0.15s ease",
+              }}
+            >
+              <IconShoppingBag />
+              Orders
+            </a>
+            <a
+              href="/account/settings"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.5rem 0.75rem",
+                textDecoration: "none",
+                color: tokens.foreground,
+                fontSize: "0.875rem",
+                fontFamily: tokens.fontBody,
+                borderRadius: tokens.radius,
+                transition: "background-color 0.15s ease",
+              }}
+            >
+              <IconSettings />
+              Settings
             </a>
           </>
         )}
         
-        <a
-          href="/account/orders"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            padding: "0.5rem 0.75rem",
-            textDecoration: "none",
-            color: tokens.foreground,
-            fontSize: "0.875rem",
-            fontFamily: tokens.fontBody,
-            borderRadius: tokens.radius,
-          }}
-        >
-          Orders
-        </a>
-        <a
-          href="/account/settings"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            padding: "0.5rem 0.75rem",
-            textDecoration: "none",
-            color: tokens.foreground,
-            fontSize: "0.875rem",
-            fontFamily: tokens.fontBody,
-            borderRadius: tokens.radius,
-          }}
-        >
-          <IconSettings />
-          Settings
-        </a>
         <LogoutButton />
       </div>
     );
   }
 
+  // Desktop version
   return (
     <div ref={dropdownRef} style={{ position: "relative" }}>
       <button
@@ -449,6 +474,7 @@ const UserDropdown = ({ user, isAdmin = false, isMobile = false }) => {
             zIndex: 100,
           }}
         >
+          {/* User info header */}
           <div style={{ padding: "0.5rem 0.75rem", borderBottom: `1px solid ${tokens.border}`, marginBottom: "0.5rem" }}>
             <div style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, display: "flex", alignItems: "center", gap: "0.5rem" }}>
               {displayName}
@@ -471,7 +497,7 @@ const UserDropdown = ({ user, isAdmin = false, isMobile = false }) => {
             </div>
           </div>
 
-          {/* Admin-only links */}
+          {/* Admin-only link */}
           {isAdmin && (
             <>
               <a
@@ -500,71 +526,76 @@ const UserDropdown = ({ user, isAdmin = false, isMobile = false }) => {
             </>
           )}
 
-          <a
-            href="/account/profile"
-            onClick={() => setIsOpen(false)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 0.75rem",
-              textDecoration: "none",
-              color: tokens.foreground,
-              fontSize: "0.8125rem",
-              fontFamily: tokens.fontBody,
-              borderRadius: tokens.radius,
-              transition: "background-color 0.15s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = tokens.border}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-          >
-            <IconUser />
-            My Profile
-          </a>
+          {/* Customer links */}
+          {isCustomer && (
+            <>
+              <a
+                href="/account/profile"
+                onClick={() => setIsOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem 0.75rem",
+                  textDecoration: "none",
+                  color: tokens.foreground,
+                  fontSize: "0.8125rem",
+                  fontFamily: tokens.fontBody,
+                  borderRadius: tokens.radius,
+                  transition: "background-color 0.15s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = tokens.border}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                <IconUser />
+                My Profile
+              </a>
 
-          <a
-            href="/account/orders"
-            onClick={() => setIsOpen(false)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 0.75rem",
-              textDecoration: "none",
-              color: tokens.foreground,
-              fontSize: "0.8125rem",
-              fontFamily: tokens.fontBody,
-              borderRadius: tokens.radius,
-              transition: "background-color 0.15s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = tokens.border}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-          >
-            <IconShoppingBag />
-            My Orders
-          </a>
+              <a
+                href="/account/orders"
+                onClick={() => setIsOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem 0.75rem",
+                  textDecoration: "none",
+                  color: tokens.foreground,
+                  fontSize: "0.8125rem",
+                  fontFamily: tokens.fontBody,
+                  borderRadius: tokens.radius,
+                  transition: "background-color 0.15s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = tokens.border}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                <IconShoppingBag />
+                My Orders
+              </a>
 
-          <a
-            href="/account/settings"
-            onClick={() => setIsOpen(false)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 0.75rem",
-              textDecoration: "none",
-              color: tokens.foreground,
-              fontSize: "0.8125rem",
-              fontFamily: tokens.fontBody,
-              borderRadius: tokens.radius,
-              transition: "background-color 0.15s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = tokens.border}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-          >
-            <IconSettings />
-            Settings
-          </a>
+              <a
+                href="/account/settings"
+                onClick={() => setIsOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem 0.75rem",
+                  textDecoration: "none",
+                  color: tokens.foreground,
+                  fontSize: "0.8125rem",
+                  fontFamily: tokens.fontBody,
+                  borderRadius: tokens.radius,
+                  transition: "background-color 0.15s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = tokens.border}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                <IconSettings />
+                Settings
+              </a>
+            </>
+          )}
 
           <div style={{ borderTop: `1px solid ${tokens.border}`, marginTop: "0.5rem", paddingTop: "0.5rem" }}>
             <LogoutButton />
@@ -660,13 +691,12 @@ const Header = () => {
 
   // Pull the authenticated user from Inertia's shared props
   const { props } = usePage();
-  const customer = props?.auth?.customer ?? null;
-  const admin = props?.auth?.admin ?? null;
+  const user = props?.auth?.user ?? null;
   
-  // Determine user type and user data
-  const isLoggedIn = !!(customer || admin);
-  const isAdmin = !!admin;
-  const user = admin || customer; // Prefer admin data if available
+  // Determine user type based on role
+  const isLoggedIn = !!user;
+  const isAdmin = user?.role === 'admin';
+  const isCustomer = user?.role === 'customer';
 
   useEffect(() => { injectFonts(); }, []);
 
@@ -731,7 +761,7 @@ const Header = () => {
             {/* Desktop auth links */}
             <div className="anita-desktop-auth">
               {isLoggedIn ? (
-                <UserDropdown user={user} isAdmin={isAdmin} />
+                <UserDropdown user={user} isAdmin={isAdmin} isCustomer={isCustomer} />
               ) : (
                 <>
                   <a
@@ -817,18 +847,6 @@ const Header = () => {
                 {link.name}
               </NavLink>
             ))}
-            
-            {/* Admin link in mobile nav for admin users */}
-            {isAdmin && (
-              <NavLink 
-                href="/admin" 
-                onClick={() => setIsMenuOpen(false)}
-                style={{ color: tokens.adminColor, fontWeight: 600 }}
-              >
-                <IconDashboard />
-                <span style={{ marginLeft: "0.5rem" }}>Dashboard</span>
-              </NavLink>
-            )}
 
             {/* Mobile auth divider */}
             <div style={{ height: "1px", backgroundColor: tokens.border, margin: "0.25rem 0" }} />
@@ -839,6 +857,7 @@ const Header = () => {
                 <UserDropdown 
                   user={user}
                   isAdmin={isAdmin}
+                  isCustomer={isCustomer}
                   isMobile={true}
                 />
               </div>

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { usePage } from "@inertiajs/react";
-import { CartProvider, useCart } from "@/Context/CartContext";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
 
@@ -76,35 +75,35 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
       }}
     >
       {/* Image */}
-      <div style={{ 
-        width: isDesktop ? "120px" : "88px", 
-        flexShrink: 0, 
-        backgroundColor: tokens.secondary, 
-        borderRadius: tokens.radius, 
-        overflow: "hidden" 
+      <div style={{
+        width: isDesktop ? "120px" : "88px",
+        flexShrink: 0,
+        backgroundColor: tokens.secondary,
+        borderRadius: tokens.radius,
+        overflow: "hidden"
       }}>
         <div style={{ paddingBottom: "133.33%", position: "relative" }}>
           {item.image ? (
-            <img 
-              src={item.image} 
-              alt={item.name} 
-              style={{ 
-                position: "absolute", 
-                inset: 0, 
-                width: "100%", 
-                height: "100%", 
-                objectFit: "cover" 
-              }} 
+            <img
+              src={item.image}
+              alt={item.name}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover"
+              }}
             />
           ) : (
-            <div style={{ 
-              position: "absolute", 
-              inset: 0, 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center", 
-              color: tokens.mutedForeground, 
-              fontSize: "0.625rem" 
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: tokens.mutedForeground,
+              fontSize: "0.625rem"
             }}>
               No image
             </div>
@@ -113,28 +112,28 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
       </div>
 
       {/* Details */}
-      <div style={{ 
-        flex: 1, 
-        display: "flex", 
-        flexDirection: "column", 
-        justifyContent: "space-between", 
-        minWidth: 0 
+      <div style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        minWidth: 0
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem" }}>
           <div style={{ minWidth: 0 }}>
-            <a 
-              href={`/product/${item.slug || item.productId}`}
+            <a
+              href={`/product/${item.slug || item.product_id}`}
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              <h3 style={{ 
-                fontFamily: tokens.fontDisplay, 
-                fontSize: "1.0625rem", 
-                fontWeight: 500, 
-                margin: 0, 
-                color: tokens.foreground, 
-                overflow: "hidden", 
-                textOverflow: "ellipsis", 
-                whiteSpace: "nowrap" 
+              <h3 style={{
+                fontFamily: tokens.fontDisplay,
+                fontSize: "1.0625rem",
+                fontWeight: 500,
+                margin: 0,
+                color: tokens.foreground,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
               }}>
                 {item.name}
               </h3>
@@ -143,20 +142,20 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
               {[item.size, item.color].filter(Boolean).join(" / ") || "—"}
             </p>
             <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, margin: "0.25rem 0 0" }}>
-              ${item.price.toFixed(2)} each
+              ${Number(item.price).toFixed(2)} each
             </p>
           </div>
           <button
-            onClick={() => onRemove(item.productId || item.product_id, item.size, item.color)}
+            onClick={() => onRemove(item.id)}
             aria-label={`Remove ${item.name}`}
             style={{
-              background: "none", 
-              border: "none", 
-              cursor: "pointer", 
+              background: "none",
+              border: "none",
+              cursor: "pointer",
               padding: "4px",
               color: removeHovered ? tokens.destructive : tokens.mutedForeground,
-              transition: "color 0.15s ease", 
-              flexShrink: 0, 
+              transition: "color 0.15s ease",
+              flexShrink: 0,
               height: "fit-content",
             }}
             onMouseEnter={() => setRemoveHovered(true)}
@@ -166,81 +165,71 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
           </button>
         </div>
 
-        <div style={{ 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "space-between", 
-          marginTop: "0.75rem" 
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: "0.75rem"
         }}>
           {/* Quantity stepper */}
-          <div style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            border: `1px solid ${tokens.border}`, 
-            borderRadius: tokens.radius 
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            border: `1px solid ${tokens.border}`,
+            borderRadius: tokens.radius
           }}>
             <button
-              onClick={() => onUpdateQuantity(
-                item.productId || item.product_id, 
-                item.size, 
-                item.color, 
-                item.quantity - 1
-              )}
+              onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
               disabled={item.quantity <= 1}
               aria-label="Decrease quantity"
-              style={{ 
-                width: "32px", 
-                height: "32px", 
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center", 
-                border: "none", 
-                background: "transparent", 
-                cursor: item.quantity <= 1 ? "not-allowed" : "pointer", 
+              style={{
+                width: "32px",
+                height: "32px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "none",
+                background: "transparent",
+                cursor: item.quantity <= 1 ? "not-allowed" : "pointer",
                 color: item.quantity <= 1 ? tokens.border : tokens.foreground,
                 opacity: item.quantity <= 1 ? 0.5 : 1
               }}
             >
               <IconMinus />
             </button>
-            <span style={{ 
-              minWidth: "32px", 
-              textAlign: "center", 
-              fontSize: "0.875rem", 
-              fontWeight: 500, 
-              color: tokens.foreground 
+            <span style={{
+              minWidth: "32px",
+              textAlign: "center",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              color: tokens.foreground
             }}>
               {item.quantity}
             </span>
             <button
-              onClick={() => onUpdateQuantity(
-                item.productId || item.product_id, 
-                item.size, 
-                item.color, 
-                item.quantity + 1
-              )}
+              onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
               aria-label="Increase quantity"
-              style={{ 
-                width: "32px", 
-                height: "32px", 
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center", 
-                border: "none", 
-                background: "transparent", 
-                cursor: "pointer", 
-                color: tokens.foreground 
+              style={{
+                width: "32px",
+                height: "32px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                color: tokens.foreground
               }}
             >
               <IconPlus />
             </button>
           </div>
 
-          <p style={{ 
-            fontSize: "0.9375rem", 
-            fontWeight: 500, 
-            color: tokens.foreground, 
-            margin: 0 
+          <p style={{
+            fontSize: "0.9375rem",
+            fontWeight: 500,
+            color: tokens.foreground,
+            margin: 0
           }}>
             ${lineTotal}
           </p>
@@ -250,17 +239,31 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
   );
 };
 
-// ─── CartContent ──────────────────────────────────────────────────────────────
-const CartContent = ({ serverCart }) => {
-  const { state, updateQuantity, removeItem, getCartTotal, clearCart, loadItems, addItem } = useCart();
-  const { auth } = usePage().props;
+// ─── Main Cart Component ─────────────────────────────────────────────────────
+const Cart = () => {
+  const { serverCart } = usePage().props;
   const [isDesktop, setIsDesktop] = useState(false);
   const [error, setError] = useState(null);
+  const [items, setItems] = useState([]);
 
-  // Check for authenticated user
-  const customer = auth?.customer ?? null;
-  const admin = auth?.admin ?? null;
-  const isAuthenticated = !!(customer || admin);
+  // Initialize cart from server data
+  useEffect(() => {
+    console.log('ServerCart received:', serverCart); // Debug log
+    
+    if (serverCart?.items && serverCart.items.length > 0) {
+      setItems(serverCart.items.map(item => ({
+        id: item.id, // Using cart item ID for API calls
+        product_id: item.product_id,
+        name: item.name,
+        price: Number(item.price),
+        image: item.image,
+        slug: item.slug,
+        size: item.size,
+        color: item.color,
+        quantity: item.quantity,
+      })));
+    }
+  }, [serverCart]);
 
   useEffect(() => {
     injectFonts();
@@ -270,80 +273,82 @@ const CartContent = ({ serverCart }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Load cart data on mount
-  useEffect(() => {
-    if (isAuthenticated && serverCart?.items && serverCart.items.length > 0) {
-      // Map server cart items to the format expected by cart context
-      const cartItems = serverCart.items.map(item => ({
-        productId: item.product_id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        slug: item.slug,
-        size: item.size,
-        color: item.color,
-        quantity: item.quantity,
-      }));
-      
-      // Load all items into cart context
-      loadItems(cartItems);
+  const handleUpdateQuantity = async (cartItemId, newQuantity) => {
+    if (newQuantity <= 0) {
+      handleRemoveItem(cartItemId);
+      return;
     }
-  }, []); // Run only once on mount
 
-  const handleUpdateQuantity = async (productId, size, color, newQuantity) => {
-    // Update local cart
-    updateQuantity(productId, size, color, newQuantity);
+    // Optimistic update
+    setItems(prev => 
+      prev.map(item => 
+        item.id === cartItemId ? { ...item, quantity: newQuantity } : item
+      )
+    );
 
-    // Sync with server if authenticated
-    if (isAuthenticated && newQuantity > 0) {
-      try {
-        await axios.put(`/cart/${productId}`, {
-          size,
-          color,
-          quantity: newQuantity
-        });
-      } catch (err) {
-        console.error('Failed to sync cart update:', err);
-        setError('Failed to update cart. Please try again.');
+    try {
+      const item = items.find(i => i.id === cartItemId);
+      await axios.put(`/cart/${item.product_id}`, { 
+        size: item.size, 
+        color: item.color, 
+        quantity: newQuantity 
+      });
+    } catch (err) {
+      console.error('Failed to update quantity:', err);
+      setError('Failed to update cart. Please try again.');
+      // Revert on error
+      const item = items.find(i => i.id === cartItemId);
+      if (item) {
+        setItems(prev => 
+          prev.map(i => 
+            i.id === cartItemId ? { ...i, quantity: item.quantity } : i
+          )
+        );
       }
     }
   };
 
-  const handleRemoveItem = async (productId, size, color) => {
-    // Remove from local cart
-    removeItem(productId, size, color);
+  const handleRemoveItem = async (cartItemId) => {
+    const itemToRemove = items.find(i => i.id === cartItemId);
+    if (!itemToRemove) return;
 
-    // Sync with server if authenticated
-    if (isAuthenticated) {
-      try {
-        await axios.delete(`/cart/${productId}`, {
-          data: { size, color }
-        });
-      } catch (err) {
-        console.error('Failed to sync cart removal:', err);
-        setError('Failed to remove item. Please try again.');
-      }
+    // Optimistic update
+    setItems(prev => prev.filter(item => item.id !== cartItemId));
+
+    try {
+      await axios.delete(`/cart/${itemToRemove.product_id}`, { 
+        data: { 
+          size: itemToRemove.size, 
+          color: itemToRemove.color 
+        } 
+      });
+    } catch (err) {
+      console.error('Failed to remove item:', err);
+      setError('Failed to remove item. Please try again.');
+      // Revert on error
+      setItems(prev => [...prev, itemToRemove]);
     }
   };
 
   const handleClearCart = async () => {
     if (!confirm('Are you sure you want to clear your cart?')) return;
     
-    clearCart();
-    
-    if (isAuthenticated) {
-      try {
-        await axios.delete('/cart/clear');
-      } catch (err) {
-        console.error('Failed to clear cart on server:', err);
-        setError('Failed to clear cart. Please try again.');
-      }
+    const previousItems = [...items];
+    setItems([]);
+
+    try {
+      await axios.delete('/cart/clear');
+    } catch (err) {
+      console.error('Failed to clear cart:', err);
+      setError('Failed to clear cart. Please try again.');
+      // Revert on error
+      setItems(previousItems);
     }
   };
 
-  const subtotal = getCartTotal();
-  const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
-  const isEmpty = state.items.length === 0;
+  const subtotal = items.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const isEmpty = items.length === 0;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
@@ -352,27 +357,27 @@ const CartContent = ({ serverCart }) => {
       <main style={{ flex: 1, backgroundColor: "rgba(245,245,245,0.4)" }}>
         <div style={{ maxWidth: "1024px", margin: "0 auto", padding: isDesktop ? "3rem 1rem" : "2rem 1rem" }}>
           {/* Header */}
-          <div style={{ 
-            display: "flex", 
-            justifyContent: "space-between", 
-            alignItems: "baseline", 
-            marginBottom: "2rem" 
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            marginBottom: "2rem"
           }}>
             <div>
-              <h1 style={{ 
-                fontFamily: tokens.fontDisplay, 
-                fontSize: "clamp(1.875rem, 4vw, 2.5rem)", 
-                fontWeight: 500, 
-                margin: 0, 
-                color: tokens.foreground 
+              <h1 style={{
+                fontFamily: tokens.fontDisplay,
+                fontSize: "clamp(1.875rem, 4vw, 2.5rem)",
+                fontWeight: 500,
+                margin: 0,
+                color: tokens.foreground
               }}>
                 Shopping Bag
               </h1>
               {!isEmpty && (
-                <p style={{ 
-                  fontSize: "0.875rem", 
-                  color: tokens.mutedForeground, 
-                  margin: "0.5rem 0 0" 
+                <p style={{
+                  fontSize: "0.875rem",
+                  color: tokens.mutedForeground,
+                  margin: "0.5rem 0 0"
                 }}>
                   {totalItems} {totalItems === 1 ? 'item' : 'items'}
                 </p>
@@ -411,7 +416,7 @@ const CartContent = ({ serverCart }) => {
               alignItems: "center"
             }}>
               <span>{error}</span>
-              <button 
+              <button
                 onClick={() => setError(null)}
                 style={{
                   background: "none",
@@ -429,50 +434,50 @@ const CartContent = ({ serverCart }) => {
 
           {/* Empty cart */}
           {isEmpty ? (
-            <div style={{ 
-              textAlign: "center", 
-              padding: "4rem 1rem", 
-              backgroundColor: tokens.background, 
-              border: `1px solid ${tokens.border}`, 
-              borderRadius: tokens.radius 
+            <div style={{
+              textAlign: "center",
+              padding: "4rem 1rem",
+              backgroundColor: tokens.background,
+              border: `1px solid ${tokens.border}`,
+              borderRadius: tokens.radius
             }}>
-              <div style={{ 
-                color: tokens.mutedForeground, 
-                display: "flex", 
-                justifyContent: "center", 
-                marginBottom: "1rem" 
+              <div style={{
+                color: tokens.mutedForeground,
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: "1rem"
               }}>
                 <IconShoppingBag />
               </div>
-              <h2 style={{ 
-                fontFamily: tokens.fontDisplay, 
-                fontSize: "1.375rem", 
-                fontWeight: 500, 
-                margin: "0 0 0.5rem", 
-                color: tokens.foreground 
+              <h2 style={{
+                fontFamily: tokens.fontDisplay,
+                fontSize: "1.375rem",
+                fontWeight: 500,
+                margin: "0 0 0.5rem",
+                color: tokens.foreground
               }}>
                 Your bag is empty
               </h2>
-              <p style={{ 
-                fontSize: "0.875rem", 
-                color: tokens.mutedForeground, 
-                margin: "0 0 1.5rem" 
+              <p style={{
+                fontSize: "0.875rem",
+                color: tokens.mutedForeground,
+                margin: "0 0 1.5rem"
               }}>
                 Looks like you haven't added anything yet.
               </p>
               <a
                 href="/collections"
                 style={{
-                  display: "inline-flex", 
-                  alignItems: "center", 
+                  display: "inline-flex",
+                  alignItems: "center",
                   justifyContent: "center",
-                  padding: "0.625rem 1.75rem", 
-                  fontSize: "0.875rem", 
+                  padding: "0.625rem 1.75rem",
+                  fontSize: "0.875rem",
                   fontWeight: 500,
-                  fontFamily: tokens.fontBody, 
-                  textDecoration: "none", 
+                  fontFamily: tokens.fontBody,
+                  textDecoration: "none",
                   borderRadius: tokens.radius,
-                  backgroundColor: tokens.foreground, 
+                  backgroundColor: tokens.foreground,
                   color: tokens.background,
                 }}
               >
@@ -481,29 +486,29 @@ const CartContent = ({ serverCart }) => {
             </div>
           ) : (
             /* Cart with items */
-            <div style={{ 
-              display: "grid", 
-              gridTemplateColumns: isDesktop ? "1fr 380px" : "1fr", 
-              gap: "2rem", 
-              alignItems: "start" 
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: isDesktop ? "1fr 380px" : "1fr",
+              gap: "2rem",
+              alignItems: "start"
             }}>
               {/* Items list */}
-              <div style={{ 
-                backgroundColor: tokens.background, 
-                border: `1px solid ${tokens.border}`, 
-                borderRadius: tokens.radius, 
-                padding: "0 1.5rem" 
+              <div style={{
+                backgroundColor: tokens.background,
+                border: `1px solid ${tokens.border}`,
+                borderRadius: tokens.radius,
+                padding: "0 1.5rem"
               }}>
-                {state.items.map((item, index) => (
+                {items.map((item) => (
                   <CartLineItem
-                    key={`${item.productId || item.product_id}-${item.size}-${item.color}-${index}`}
+                    key={item.id}
                     item={item}
                     onUpdateQuantity={handleUpdateQuantity}
                     onRemove={handleRemoveItem}
                     isDesktop={isDesktop}
                   />
                 ))}
-                
+
                 {/* Continue shopping link */}
                 <div style={{ padding: "1.5rem 0", textAlign: "center" }}>
                   <a
@@ -521,121 +526,97 @@ const CartContent = ({ serverCart }) => {
               </div>
 
               {/* Order summary */}
-              <div style={{ 
-                backgroundColor: tokens.background, 
-                border: `1px solid ${tokens.border}`, 
-                borderRadius: tokens.radius, 
-                padding: "1.5rem", 
-                position: isDesktop ? "sticky" : "static", 
-                top: "88px" 
+              <div style={{
+                backgroundColor: tokens.background,
+                border: `1px solid ${tokens.border}`,
+                borderRadius: tokens.radius,
+                padding: "1.5rem",
+                position: isDesktop ? "sticky" : "static",
+                top: "88px"
               }}>
-                <h3 style={{ 
-                  fontFamily: tokens.fontDisplay, 
-                  fontSize: "1.25rem", 
-                  fontWeight: 500, 
-                  margin: "0 0 1.25rem", 
-                  color: tokens.foreground 
+                <h3 style={{
+                  fontFamily: tokens.fontDisplay,
+                  fontSize: "1.25rem",
+                  fontWeight: 500,
+                  margin: "0 0 1.25rem",
+                  color: tokens.foreground
                 }}>
                   Order Summary
                 </h3>
-                
-                <div style={{ 
-                  display: "flex", 
-                  flexDirection: "column", 
-                  gap: "0.75rem", 
-                  fontSize: "0.875rem" 
+
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                  fontSize: "0.875rem"
                 }}>
-                  <div style={{ 
-                    display: "flex", 
-                    justifyContent: "space-between", 
-                    color: tokens.mutedForeground 
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    color: tokens.mutedForeground
                   }}>
                     <span>Subtotal ({totalItems} items)</span>
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
-                  
-                  <div style={{ 
-                    display: "flex", 
-                    justifyContent: "space-between", 
-                    color: tokens.mutedForeground 
+
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    color: tokens.mutedForeground
                   }}>
                     <span>Shipping</span>
                     <span>Calculated at checkout</span>
                   </div>
-                  
-                  <div style={{ 
-                    display: "flex", 
-                    justifyContent: "space-between", 
-                    color: tokens.mutedForeground 
+
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    color: tokens.mutedForeground
                   }}>
                     <span>Tax</span>
                     <span>Calculated at checkout</span>
                   </div>
-                  
-                  <hr style={{ 
-                    border: "none", 
-                    borderTop: `1px solid ${tokens.border}`, 
-                    margin: "0.5rem 0" 
+
+                  <hr style={{
+                    border: "none",
+                    borderTop: `1px solid ${tokens.border}`,
+                    margin: "0.5rem 0"
                   }} />
-                  
-                  <div style={{ 
-                    display: "flex", 
-                    justifyContent: "space-between", 
-                    fontSize: "1.0625rem", 
-                    fontWeight: 600, 
-                    color: tokens.foreground 
+
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "1.0625rem",
+                    fontWeight: 600,
+                    color: tokens.foreground
                   }}>
                     <span>Estimated Total</span>
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                 </div>
-                
+
                 <a
                   href="/checkout"
                   style={{
-                    display: "flex", 
-                    alignItems: "center", 
+                    display: "flex",
+                    alignItems: "center",
                     justifyContent: "center",
-                    width: "100%", 
-                    height: "48px", 
+                    width: "100%",
+                    height: "48px",
                     marginTop: "1.5rem",
-                    fontSize: "0.9375rem", 
-                    fontWeight: 500, 
+                    fontSize: "0.9375rem",
+                    fontWeight: 500,
                     fontFamily: tokens.fontBody,
-                    textDecoration: "none", 
-                    borderRadius: tokens.radius, 
+                    textDecoration: "none",
+                    borderRadius: tokens.radius,
                     border: "none",
-                    backgroundColor: tokens.foreground, 
+                    backgroundColor: tokens.foreground,
                     color: tokens.background,
                     boxSizing: "border-box",
                   }}
                 >
                   Proceed to Checkout
                 </a>
-                
-                {/* Authentication status indicator */}
-                {isAuthenticated ? (
-                  <p style={{ 
-                    marginTop: "1rem", 
-                    fontSize: "0.75rem", 
-                    color: tokens.green, 
-                    textAlign: "center" 
-                  }}>
-                    ✓ Your cart is saved to your account
-                  </p>
-                ) : (
-                  <p style={{ 
-                    marginTop: "1rem", 
-                    fontSize: "0.75rem", 
-                    color: tokens.mutedForeground, 
-                    textAlign: "center" 
-                  }}>
-                    <a href="/login" style={{ color: tokens.foreground, textDecoration: "underline" }}>
-                      Sign in
-                    </a>
-                    {' '}to save your cart for later
-                  </p>
-                )}
               </div>
             </div>
           )}
@@ -646,12 +627,5 @@ const CartContent = ({ serverCart }) => {
     </div>
   );
 };
-
-// ─── Export wrapped in CartProvider ──────────────────────────────────────────
-const Cart = ({ serverCart }) => (
-  <CartProvider>
-    <CartContent serverCart={serverCart} />
-  </CartProvider>
-);
 
 export default Cart;

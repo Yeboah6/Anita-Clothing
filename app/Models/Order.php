@@ -11,13 +11,23 @@ use App\Models\Payment;
 class Order extends Model
 {
     protected $fillable = [
-        'order_id',
         'user_id',
         'order_number',
         'total_amount',
-        'payment_status',
+        'email',
+        'phone',
+        'first_name',
+        'last_name',
+        'apartment',
+        'address',
+        'city',
+        'state',
+        'zip',
+        'note',
+        'subtotal',
+        'shipping',
+        'tax',
         'order_status',
-        'shipping_address'
     ];
 
     public function user() 

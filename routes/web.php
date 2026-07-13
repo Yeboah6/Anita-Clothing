@@ -31,7 +31,7 @@ Route::get('/product/{slug}', [MainController::class, 'product'])->name('product
 
 Route::get('/cart', [CartController::class, 'cart'])->name('cart');
 
-Route::get('/checkout', [MainController::class, 'checkout'])->name('checkout');
+// Route::get('/checkout', [MainController::class, 'checkout'])->name('checkout');
 
 // Auth Routes
 // Guest routes (only accessible when not logged in)
@@ -54,6 +54,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/cart/{productId}', [CartController::class, 'destroy'])->name('cart.destroy');
     Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
+
+    Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
+    Route::post('/checkout', [CartController::class, 'processCheckout'])->name('checkout.process');
 
     // Customer & Account Routes
     Route::middleware('role:customer')->group(function () {

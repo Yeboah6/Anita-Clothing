@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use Inertia\Inertia;
 
 class MainController extends Controller
 {
@@ -120,11 +121,6 @@ class MainController extends Controller
             ],
             'products' => $products,
         ]);
-    }
-
-    public function checkout()
-    {
-        return inertia('Checkout');
     }
 
     private function formatProduct(Product $product): array

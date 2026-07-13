@@ -10,11 +10,13 @@ use App\Models\Order;
 class OrderItem extends Model
 {
     protected $fillable = [
-        'order_item_id',
         'order_id',
         'product_id',
+        'name',
         'quantity',
-        'price'
+        'price',
+        'color',
+        'size'
     ];
 
     public function order() 
