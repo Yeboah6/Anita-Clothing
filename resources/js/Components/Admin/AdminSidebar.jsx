@@ -71,6 +71,7 @@ const navItems = [
   { title: "Overview", url: "/admin", icon: IconLayoutDashboard },
   { title: "Products", url: "/admin/products", icon: IconBox },
   { title: "Orders", url: "/admin/orders", icon: IconShoppingBag },
+  {title: "Payments", url: "/admin/payments", icon: IconBox},
   { title: "Customers", url: "/admin/customers", icon: IconUsers },
 ];
 

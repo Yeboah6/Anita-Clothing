@@ -76,7 +76,7 @@ class CartController extends Controller
             }
         }
 
-        // dd($cartItems);
+        // dd($itemData);
         
         return Inertia::render('Cart', [
             'serverCart' => [
@@ -88,86 +88,86 @@ class CartController extends Controller
     }
 
     public function checkout()
-{
-    $user = Auth::user();
-    $items = [];
-    $count = 0;
-    $subtotal = 0;
-
-    $userInfo = null;
+    {
+        $user = Auth::user();
+        $items = [];
+        $count = 0;
+        $subtotal = 0;
     
-    if ($user) {
-        $nameParts = explode(' ', $user->name, 2);
-        $firstName = $nameParts[0] ?? '';
-        $lastName = $nameParts[1] ?? '';
-
-         $userInfo = [
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'email' => $user->email ?? '',
-            'phone' => $user->phone ?? $user->mobile ?? $user->contact_number ?? '',
-        ];
-
-        // Get cart items with product details
-        $cartItems = Cart::where('user_id', $user->id)
-            ->with('product')
-            ->get();
+        $userInfo = null;
         
-        foreach ($cartItems as $cartItem) {
-            $product = $cartItem->product;
-            if (!$product) continue;
+        if ($user) {
+            $nameParts = explode(' ', $user->name, 2);
+            $firstName = $nameParts[0] ?? '';
+            $lastName = $nameParts[1] ?? '';
+    
+             $userInfo = [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $user->email ?? '',
+                'phone' => $user->phone ?? $user->mobile ?? $user->contact_number ?? '',
+            ];
+    
+            // Get cart items with product details
+            $cartItems = Cart::where('user_id', $user->id)
+                ->with('product')
+                ->get();
             
-            $basePrice = floatval($product->price ?? 0);
-            $discountAmount = floatval($product->discount_amount ?? 0);
-            $finalPrice = $discountAmount > 0 ? $basePrice - $discountAmount : $basePrice;
-            
-            // Get first image
-            $imageUrl = null;
-            if (method_exists($product, 'images')) {
-                $firstImage = $product->images()->first();
-                if ($firstImage) {
-                    $imageUrl = $firstImage->image_url 
-                        ?? $firstImage->url 
-                        ?? $firstImage->path 
-                        ?? $firstImage->filename 
-                        ?? $firstImage->src 
-                        ?? null;
-                    
-                    if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL) && !str_starts_with($imageUrl, '/')) {
-                        $imageUrl = '/storage/' . $imageUrl;
+            foreach ($cartItems as $cartItem) {
+                $product = $cartItem->product;
+                if (!$product) continue;
+                
+                $basePrice = floatval($product->price ?? 0);
+                $discountAmount = floatval($product->discount_amount ?? 0);
+                $finalPrice = $discountAmount > 0 ? $basePrice - $discountAmount : $basePrice;
+                
+                // Get first image
+                $imageUrl = null;
+                if (method_exists($product, 'images')) {
+                    $firstImage = $product->images()->first();
+                    if ($firstImage) {
+                        $imageUrl = $firstImage->image_url 
+                            ?? $firstImage->url 
+                            ?? $firstImage->path 
+                            ?? $firstImage->filename 
+                            ?? $firstImage->src 
+                            ?? null;
+                        
+                        if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL) && !str_starts_with($imageUrl, '/')) {
+                            $imageUrl = '/storage/' . $imageUrl;
+                        }
                     }
                 }
+                
+                $itemData = [
+                    'id' => $cartItem->id,
+                    'product_id' => $cartItem->product_id,
+                    'name' => $product->name ?? 'Product',
+                    'slug' => $product->slug ?? null,
+                    'price' => $finalPrice,
+                    'original_price' => $basePrice,
+                    'discount_amount' => $discountAmount,
+                    'image' => $imageUrl,
+                    'size' => $cartItem->size,
+                    'color' => $cartItem->color,
+                    'quantity' => $cartItem->quantity,
+                ];
+                
+                $items[] = $itemData;
+                $count += $cartItem->quantity;
+                $subtotal += $finalPrice * $cartItem->quantity;
             }
-            
-            $itemData = [
-                'id' => $cartItem->id,
-                'product_id' => $cartItem->product_id,
-                'name' => $product->name ?? 'Product',
-                'slug' => $product->slug ?? null,
-                'price' => $finalPrice,
-                'original_price' => $basePrice,
-                'discount_amount' => $discountAmount,
-                'image' => $imageUrl,
-                'size' => $cartItem->size,
-                'color' => $cartItem->color,
-                'quantity' => $cartItem->quantity,
-            ];
-            
-            $items[] = $itemData;
-            $count += $cartItem->quantity;
-            $subtotal += $finalPrice * $cartItem->quantity;
         }
+        
+        return Inertia::render('Checkout', [
+            'serverCart' => [
+                'items' => $items,
+                'count' => $count,
+                'total' => round($subtotal, 2),
+            ],
+            'userInfo' => $userInfo,
+        ]);
     }
-    
-    return Inertia::render('Checkout', [
-        'serverCart' => [
-            'items' => $items,
-            'count' => $count,
-            'total' => round($subtotal, 2),
-        ],
-        'userInfo' => $userInfo,
-    ]);
-}
 
 public function processCheckout(Request $request)
 {
@@ -213,9 +213,9 @@ public function processCheckout(Request $request)
     }
     
     // Calculate shipping and tax
-    $shipping = $subtotal > 100 ? 0 : 9.99;
-    $tax = round($subtotal * 0.08, 2);
-    $total = $subtotal + $shipping + $tax;
+    // $shipping = $subtotal > 100 ? 0 : 9.99;
+    // $tax = round($subtotal * 0.08, 2);
+    $total = $subtotal;
     
     // Create order
     $order = Order::create([
@@ -231,9 +231,9 @@ public function processCheckout(Request $request)
         'zip' => $validated['zip'],
         'notes' => $validated['notes'] ?? null,
         'subtotal' => $subtotal,
-        'shipping' => $shipping,
-        'tax' => $tax,
-        'total' => $total,
+        // 'shipping' => $shipping,
+        // 'tax' => $tax,
+        'total_amount' => $total,
         'status' => 'pending',
         'order_number' => 'ORD-' . strtoupper(uniqid()),
     ]);
@@ -242,7 +242,7 @@ public function processCheckout(Request $request)
     foreach ($validated['items'] as $item) {
         $order->items()->create([
             'product_id' => $item['product_id'],
-            'name' => Product::find($item['product_id'])->name ?? 'Product',
+            // 'name' => Product::find($item['product_id'])->name ?? 'Product',
             'price' => $item['price'],
             'quantity' => $item['quantity'],
             'size' => $item['size'] ?? null,
@@ -263,7 +263,7 @@ public function processCheckout(Request $request)
         'message' => 'Order placed successfully!',
         'order_id' => $order->id,
         'order_number' => $order->order_number,
-        'redirect' => route('order.confirmation', ['order' => $order->id]),
+        'redirect' => route('checkout.pay', ['order' => $order->id]),
     ]);
 }
 
@@ -297,6 +297,25 @@ public function processCheckout(Request $request)
         }
 
         return response()->json(['message' => 'Added to cart.']);
+    }
+
+    public function update(Request $request, $productId)
+    {
+        $validated = $request->validate([
+            'size'     => ['nullable', 'string', 'max:20'],
+            'color'    => ['nullable', 'string', 'max:50'],
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $cartItem = Cart::where('user_id', Auth::id())
+            ->where('product_id', $productId)
+            ->where('size', $validated['size'] ?? null)
+            ->where('color', $validated['color'] ?? null)
+            ->firstOrFail();
+
+        $cartItem->update(['quantity' => $validated['quantity']]);
+
+        return response()->json(['message' => 'Cart updated.']);
     }
 
     public function destroy(Request $request, $productId)

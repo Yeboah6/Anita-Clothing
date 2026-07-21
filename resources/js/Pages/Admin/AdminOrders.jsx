@@ -182,6 +182,71 @@ const CustomSelect = ({ value, onChange, options, placeholder, style }) => {
   );
 };
 
+const OrderRow = ({ order }) => {
+  const [viewHovered, setViewHovered] = useState(false);
+
+  return (
+    <tr style={{ borderBottom: `1px solid ${tokens.border}` }}>
+      <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>
+        {order.id}
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem" }}>
+        <div>
+          <p style={{ fontSize: "0.875rem", color: tokens.foreground, margin: 0 }}>{order.customer}</p>
+          <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: "2px 0 0" }}>{order.email}</p>
+        </div>
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem", color: tokens.mutedForeground }}>
+        {order.date}
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem", color: tokens.foreground }}>
+        {order.items}
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>
+        ${order.total}
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem" }}>
+        <span
+          style={{
+            display: "inline-block",
+            padding: "0.125rem 0.625rem",
+            borderRadius: "9999px",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+            textTransform: "capitalize",
+            ...getStatusStyle(order.status),
+          }}
+        >
+          {order.status}
+        </span>
+      </td>
+      <td style={{ padding: "0.75rem 1.5rem", textAlign: "right" }}>
+        <button
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0.375rem 0.75rem",
+            fontSize: "0.8125rem",
+            fontWeight: 500,
+            fontFamily: tokens.fontBody,
+            borderRadius: tokens.radius,
+            border: "none",
+            background: viewHovered ? tokens.secondary : "transparent",
+            color: tokens.foreground,
+            cursor: "pointer",
+            transition: "background-color 0.15s ease",
+          }}
+          onMouseEnter={() => setViewHovered(true)}
+          onMouseLeave={() => setViewHovered(false)}
+        >
+          View
+        </button>
+      </td>
+    </tr>
+  );
+};
+
 // ─── Status badge style helper ───────────────────────────────────────────────
 const getStatusStyle = (status) => {
   const styles = {
@@ -195,7 +260,7 @@ const getStatusStyle = (status) => {
 };
 
 // ─── AdminOrders Page ────────────────────────────────────────────────────────
-const AdminOrders = () => {
+const AdminOrders = ({ orders=[] }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -230,7 +295,7 @@ const AdminOrders = () => {
   };
 
   // Filter and search orders
-  const filteredOrders = mockOrders.filter((order) => {
+  const filteredOrders = orders.filter((order) => {
     const matchesFilter = filter === "all" || order.status === filter;
     const matchesSearch =
       searchQuery === "" ||
@@ -405,7 +470,7 @@ const AdminOrders = () => {
               Orders
             </h1>
             <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
-              {mockOrders.length} total orders
+              {orders.length} total orders
             </p>
           </div>
           <button
@@ -509,70 +574,9 @@ const AdminOrders = () => {
                       </td>
                     </tr>
                   ) : (
-                    filteredOrders.map((order) => {
-                      const [viewHovered, setViewHovered] = useState(false);
-
-                      return (
-                        <tr key={order.id} style={{ borderBottom: `1px solid ${tokens.border}` }}>
-                          <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>
-                            {order.id}
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem" }}>
-                            <div>
-                              <p style={{ fontSize: "0.875rem", color: tokens.foreground, margin: 0 }}>{order.customer}</p>
-                              <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: "2px 0 0" }}>{order.email}</p>
-                            </div>
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem", color: tokens.mutedForeground }}>
-                            {order.date}
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem", color: tokens.foreground }}>
-                            {order.items}
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>
-                            ${order.total}
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem" }}>
-                            <span
-                              style={{
-                                display: "inline-block",
-                                padding: "0.125rem 0.625rem",
-                                borderRadius: "9999px",
-                                fontSize: "0.75rem",
-                                fontWeight: 500,
-                                textTransform: "capitalize",
-                                ...getStatusStyle(order.status),
-                              }}
-                            >
-                              {order.status}
-                            </span>
-                          </td>
-                          <td style={{ padding: "0.75rem 1.5rem", textAlign: "right" }}>
-                            <button
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                padding: "0.375rem 0.75rem",
-                                fontSize: "0.8125rem",
-                                fontWeight: 500,
-                                fontFamily: tokens.fontBody,
-                                borderRadius: tokens.radius,
-                                border: "none",
-                                background: viewHovered ? tokens.secondary : "transparent",
-                                color: tokens.foreground,
-                                cursor: "pointer",
-                                transition: "background-color 0.15s ease",
-                              }}
-                              onMouseEnter={() => setViewHovered(true)}
-                              onMouseLeave={() => setViewHovered(false)}
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
+                    filteredOrders.map((order) => (
+                      <OrderRow key={order.id} order={order} />
+                    ))
                   )}
                 </tbody>
               </table>

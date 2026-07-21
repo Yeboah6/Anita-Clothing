@@ -102,7 +102,7 @@ const HoverLink = ({ href, target, rel, ariaLabel, children, style: baseStyle })
 };
 
 // ─── About Page ──────────────────────────────────────────────────────────────
-const About = () => {
+const About = ({ collections }) => {
   const [breadcrumbHomeHovered, setBreadcrumbHomeHovered] = useState(false);
   const [shopBtnHovered, setShopBtnHovered] = useState(false);
   const [newArrivalsBtnHovered, setNewArrivalsBtnHovered] = useState(false);
@@ -145,17 +145,17 @@ const About = () => {
             <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "1fr 1fr" : "1fr", gap: isDesktop ? "4rem" : "2.5rem", alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                 <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(2.25rem, 5vw, 3.75rem)", fontWeight: 500, letterSpacing: "-0.02em", margin: 0, color: tokens.foreground }}>
-                  About Anita Clothing
+                  About CuteBloom
                 </h1>
                 <p style={{ fontSize: "1.125rem", color: tokens.mutedForeground, lineHeight: 1.7, margin: 0 }}>
-                  Founded with a vision to redefine everyday elegance, Anita Clothing 
+                  Founded with a vision to redefine everyday elegance, CuteBloom 
                   creates timeless pieces that transcend seasons and trends.
                 </p>
               </div>
               <div style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden", backgroundColor: tokens.secondary }}>
                 <img
                   src="images/user.jpeg"
-                  alt="Anita Clothing atelier"
+                  alt="CuteBloom atelier"
                   loading="lazy"
                   style={{ height: "100%", width: "100%", objectFit: "cover", display: "block" }}
                 />
@@ -173,7 +173,7 @@ const About = () => {
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem", color: tokens.mutedForeground, fontSize: "1rem", lineHeight: 1.7 }}>
                 <p style={{ margin: 0 }}>
-                  Anita Clothing was born from a simple belief: that every woman deserves 
+                  CuteBloom was born from a simple belief: that every woman deserves 
                   to feel effortlessly elegant in her everyday life. We started with a 
                   small collection of essential pieces, each designed to be worn and loved 
                   for years to come.
@@ -252,7 +252,7 @@ const About = () => {
                 <p style={{ marginTop: "0.5rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>Unique Pieces</p>
               </div>
               <div>
-                <p style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(2.25rem, 5vw, 3rem)", fontWeight: 500, margin: 0, color: tokens.foreground }}>5</p>
+                <p style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(2.25rem, 5vw, 3rem)", fontWeight: 500, margin: 0, color: tokens.foreground }}>{collections}</p>
                 <p style={{ marginTop: "0.5rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>Collections</p>
               </div>
               <div>

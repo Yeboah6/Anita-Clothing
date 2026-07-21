@@ -130,16 +130,11 @@ const Footer = () => {
                 color: tokens.foreground,
               }}
             >
-              <span
-                style={{
-                  fontFamily: tokens.fontDisplay,
-                  fontSize: "1.5rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.05em",
-                }}
-              >
-                ANITA
-              </span>
+              <img
+              src="/images/logo.png"
+              alt="CuteBloom Logo"
+              style={{ height: "55px", width: "auto", borderRadius: tokens.radius, objectFit: "cover" }}
+            />
             </a>
             <p
               style={{

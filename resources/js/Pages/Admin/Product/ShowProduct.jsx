@@ -129,10 +129,6 @@ const IconImageOff = () => (
 );
 
 // ─── ShowProduct Page ──────────────────────────────────────────────────────
-// Expects an Inertia prop:
-//   product: { id, name, sku, description, price, discount_amount, stock_quantity,
-//              featured, status, created_at, category: { id, name },
-//              images: [{ id, image, url }], variants: [{ id, size, color, stock_quantity }] }
 const ShowProduct = ({ product }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);

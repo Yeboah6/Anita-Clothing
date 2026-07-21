@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { usePage } from "@inertiajs/react";
-import { CartProvider, useCart } from "@/Context/CartContext";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
 
@@ -183,13 +182,15 @@ const Toast = ({ message, visible, type = "success" }) => {
 
 // ─── ProductDetail Page ──────────────────────────────────────────────────────
 const ProductDetail = ({ product }) => {
-  const { addItem } = useCart();
-  const { auth } = usePage().props;
+
+  // Pull the authenticated user from Inertia's shared props
+  const { props } = usePage();
+  const user = props?.auth?.user ?? null;
   
-  // Check for both customer and admin authentication
-  const customer = auth?.customer ?? null;
-  const admin = auth?.admin ?? null;
-  const isAuthenticated = !!(customer || admin);
+  // Determine user type based on role
+  const isAuthenticated = !!user;
+  const admin = user?.role === 'admin';
+  const customer = user?.role === 'customer';
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
@@ -251,37 +252,24 @@ const ProductDetail = ({ product }) => {
 
   const { category, relatedProducts = [], images = [], sizes = [], colors = [] } = product;
 
-const handleAddToBag = async () => {
-  const needsSize = sizes.length > 0;
-  const needsColor = colors.length > 0;
-  const canAdd = (!needsSize || selectedSize) && (!needsColor || selectedColor);
+  const handleAddToBag = async () => {
+    const needsSize = sizes.length > 0;
+    const needsColor = colors.length > 0;
+    const canAdd = (!needsSize || selectedSize) && (!needsColor || selectedColor);
 
-  if (!canAdd || isAddingToCart) return;
+    if (!canAdd || isAddingToCart) return;
 
-  // Require login before anything is added to the cart
-  if (!isAuthenticated) {
-    showToast("Please log in to add items to your bag", "error");
-    setTimeout(() => {
-      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
-    }, 1200);
-    return;
-  }
+    // Require login before anything is added to the cart
+    if (!isAuthenticated) {
+      showToast("Please log in to add items to your bag", "error");
+      setTimeout(() => {
+        window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      }, 1200);
+      return;
+    }
 
-  setIsAddingToCart(true);
+    setIsAddingToCart(true);
 
-  try {
-    // Add to local cart context
-    addItem({
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      image: images[0] ?? null,
-      size: selectedSize,
-      color: selectedColor,
-      quantity: quantity,
-    });
-
-    // Sync to server database
     try {
       await axios.post("/cart", {
         product_id: product.id,
@@ -289,19 +277,16 @@ const handleAddToBag = async () => {
         color: selectedColor || null,
         quantity: quantity,
       });
-    } catch (error) {
-      console.error("Failed to sync cart to server:", error);
-    }
 
-    showToast(`${quantity > 1 ? `${quantity}× ` : ''}${product.name} added to bag`);
-    setQuantity(1);
-  } catch (error) {
-    console.error("Error adding to cart:", error);
-    showToast("Failed to add item to cart. Please try again.", "error");
-  } finally {
-    setIsAddingToCart(false);
-  }
-};
+      showToast(`${quantity > 1 ? `${quantity}× ` : ''}${product.name} added to bag`);
+      setQuantity(1);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      showToast("Failed to add item to cart. Please try again.", "error");
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   const needsSize = sizes.length > 0;
   const needsColor = colors.length > 0;
@@ -536,11 +521,4 @@ const handleAddToBag = async () => {
   );
 };
 
-// ─── Export wrapped in CartProvider ──────────────────────────────────────────
-const ProductDetailWithCart = ({ product }) => (
-  <CartProvider>
-    <ProductDetail product={product} />
-  </CartProvider>
-);
-
-export default ProductDetailWithCart;
+export default ProductDetail;

@@ -73,7 +73,10 @@ class MainController extends Controller
 
     public function about()
     {
-        return inertia('About');
+        $collections = Category::all()->count();
+        return inertia('About', [
+            'collections' => $collections,
+        ]);
     }
 
     public function product(string $slug)

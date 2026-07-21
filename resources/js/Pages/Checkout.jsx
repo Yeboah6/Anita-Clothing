@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { usePage, router } from "@inertiajs/react";
+import axios from "axios";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
 
@@ -162,49 +163,51 @@ const Checkout = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
+  e.preventDefault();
+
+  if (!validateForm()) {
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    const response = await axios.post('/checkout', {
+      ...formData,
+      items: items.map(item => ({
+        product_id: item.product_id,
+        size: item.size,
+        color: item.color,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    });
+
+    if (response.data?.redirect) {
+      window.location.href = response.data.redirect;
+      return; // stop here — page is navigating away
     }
 
-    setIsSubmitting(true);
+    // Fallback in case redirect is ever missing
+    setIsSubmitted(true);
 
-    try {
-      // Submit order to server
-      const response = await axios.post('/checkout', {
-        ...formData,
-        items: items.map(item => ({
-          product_id: item.product_id,
-          size: item.size,
-          color: item.color,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-      });
-
-      setIsSubmitted(true);
-      
-      // Redirect to order confirmation or show success
-      // router.visit('/order-confirmation');
-      
-    } catch (err) {
-      console.error('Checkout failed:', err);
-      if (err.response?.data?.errors) {
-        setErrors(err.response.data.errors);
-      } else {
-        setErrors({ submit: 'Failed to process order. Please try again.' });
-      }
-    } finally {
-      setIsSubmitting(false);
+  } catch (err) {
+    console.error('Checkout failed:', err);
+    if (err.response?.data?.errors) {
+      setErrors(err.response.data.errors);
+    } else {
+      setErrors({ submit: 'Failed to process order. Please try again.' });
     }
-  };
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const subtotal = items.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const shipping = subtotal > 100 ? 0 : 9.99; // Free shipping over $100
-  const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal + shipping + tax;
+  // const tax = subtotal * 0.08; // 8% tax
+  const total = subtotal + shipping;
 
   // Success state
   if (isSubmitted) {
@@ -572,10 +575,10 @@ const Checkout = () => {
                         {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
                       </span>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
+                    {/* <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
                       <span style={{ color: tokens.mutedForeground }}>Tax (8%)</span>
                       <span style={{ color: tokens.foreground }}>${tax.toFixed(2)}</span>
-                    </div>
+                    </div> */}
                   </div>
 
                   <hr style={{ margin: "1rem 0", border: "none", borderTop: `1px solid ${tokens.border}` }} />

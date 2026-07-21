@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('order_number')->unique();
             $table->string('email');
-            $table->string('phone')->nullable();
+            $table->string('phone');
             $table->string('first_name');
             $table->string('last_name');
             $table->string('address');
@@ -26,8 +26,6 @@ return new class extends Migration
             $table->string('zip');
             $table->text('notes')->nullable();
             $table->decimal('subtotal', 10, 2);
-            $table->decimal('shipping', 10, 2);
-            $table->decimal('tax', 10, 2);
             $table->decimal('total_amount', 10, 2);
             $table->string('order_status')->default('pending');
             $table->timestamps();

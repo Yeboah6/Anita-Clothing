@@ -44,15 +44,15 @@ class DashboardController extends Controller
     private function getStats($startOfThisMonth, $startOfLastMonth, $endOfLastMonth): array
     {
         // Revenue
-        $revenueThisMonth = Order::where('payment_status', 'paid')
+        $revenueThisMonth = Order::where('order_status', 'pending')
             ->where('created_at', '>=', $startOfThisMonth)
             ->sum('total_amount');
 
-        $revenueLastMonth = Order::where('payment_status', 'paid')
+        $revenueLastMonth = Order::where('order_status', 'pending')
             ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
             ->sum('total_amount');
 
-        $totalRevenue = Order::where('payment_status', 'paid')->sum('total_amount');
+        $totalRevenue = Order::where('order_status', 'pending')->sum('total_amount');
 
         // Orders
         $ordersThisMonth = Order::where('created_at', '>=', $startOfThisMonth)->count();
@@ -111,7 +111,7 @@ class DashboardController extends Controller
             $cursor->addMonth();
         }
 
-        $raw = Order::where('payment_status', 'paid')
+        $raw = Order::where('order_status', 'pending')
             ->where('created_at', '>=', Carbon::now()->subMonths(11)->startOfMonth())
             ->selectRaw('YEAR(created_at) as y, MONTH(created_at) as m, SUM(total_amount) as revenue')
             ->groupBy('y', 'm')

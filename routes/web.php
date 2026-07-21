@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\AdminPaymentController;
 
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\WishlistController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Account\CustomerOrderController;
 use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\PaymentController;
 
 
 Route::get('/', [MainController::class, 'index'])->name('home');
@@ -29,9 +31,10 @@ Route::get('/category/{slug}', [MainController::class, 'category'])->name('categ
 
 Route::get('/product/{slug}', [MainController::class, 'product'])->name('product');
 
-Route::get('/cart', [CartController::class, 'cart'])->name('cart');
+Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 
-// Route::get('/checkout', [MainController::class, 'checkout'])->name('checkout');
+// Webhook must be excluded from CSRF protection (see note below)
+Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
 
 // Auth Routes
 // Guest routes (only accessible when not logged in)
@@ -49,14 +52,19 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
+    Route::get('/cart', [CartController::class, 'cart'])->name('cart');
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
     Route::get('/cart/items', [CartController::class, 'getItems'])->name('cart.items');
+    Route::put('/cart/{product}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{productId}', [CartController::class, 'destroy'])->name('cart.destroy');
     Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
 
     Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
     Route::post('/checkout', [CartController::class, 'processCheckout'])->name('checkout.process');
+
+    Route::get('/checkout/{order}/pay', [PaymentController::class, 'checkout'])->name('checkout.pay');
+    Route::post('/checkout/{order}/pay', [PaymentController::class, 'initialize'])->name('checkout.initialize');
 
     // Customer & Account Routes
     Route::middleware('role:customer')->group(function () {
@@ -84,6 +92,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/orders', [OrderController::class, 'Index']);
         Route::get('/admin/customers', [CustomerController::class, 'Index']);
         Route::get('/admin/categories', [CategoryController::class, 'Index']);
+
+        Route::get('/admin/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
+        Route::get('/admin/payments/export', [AdminPaymentController::class, 'export'])->name('admin.payments.export');
 
         Route::get('/admin/categories/add', [CategoryController::class, 'create'])->name('admin.categories.add');
         Route::post('/admin/categories/add', [CategoryController::class, 'store'])->name('admin.categories.store');

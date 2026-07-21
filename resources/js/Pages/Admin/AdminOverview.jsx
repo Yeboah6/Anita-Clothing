@@ -45,22 +45,6 @@ const salesData = [
   { month: "Dec", revenue: 15200 },
 ];
 
-// const topProducts = [
-//   { name: "Silk Midi Dress", sold: 48, revenue: 13872 },
-//   { name: "Cashmere Wrap Coat", sold: 32, revenue: 15840 },
-//   { name: "Leather Crossbody Bag", sold: 56, revenue: 13720 },
-//   { name: "Linen Palazzo Pants", sold: 41, revenue: 6765 },
-//   { name: "Tailored Wool Blazer", sold: 28, revenue: 9660 },
-// ];
-
-// const mockOrders = [
-//   { id: "#AN-1001", customer: "Sarah Johnson", date: "2025-06-23", status: "delivered", total: 289 },
-//   { id: "#AN-1002", customer: "Emily Chen", date: "2025-06-22", status: "processing", total: 495 },
-//   { id: "#AN-1003", customer: "Maria Garcia", date: "2025-06-22", status: "shipped", total: 165 },
-//   { id: "#AN-1004", customer: "Jessica Lee", date: "2025-06-21", status: "pending", total: 245 },
-//   { id: "#AN-1005", customer: "Amanda White", date: "2025-06-20", status: "delivered", total: 125 },
-//   { id: "#AN-1006", customer: "Rachel Black", date: "2025-06-19", status: "cancelled", total: 345 },
-// ];
 
 const stats = [
   { label: "Total Revenue", value: "$108,000", change: "+12.4%", trend: "up" },
