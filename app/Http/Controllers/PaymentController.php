@@ -156,4 +156,45 @@ class PaymentController extends Controller
 
         return response()->json(['message' => 'ok']);
     }
+
+    public function success(Order $order)
+    {
+        $payment = Payment::where('order_id', $order->id)
+            ->where('status', 'success')
+            ->latest()
+            ->first();
+    
+        return Inertia::render('Checkout/Success', [
+            'order' => [
+                'id' => $order->id,
+                'total_amount' => $order->total_amount,
+            ],
+            'payment' => $payment ? [
+                'reference' => $payment->reference,
+                'channel' => $payment->channel,
+                'paid_at' => $payment->paid_at,
+            ] : null,
+        ]);
+    }
+
+    /**
+     * Show the failed page for an order whose payment did not succeed.
+     */
+    public function failed(Order $order)
+    {
+        $payment = Payment::where('order_id', $order->id)
+            ->latest()
+            ->first();
+
+        return Inertia::render('Checkout/Failed', [
+            'order' => [
+                'id' => $order->id,
+                'total_amount' => $order->total_amount,
+            ],
+            'payment' => $payment ? [
+                'reference' => $payment->reference,
+                'status' => $payment->status,
+            ] : null,
+        ]);
+    }
 }

@@ -85,7 +85,7 @@ export default function Success({ order, payment }) {
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
               <span style={{ color: tokens.mutedForeground }}>Amount Paid</span>
               <span style={{ color: tokens.foreground, fontWeight: 500 }}>
-                ₦{Number(order.total_amount).toLocaleString()}
+                GHS {Number(order.total_amount).toLocaleString()}
               </span>
             </div>
             {payment?.reference && (

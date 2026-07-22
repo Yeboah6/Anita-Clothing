@@ -1,31 +1,52 @@
 // Target path: resources/js/Pages/Admin/PaymentReport.jsx
 
-import { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { router, Link } from "@inertiajs/react";
+import AdminSidebar from "@/Components/Admin/AdminSidebar";
 
+// ─── Fonts ───────────────────────────────────────────────────────────────────
+const injectFonts = () => {
+  const id = "anita-fonts";
+  if (!document.getElementById(id)) {
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap";
+    document.head.appendChild(link);
+  }
+};
+
+// ─── Design tokens ───────────────────────────────────────────────────────────
+// Matches AdminProducts.jsx exactly, plus a pink accent for the revenue chart
+// and primary export action (brand color, not present in AdminProducts' own
+// token set since that page uses black for its primary actions).
 const tokens = {
-  cream: "#faf7f2",
-  white: "#ffffff",
-  ink: "#2b2320",
-  inkSoft: "#6f6560",
-  border: "#e8e1d8",
-  pink: "#ff6bb3",
-  pinkSoft: "#ffe3f0",
-  green: "#3fa66b",
-  greenSoft: "#e7f6ed",
-  red: "#e2543d",
-  redSoft: "#fbe6e2",
+  fontDisplay: "'Cormorant Garamond', serif",
+  fontBody: "'Inter', sans-serif",
+  foreground: "#141414",
+  background: "#ffffff",
+  mutedForeground: "#737373",
+  secondary: "#f5f5f5",
+  border: "#e6e6e6",
+  radius: "4px",
+  green: "#16a34a",
+  destructive: "#ef4444",
   amber: "#d99a2b",
   amberSoft: "#faf0dd",
-  displayFont: "'Cormorant Garamond', serif",
-  bodyFont: "'Inter', sans-serif",
+  greenSoft: "#e7f6ed",
+  redSoft: "#fbe6e2",
+  purple: "#7a5cc4",
+  purpleSoft: "#eee7fb",
+  pink: "#ff6bb3",
+  pinkSoft: "#ffe3f0",
 };
 
 const STATUS_STYLES = {
   completed: { bg: tokens.greenSoft, fg: tokens.green },
   pending: { bg: tokens.amberSoft, fg: tokens.amber },
-  failed: { bg: tokens.redSoft, fg: tokens.red },
-  refunded: { bg: "#eee7fb", fg: "#7a5cc4" },
+  failed: { bg: tokens.redSoft, fg: tokens.destructive },
+  refunded: { bg: tokens.purpleSoft, fg: tokens.purple },
 };
 
 function currency(n) {
@@ -33,67 +54,151 @@ function currency(n) {
   return "₵" + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function StatusBadge({ status }) {
-  const style = STATUS_STYLES[status] || { bg: "#eee", fg: "#555" };
+// ─── Icons (reused from AdminProducts) ───────────────────────────────────────
+const IconBell = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+);
+
+const IconSearch = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+const IconMenu = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+);
+
+const IconChevronLeft = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
+
+const IconChevronDown = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+const IconDownload = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);
+
+const IconDollarSign = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="12" y1="1" x2="12" y2="23" />
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  </svg>
+);
+
+const IconReceipt = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 2h16v20l-3-2-2 2-2-2-2 2-2-2-2 2-3-2Z" />
+    <line x1="8" y1="7" x2="16" y2="7" />
+    <line x1="8" y1="11" x2="16" y2="11" />
+    <line x1="8" y1="15" x2="12" y2="15" />
+  </svg>
+);
+
+const IconRotateCcw = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="1 4 1 10 7 10" />
+    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+  </svg>
+);
+
+const IconAlertCircle = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+// ─── MetricCard (identical pattern to AdminProducts) ─────────────────────────
+const MetricCard = ({ icon, label, value, color }) => {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      style={{
+        backgroundColor: tokens.background,
+        border: `1px solid ${tokens.border}`,
+        borderRadius: tokens.radius,
+        padding: "1.25rem",
+        display: "flex",
+        alignItems: "center",
+        gap: "1rem",
+        transition: "box-shadow 0.2s ease, transform 0.2s ease",
+        boxShadow: hovered ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
+        transform: hovered ? "translateY(-2px)" : "none",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "40px",
+          height: "40px",
+          borderRadius: tokens.radius,
+          backgroundColor: tokens.secondary,
+          color: color,
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "0.75rem", fontWeight: 500, color: tokens.mutedForeground, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          {label}
+        </div>
+        <div style={{ fontSize: "1.5rem", fontWeight: 600, color: tokens.foreground, lineHeight: 1.2 }}>
+          {value}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── StatusBadge ──────────────────────────────────────────────────────────────
+const StatusBadge = ({ status }) => {
+  const style = STATUS_STYLES[status] || { bg: tokens.secondary, fg: tokens.mutedForeground };
   return (
     <span
       style={{
         display: "inline-block",
-        padding: "4px 12px",
-        borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 600,
-        letterSpacing: 0.3,
+        padding: "0.125rem 0.625rem",
+        borderRadius: "9999px",
+        fontSize: "0.75rem",
+        fontWeight: 500,
         textTransform: "capitalize",
-        background: style.bg,
+        backgroundColor: style.bg,
         color: style.fg,
-        fontFamily: tokens.bodyFont,
       }}
     >
       {status}
     </span>
   );
-}
+};
 
-function StatCard({ label, value, accent }) {
-  return (
-    <div
-      style={{
-        background: tokens.white,
-        border: `1px solid ${tokens.border}`,
-        borderRadius: 14,
-        padding: "20px 22px",
-        flex: "1 1 180px",
-        minWidth: 180,
-      }}
-    >
-      <div
-        style={{
-          fontFamily: tokens.bodyFont,
-          fontSize: 12,
-          textTransform: "uppercase",
-          letterSpacing: 0.6,
-          color: tokens.inkSoft,
-          marginBottom: 8,
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          fontFamily: tokens.displayFont,
-          fontSize: 30,
-          fontWeight: 600,
-          color: accent || tokens.ink,
-        }}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function RevenueChart({ data }) {
+// ─── RevenueChart ─────────────────────────────────────────────────────────────
+const RevenueChart = ({ data }) => {
   const width = 720;
   const height = 220;
   const padding = 36;
@@ -106,9 +211,9 @@ function RevenueChart({ data }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: tokens.inkSoft,
-          fontFamily: tokens.bodyFont,
-          fontSize: 14,
+          color: tokens.mutedForeground,
+          fontFamily: tokens.fontBody,
+          fontSize: "0.875rem",
         }}
       >
         No revenue in this range yet.
@@ -135,18 +240,11 @@ function RevenueChart({ data }) {
     <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "auto" }}>
       <defs>
         <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={tokens.pink} stopOpacity="0.28" />
+          <stop offset="0%" stopColor={tokens.pink} stopOpacity="0.25" />
           <stop offset="100%" stopColor={tokens.pink} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <line
-        x1={padding}
-        y1={height - padding}
-        x2={width - padding}
-        y2={height - padding}
-        stroke={tokens.border}
-        strokeWidth="1"
-      />
+      <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke={tokens.border} strokeWidth="1" />
       <path d={areaPath} fill="url(#revenueFill)" />
       <path d={linePath} fill="none" stroke={tokens.pink} strokeWidth="2.5" />
       {points.map((p, i) => (
@@ -156,61 +254,54 @@ function RevenueChart({ data }) {
         if (data.length > 10 && i % Math.ceil(data.length / 8) !== 0) return null;
         const x = padding + i * stepX;
         return (
-          <text
-            key={d.date}
-            x={x}
-            y={height - padding + 18}
-            fontSize="10"
-            fill={tokens.inkSoft}
-            fontFamily={tokens.bodyFont}
-            textAnchor="middle"
-          >
+          <text key={d.date} x={x} y={height - padding + 18} fontSize="10" fill={tokens.mutedForeground} fontFamily={tokens.fontBody} textAnchor="middle">
             {d.date.slice(5)}
           </text>
         );
       })}
     </svg>
   );
-}
+};
 
-function MethodBreakdown({ data }) {
-  const maxTotal = Math.max(...data.map((d) => Number(d.total)), 1);
+// ─── MethodBreakdown ──────────────────────────────────────────────────────────
+const MethodBreakdown = ({ data }) => {
+  const maxTotal = Math.max(...(data || []).map((d) => Number(d.total)), 1);
 
   if (!data || data.length === 0) {
     return (
-      <div style={{ color: tokens.inkSoft, fontFamily: tokens.bodyFont, fontSize: 14 }}>
+      <div style={{ color: tokens.mutedForeground, fontFamily: tokens.fontBody, fontSize: "0.875rem" }}>
         No transactions in this range.
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
       {data.map((row) => (
         <div key={row.method}>
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              fontFamily: tokens.bodyFont,
-              fontSize: 13,
-              color: tokens.ink,
-              marginBottom: 4,
+              fontFamily: tokens.fontBody,
+              fontSize: "0.8125rem",
+              color: tokens.foreground,
+              marginBottom: "0.25rem",
               textTransform: "capitalize",
             }}
           >
             <span>{row.method}</span>
-            <span style={{ color: tokens.inkSoft }}>
+            <span style={{ color: tokens.mutedForeground }}>
               {row.count} · {currency(row.total)}
             </span>
           </div>
-          <div style={{ background: tokens.pinkSoft, borderRadius: 999, height: 8, overflow: "hidden" }}>
+          <div style={{ background: tokens.secondary, borderRadius: "9999px", height: "8px", overflow: "hidden" }}>
             <div
               style={{
                 width: `${(Number(row.total) / maxTotal) * 100}%`,
                 background: tokens.pink,
                 height: "100%",
-                borderRadius: 999,
+                borderRadius: "9999px",
               }}
             />
           </div>
@@ -218,10 +309,12 @@ function MethodBreakdown({ data }) {
       ))}
     </div>
   );
-}
+};
 
-function Dropdown({ label, value, options, onChange }) {
+// ─── Dropdown (styled like AdminProducts' search input, not the old CustomSelect) ─
+const Dropdown = ({ label, value, options, onChange }) => {
   const [open, setOpen] = useState(false);
+  const [hoveredOption, setHoveredOption] = useState(null);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -235,38 +328,41 @@ function Dropdown({ label, value, options, onChange }) {
   const current = options.find((o) => o.value === value) || options[0];
 
   return (
-    <div ref={ref} style={{ position: "relative", fontFamily: tokens.bodyFont }}>
+    <div ref={ref} style={{ position: "relative", fontFamily: tokens.fontBody }}>
       <button
         onClick={() => setOpen((o) => !o)}
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          padding: "9px 14px",
-          borderRadius: 10,
-          border: `1px solid ${tokens.border}`,
-          background: tokens.white,
-          fontSize: 13,
-          color: tokens.ink,
+          gap: "0.5rem",
+          height: "36px",
+          padding: "0 0.75rem",
+          borderRadius: tokens.radius,
+          border: `1px solid ${open ? tokens.foreground : tokens.border}`,
+          background: tokens.background,
+          fontSize: "0.8125rem",
+          color: tokens.foreground,
           cursor: "pointer",
+          transition: "border-color 0.2s ease",
         }}
       >
-        <span style={{ color: tokens.inkSoft }}>{label}:</span>
-        <span style={{ fontWeight: 600, textTransform: "capitalize" }}>{current?.label}</span>
+        <span style={{ color: tokens.mutedForeground }}>{label}:</span>
+        <span style={{ fontWeight: 500, textTransform: "capitalize" }}>{current?.label}</span>
+        <IconChevronDown />
       </button>
       {open && (
         <div
           style={{
             position: "absolute",
-            top: "calc(100% + 6px)",
+            top: "calc(100% + 4px)",
             left: 0,
-            background: tokens.white,
+            background: tokens.background,
             border: `1px solid ${tokens.border}`,
-            borderRadius: 10,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+            borderRadius: tokens.radius,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
             overflow: "hidden",
             zIndex: 20,
-            minWidth: 160,
+            minWidth: "160px",
           }}
         >
           {options.map((opt) => (
@@ -276,19 +372,17 @@ function Dropdown({ label, value, options, onChange }) {
                 onChange(opt.value);
                 setOpen(false);
               }}
+              onMouseEnter={() => setHoveredOption(opt.value)}
+              onMouseLeave={() => setHoveredOption(null)}
               style={{
-                padding: "9px 14px",
-                fontSize: 13,
+                padding: "0.5rem 0.75rem",
+                fontSize: "0.8125rem",
                 cursor: "pointer",
                 textTransform: "capitalize",
-                background: opt.value === value ? tokens.pinkSoft : "transparent",
-                color: opt.value === value ? tokens.pink : tokens.ink,
-              }}
-              onMouseEnter={(e) => {
-                if (opt.value !== value) e.currentTarget.style.background = "#f5f1ea";
-              }}
-              onMouseLeave={(e) => {
-                if (opt.value !== value) e.currentTarget.style.background = "transparent";
+                backgroundColor:
+                  opt.value === value ? tokens.secondary : hoveredOption === opt.value ? tokens.secondary : "transparent",
+                color: tokens.foreground,
+                transition: "background-color 0.1s ease",
               }}
             >
               {opt.label}
@@ -298,18 +392,40 @@ function Dropdown({ label, value, options, onChange }) {
       )}
     </div>
   );
-}
+};
 
+// ─── PaymentReport Page ───────────────────────────────────────────────────────
 export default function PaymentReport({ transactions, summary, revenueOverTime, methodBreakdown, statusBreakdown, filters }) {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [activeUrl, setActiveUrl] = useState("/admin/payments");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [localFilters, setLocalFilters] = useState(filters);
+
   useEffect(() => {
-    const link = document.createElement("link");
-    link.href = "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-    return () => document.head.removeChild(link);
+    injectFonts();
+
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarCollapsed(true);
+        setMobileSidebarOpen(false);
+      } else {
+        setSidebarCollapsed(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const [localFilters, setLocalFilters] = useState(filters);
+  const handleNavigate = (url) => {
+    setActiveUrl(url);
+    if (isMobile) setMobileSidebarOpen(false);
+  };
 
   const applyFilters = (next) => {
     const merged = { ...localFilters, ...next };
@@ -337,225 +453,377 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
   ];
 
   return (
-    <div style={{ background: tokens.cream, minHeight: "100vh", padding: "36px 40px", fontFamily: tokens.bodyFont }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <h1 style={{ fontFamily: tokens.displayFont, fontSize: 34, fontWeight: 700, color: tokens.ink, margin: 0 }}>
-            Payment Reports
-          </h1>
-          <p style={{ color: tokens.inkSoft, fontSize: 14, marginTop: 6 }}>
-            Track revenue, transactions, and payment health across your store.
-          </p>
-        </div>
-        <a
-          href={exportUrl}
+    <div style={{ display: "flex", minHeight: "100vh", fontFamily: tokens.fontBody, backgroundColor: "rgba(245,245,245,0.6)" }}>
+      {/* Mobile overlay */}
+      {mobileSidebarOpen && isMobile && (
+        <div
+          onClick={() => setMobileSidebarOpen(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 40, backgroundColor: "rgba(0,0,0,0.5)", cursor: "pointer" }}
+        />
+      )}
+
+      {/* Sidebar */}
+      <AdminSidebar
+        collapsed={sidebarCollapsed}
+        isMobile={isMobile}
+        isOpen={mobileSidebarOpen}
+        onNavigate={handleNavigate}
+        activeUrl={activeUrl}
+      />
+
+      {/* Main content */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        {/* Top bar */}
+        <header
           style={{
-            display: "inline-flex",
+            position: "sticky",
+            top: 0,
+            zIndex: 30,
+            height: "64px",
+            display: "flex",
             alignItems: "center",
-            gap: 8,
-            padding: "11px 20px",
-            borderRadius: 10,
-            background: tokens.pink,
-            color: tokens.white,
-            fontSize: 14,
-            fontWeight: 600,
-            textDecoration: "none",
+            gap: "1rem",
+            borderBottom: `1px solid ${tokens.border}`,
+            backgroundColor: tokens.background,
+            padding: "0 1rem",
           }}
         >
-          Export CSV
-        </a>
-      </div>
-
-      {/* Filters */}
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          flexWrap: "wrap",
-          alignItems: "center",
-          background: tokens.white,
-          border: `1px solid ${tokens.border}`,
-          borderRadius: 14,
-          padding: "16px 18px",
-          marginBottom: 24,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <label style={{ fontSize: 13, color: tokens.inkSoft }}>From</label>
-          <input
-            type="date"
-            value={localFilters.date_from}
-            onChange={(e) => applyFilters({ date_from: e.target.value })}
-            style={{
-              padding: "8px 10px",
-              borderRadius: 8,
-              border: `1px solid ${tokens.border}`,
-              fontSize: 13,
-              fontFamily: tokens.bodyFont,
-              color: tokens.ink,
+          <button
+            onClick={() => {
+              if (isMobile) {
+                setMobileSidebarOpen(!mobileSidebarOpen);
+              } else {
+                setSidebarCollapsed(!sidebarCollapsed);
+              }
             }}
-          />
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <label style={{ fontSize: 13, color: tokens.inkSoft }}>To</label>
-          <input
-            type="date"
-            value={localFilters.date_to}
-            onChange={(e) => applyFilters({ date_to: e.target.value })}
+            aria-label={isMobile ? (mobileSidebarOpen ? "Close menu" : "Open menu") : (sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar")}
             style={{
-              padding: "8px 10px",
-              borderRadius: 8,
-              border: `1px solid ${tokens.border}`,
-              fontSize: 13,
-              fontFamily: tokens.bodyFont,
-              color: tokens.ink,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "36px",
+              height: "36px",
+              borderRadius: tokens.radius,
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: tokens.foreground,
+              transition: "background-color 0.15s ease",
+              flexShrink: 0,
             }}
-          />
-        </div>
-        <Dropdown
-          label="Status"
-          value={localFilters.status}
-          options={statusOptions}
-          onChange={(value) => applyFilters({ status: value })}
-        />
-        <Dropdown
-          label="Method"
-          value={localFilters.method}
-          options={methodOptions}
-          onChange={(value) => applyFilters({ method: value })}
-        />
-      </div>
-
-      {/* Summary cards */}
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
-        <StatCard label="Total Revenue" value={currency(summary.total_revenue)} accent={tokens.pink} />
-        <StatCard label="Transactions" value={summary.total_transactions} />
-        <StatCard label="Avg. Transaction" value={currency(summary.avg_transaction)} />
-        <StatCard label="Refunded" value={currency(summary.refunded_amount)} accent={tokens.red} />
-        <StatCard label="Failed" value={summary.failed_count} accent={tokens.amber} />
-      </div>
-
-      {/* Chart + breakdown */}
-      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 24 }}>
-        <div
-          style={{
-            flex: "2 1 420px",
-            background: tokens.white,
-            border: `1px solid ${tokens.border}`,
-            borderRadius: 14,
-            padding: 22,
-          }}
-        >
-          <h3 style={{ fontFamily: tokens.displayFont, fontSize: 20, margin: "0 0 14px", color: tokens.ink }}>
-            Revenue Over Time
-          </h3>
-          <RevenueChart data={revenueOverTime} />
-        </div>
-        <div
-          style={{
-            flex: "1 1 260px",
-            background: tokens.white,
-            border: `1px solid ${tokens.border}`,
-            borderRadius: 14,
-            padding: 22,
-          }}
-        >
-          <h3 style={{ fontFamily: tokens.displayFont, fontSize: 20, margin: "0 0 14px", color: tokens.ink }}>
-            By Payment Method
-          </h3>
-          <MethodBreakdown data={methodBreakdown} />
-        </div>
-      </div>
-
-      {/* Transactions table */}
-      <div
-        style={{
-          background: tokens.white,
-          border: `1px solid ${tokens.border}`,
-          borderRadius: 14,
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ padding: "18px 22px", borderBottom: `1px solid ${tokens.border}` }}>
-          <h3 style={{ fontFamily: tokens.displayFont, fontSize: 20, margin: 0, color: tokens.ink }}>Transactions</h3>
-        </div>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ background: tokens.cream }}>
-              {["Transaction", "Customer", "Amount", "Method", "Status", "Date"].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    textAlign: "left",
-                    padding: "12px 22px",
-                    fontSize: 12,
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                    color: tokens.inkSoft,
-                    fontWeight: 600,
-                  }}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.data.length === 0 && (
-              <tr>
-                <td colSpan={6} style={{ padding: "28px 22px", textAlign: "center", color: tokens.inkSoft, fontSize: 14 }}>
-                  No transactions match these filters.
-                </td>
-              </tr>
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = tokens.secondary)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+          >
+            {isMobile ? (
+              <IconMenu />
+            ) : (
+              <IconChevronLeft style={{ transform: sidebarCollapsed ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s ease" }} />
             )}
-            {transactions.data.map((tx) => (
-              <tr key={tx.id} style={{ borderTop: `1px solid ${tokens.border}` }}>
-                <td style={{ padding: "14px 22px", fontSize: 13, color: tokens.ink }}>{tx.transaction_id}</td>
-                <td style={{ padding: "14px 22px", fontSize: 13, color: tokens.ink }}>
-                  {tx.user ? `${tx.user.first_name} ${tx.user.last_name}` : "Guest"}
-                </td>
-                <td style={{ padding: "14px 22px", fontSize: 13, color: tokens.ink, fontWeight: 600 }}>
-                  {currency(tx.amount)}
-                </td>
-                <td style={{ padding: "14px 22px", fontSize: 13, color: tokens.ink, textTransform: "capitalize" }}>
-                  {tx.method}
-                </td>
-                <td style={{ padding: "14px 22px" }}>
-                  <StatusBadge status={tx.status} />
-                </td>
-                <td style={{ padding: "14px 22px", fontSize: 13, color: tokens.inkSoft }}>
-                  {new Date(tx.created_at).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          </button>
 
-        {/* Pagination */}
-        {transactions.links && transactions.links.length > 3 && (
-          <div style={{ display: "flex", gap: 6, padding: "16px 22px", flexWrap: "wrap" }}>
-            {transactions.links.map((link, i) => (
-              <Link
-                key={i}
-                href={link.url || "#"}
-                preserveScroll
-                preserveState
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: 8,
-                  fontSize: 13,
-                  textDecoration: "none",
-                  background: link.active ? tokens.pink : "transparent",
-                  color: link.active ? tokens.white : link.url ? tokens.ink : tokens.inkSoft,
-                  border: `1px solid ${link.active ? tokens.pink : tokens.border}`,
-                  pointerEvents: link.url ? "auto" : "none",
-                  opacity: link.url ? 1 : 0.5,
-                }}
-                dangerouslySetInnerHTML={{ __html: link.label }}
-              />
-            ))}
+          <div style={{ position: "relative", flex: 1, maxWidth: "320px", display: isMobile ? "none" : "block" }}>
+            <span style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: tokens.mutedForeground, display: "flex" }}>
+              <IconSearch />
+            </span>
+            <input
+              type="text"
+              placeholder="Search transactions..."
+              style={{
+                width: "100%",
+                height: "36px",
+                padding: "0 0.75rem 0 2.25rem",
+                fontSize: "0.875rem",
+                fontFamily: tokens.fontBody,
+                border: `1px solid ${searchFocused ? tokens.foreground : tokens.border}`,
+                borderRadius: tokens.radius,
+                backgroundColor: tokens.background,
+                color: tokens.foreground,
+                outline: "none",
+                boxSizing: "border-box",
+                transition: "border-color 0.2s ease",
+              }}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+            />
           </div>
-        )}
+
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
+            <button
+              aria-label="Notifications"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "36px",
+                height: "36px",
+                borderRadius: tokens.radius,
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                color: tokens.mutedForeground,
+                transition: "background-color 0.15s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = tokens.secondary)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            >
+              <IconBell />
+            </button>
+            <div
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "50%",
+                backgroundColor: tokens.foreground,
+                color: tokens.background,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                fontFamily: tokens.fontBody,
+              }}
+            >
+              AN
+            </div>
+          </div>
+        </header>
+
+        {/* Page heading */}
+        <div
+          style={{
+            borderBottom: `1px solid ${tokens.border}`,
+            backgroundColor: tokens.background,
+            padding: "1.5rem",
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            alignItems: isMobile ? "flex-start" : "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+          }}
+        >
+          <div>
+            <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 500, margin: 0, color: tokens.foreground }}>
+              Payments
+            </h1>
+            <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
+              Track revenue, transactions, and payment health across your store
+            </p>
+          </div>
+          <a
+            href={exportUrl}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 1rem",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              fontFamily: tokens.fontBody,
+              borderRadius: tokens.radius,
+              border: "none",
+              backgroundColor: tokens.pink,
+              color: "#ffffff",
+              cursor: "pointer",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <IconDownload />
+            Export CSV
+          </a>
+        </div>
+
+        {/* Page content */}
+        <main style={{ flex: 1, padding: "1.5rem" }}>
+          {/* Metric cards */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: "1rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <MetricCard icon={<IconDollarSign />} label="Total Revenue" value={currency(summary.total_revenue)} color={tokens.pink} />
+            <MetricCard icon={<IconReceipt />} label="Transactions" value={summary.total_transactions} color={tokens.foreground} />
+            <MetricCard icon={<IconDollarSign />} label="Avg. Transaction" value={currency(summary.avg_transaction)} color={tokens.foreground} />
+            <MetricCard icon={<IconRotateCcw />} label="Refunded" value={currency(summary.refunded_amount)} color={tokens.destructive} />
+            <MetricCard
+              icon={<IconAlertCircle />}
+              label="Failed"
+              value={summary.failed_count}
+              color={summary.failed_count > 0 ? tokens.destructive : tokens.mutedForeground}
+            />
+          </div>
+
+          {/* Filters */}
+          <div
+            style={{
+              display: "flex",
+              gap: "0.75rem",
+              flexWrap: "wrap",
+              alignItems: "center",
+              backgroundColor: tokens.background,
+              border: `1px solid ${tokens.border}`,
+              borderRadius: tokens.radius,
+              padding: "1rem 1.25rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <label style={{ fontSize: "0.8125rem", color: tokens.mutedForeground }}>From</label>
+              <input
+                type="date"
+                value={localFilters.date_from}
+                onChange={(e) => applyFilters({ date_from: e.target.value })}
+                style={{
+                  height: "36px",
+                  padding: "0 0.625rem",
+                  borderRadius: tokens.radius,
+                  border: `1px solid ${tokens.border}`,
+                  fontSize: "0.8125rem",
+                  fontFamily: tokens.fontBody,
+                  color: tokens.foreground,
+                }}
+              />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <label style={{ fontSize: "0.8125rem", color: tokens.mutedForeground }}>To</label>
+              <input
+                type="date"
+                value={localFilters.date_to}
+                onChange={(e) => applyFilters({ date_to: e.target.value })}
+                style={{
+                  height: "36px",
+                  padding: "0 0.625rem",
+                  borderRadius: tokens.radius,
+                  border: `1px solid ${tokens.border}`,
+                  fontSize: "0.8125rem",
+                  fontFamily: tokens.fontBody,
+                  color: tokens.foreground,
+                }}
+              />
+            </div>
+            <Dropdown label="Status" value={localFilters.status} options={statusOptions} onChange={(value) => applyFilters({ status: value })} />
+            <Dropdown label="Method" value={localFilters.method} options={methodOptions} onChange={(value) => applyFilters({ method: value })} />
+          </div>
+
+          {/* Chart + breakdown */}
+          <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+            <div
+              style={{
+                flex: "2 1 420px",
+                backgroundColor: tokens.background,
+                border: `1px solid ${tokens.border}`,
+                borderRadius: tokens.radius,
+                padding: "1.5rem",
+              }}
+            >
+              <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: "0 0 1rem", color: tokens.foreground }}>
+                Revenue Over Time
+              </h3>
+              <RevenueChart data={revenueOverTime} />
+            </div>
+            <div
+              style={{
+                flex: "1 1 260px",
+                backgroundColor: tokens.background,
+                border: `1px solid ${tokens.border}`,
+                borderRadius: tokens.radius,
+                padding: "1.5rem",
+              }}
+            >
+              <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: "0 0 1rem", color: tokens.foreground }}>
+                By Payment Method
+              </h3>
+              <MethodBreakdown data={methodBreakdown} />
+            </div>
+          </div>
+
+          {/* Transactions table */}
+          <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, overflow: "hidden" }}>
+            <div style={{ padding: "1.5rem", borderBottom: `1px solid ${tokens.border}` }}>
+              <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>
+                Transactions
+              </h3>
+            </div>
+
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${tokens.border}` }}>
+                    {["Transaction", "Customer", "Amount", "Method", "Status", "Date"].map((h) => (
+                      <th
+                        key={h}
+                        style={{
+                          textAlign: "left",
+                          padding: "0.75rem 1.5rem",
+                          fontWeight: 500,
+                          color: tokens.mutedForeground,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.data.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ padding: "3rem 1.5rem", textAlign: "center", color: tokens.mutedForeground }}>
+                        No transactions match these filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    transactions.data.map((tx) => (
+                      <tr key={tx.id} style={{ borderBottom: `1px solid ${tokens.border}` }}>
+                        <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>{tx.transaction_id}</td>
+                        <td style={{ padding: "0.75rem 1.5rem", color: tokens.foreground }}>
+                          {tx.user ? `${tx.user.first_name} ${tx.user.last_name}` : "Guest"}
+                        </td>
+                        <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>{currency(tx.amount)}</td>
+                        <td style={{ padding: "0.75rem 1.5rem", color: tokens.mutedForeground, textTransform: "capitalize" }}>{tx.method}</td>
+                        <td style={{ padding: "0.75rem 1.5rem" }}>
+                          <StatusBadge status={tx.status} />
+                        </td>
+                        <td style={{ padding: "0.75rem 1.5rem", color: tokens.mutedForeground }}>
+                          {new Date(tx.created_at).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {transactions.links && transactions.links.length > 3 && (
+              <div style={{ display: "flex", gap: "0.375rem", padding: "1rem 1.5rem", flexWrap: "wrap", borderTop: `1px solid ${tokens.border}` }}>
+                {transactions.links.map((link, i) => (
+                  <Link
+                    key={i}
+                    href={link.url || "#"}
+                    preserveScroll
+                    preserveState
+                    style={{
+                      padding: "0.375rem 0.75rem",
+                      borderRadius: tokens.radius,
+                      fontSize: "0.8125rem",
+                      textDecoration: "none",
+                      backgroundColor: link.active ? tokens.foreground : "transparent",
+                      color: link.active ? tokens.background : link.url ? tokens.foreground : tokens.mutedForeground,
+                      border: `1px solid ${link.active ? tokens.foreground : tokens.border}`,
+                      pointerEvents: link.url ? "auto" : "none",
+                      opacity: link.url ? 1 : 0.5,
+                    }}
+                    dangerouslySetInnerHTML={{ __html: link.label }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );

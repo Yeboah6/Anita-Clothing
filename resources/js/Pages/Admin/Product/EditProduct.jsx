@@ -98,9 +98,6 @@ const IconLoader = () => (
 );
 
 // ─── Custom Select Component ─────────────────────────────────────────────────
-// Uses a ref + document click-outside listener (instead of onBlur + setTimeout)
-// so option clicks register reliably, and the dropdown itself is not clipped
-// by any ancestor's overflow (see cardStyle below).
 const CustomSelect = ({ value, onChange, options, placeholder, style, error }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredOption, setHoveredOption] = useState(null);
@@ -231,9 +228,6 @@ const inputStyle = { height: "40px", width: "100%", padding: "0 0.75rem", fontSi
 const textareaStyle = { width: "100%", padding: "0.75rem", fontSize: "0.875rem", fontFamily: tokens.fontBody, backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, color: tokens.foreground, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s ease", resize: "vertical", minHeight: "100px" };
 const labelStyle = { fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, color: tokens.foreground, marginBottom: "0.5rem", display: "block" };
 
-// Card wrapper — overflow is intentionally NOT "hidden" here so that
-// absolutely-positioned children (like CustomSelect dropdowns) aren't clipped.
-// The header gets its own top corner radius so there's no visual seam.
 const cardStyle = {
   backgroundColor: tokens.background,
   border: `1px solid ${tokens.border}`,
@@ -247,23 +241,13 @@ const cardHeaderStyle = {
 };
 
 // ─── EditProduct Page ────────────────────────────────────────────────────────
-// Expects Inertia props:
-//   product:    { id, name, description, price, discount_amount, stock_quantity, sku,
-//                 featured, status, category_id, images: [{id, image, url}],
-//                 variants: [{id, size, color, stock_quantity}] }
-//   categories: [{ id, name }]
 const EditProduct = ({ product, categories }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeUrl, setActiveUrl] = useState("/admin/products");
 
-  // ─── Inertia form — everything that actually gets submitted ───────────────
-  // NOTE: Inertia can't send file uploads via put()/patch() — PHP doesn't parse
-  // multipart bodies on PUT requests, so the whole payload arrives empty and
-  // every "required" rule fails even though the fields are filled in. The fix
-  // is to submit via post() with a spoofed _method field, which Laravel reads
-  // and treats as a real PUT internally.
+
   const { data, setData, post, processing, errors, transform } = useForm({
     _method: "put",
     name: product.name ?? "",
@@ -434,8 +418,6 @@ const EditProduct = ({ product, categories }) => {
 
     if (!isValid) return;
 
-    // post() + _method: "put" (set in useForm above) — see note above on why
-    // put()/patch() can't be used directly when the payload includes files.
     post("/admin/products/" + product.id, {
       forceFormData: true,
       onSuccess: () => {

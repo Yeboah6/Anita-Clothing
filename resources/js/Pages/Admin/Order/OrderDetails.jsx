@@ -27,6 +27,8 @@ const tokens = {
   radius: "4px",
   green: "#16a34a",
   destructive: "#ef4444",
+  amber: "#d97706",
+  blue: "#2563eb",
 };
 
 // ─── Status config ────────────────────────────────────────────────────────────
@@ -36,12 +38,6 @@ const orderStatusOptions = [
   { value: "shipped", label: "Shipped" },
   { value: "delivered", label: "Delivered" },
   { value: "cancelled", label: "Cancelled" },
-];
-
-const paymentStatusOptions = [
-  { value: "unpaid", label: "Unpaid" },
-  { value: "paid", label: "Paid" },
-  { value: "refunded", label: "Refunded" },
 ];
 
 const statusColors = {
@@ -55,11 +51,24 @@ const statusColors = {
   refunded: { bg: "#f3f4f6", fg: "#374151" },
 };
 
-const StatusBadge = ({ value }) => {
+const StatusBadge = ({ value, fallbackLabel }) => {
   const colors = statusColors[value] || { bg: tokens.secondary, fg: tokens.mutedForeground };
-  const label = value ? value.charAt(0).toUpperCase() + value.slice(1) : "—";
+  const label = fallbackLabel || (value ? value.charAt(0).toUpperCase() + value.slice(1) : "—");
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", padding: "0.25rem 0.625rem", borderRadius: "999px", fontSize: "0.75rem", fontWeight: 500, fontFamily: tokens.fontBody, backgroundColor: colors.bg, color: colors.fg, whiteSpace: "nowrap" }}>
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "0.25rem 0.625rem",
+        borderRadius: "999px",
+        fontSize: "0.75rem",
+        fontWeight: 500,
+        fontFamily: tokens.fontBody,
+        backgroundColor: colors.bg,
+        color: colors.fg,
+        whiteSpace: "nowrap",
+      }}
+    >
       {label}
     </span>
   );
@@ -106,9 +115,9 @@ const IconUser = () => (
     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
   </svg>
 );
-const IconTruck = () => (
+const IconMapPin = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M10 17h4V5H2v12h3" /><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1" /><circle cx="7.5" cy="17.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" />
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
   </svg>
 );
 const IconReceipt = () => (
@@ -116,9 +125,14 @@ const IconReceipt = () => (
     <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 3 2 3-2 3 2V4a2 2 0 0 0-2-2z" /><path d="M14 2v6h6" /><line x1="8" y1="11" x2="16" y2="11" /><line x1="8" y1="15" x2="16" y2="15" />
   </svg>
 );
+const IconCopy = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);
 
-// ─── Custom Select ─────────────────────────────────────────────────────────
-const CustomSelect = ({ value, onChange, options, placeholder, style, error }) => {
+// ─── Custom Select (status changer) ───────────────────────────────────────────
+const CustomSelect = ({ value, onChange, options, placeholder, style }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredOption, setHoveredOption] = useState(null);
   const selectRef = React.useRef(null);
@@ -148,7 +162,7 @@ const CustomSelect = ({ value, onChange, options, placeholder, style, error }) =
           fontSize: "0.875rem",
           fontFamily: tokens.fontBody,
           backgroundColor: tokens.background,
-          border: `1px solid ${error ? tokens.destructive : isOpen ? tokens.foreground : tokens.border}`,
+          border: `1px solid ${isOpen ? tokens.foreground : tokens.border}`,
           borderRadius: tokens.radius,
           color: value ? tokens.foreground : tokens.mutedForeground,
           cursor: "pointer",
@@ -168,7 +182,20 @@ const CustomSelect = ({ value, onChange, options, placeholder, style, error }) =
       </button>
 
       {isOpen && (
-        <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 50, backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", overflow: "hidden" }}>
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 4px)",
+            left: 0,
+            right: 0,
+            zIndex: 50,
+            backgroundColor: tokens.background,
+            border: `1px solid ${tokens.border}`,
+            borderRadius: tokens.radius,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            overflow: "hidden",
+          }}
+        >
           {options.map((option) => {
             const isSelected = option.value === value;
             const isHovered = hoveredOption === option.value;
@@ -205,14 +232,10 @@ const CustomSelect = ({ value, onChange, options, placeholder, style, error }) =
   );
 };
 
-// ─── Shared styles ────────────────────────────────────────────────────────────
+// ─── Shared card styles ────────────────────────────────────────────────────────
 const cardStyle = { backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius };
-const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: `1px solid ${tokens.border}` };
+const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: `1px solid ${tokens.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" };
 const cardTitleStyle = { display: "flex", alignItems: "center", gap: "0.5rem", fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 500, margin: 0, color: tokens.foreground };
-const labelStyle = { fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, color: tokens.foreground, marginBottom: "0.5rem", display: "block" };
-const inputStyle = { height: "40px", width: "100%", padding: "0 0.75rem", fontSize: "0.875rem", fontFamily: tokens.fontBody, backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, color: tokens.foreground, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s ease" };
-const textareaStyle = { width: "100%", padding: "0.75rem", fontSize: "0.875rem", fontFamily: tokens.fontBody, backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, color: tokens.foreground, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s ease", resize: "vertical", minHeight: "90px" };
-
 const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 const formatDate = (d) => {
   if (!d) return "—";
@@ -222,29 +245,29 @@ const formatDate = (d) => {
     " · " + date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 };
 
-// ─── EditOrder Page ───────────────────────────────────────────────────────────
+// ─── OrderDetails Page ─────────────────────────────────────────────────────────
 // Expects Inertia props:
 //   order: {
-//     id, order_number, status, payment_status, tracking_number, courier, admin_note,
-//     created_at, total,
+//     id, order_number, status, payment_status, payment_method,
+//     created_at, subtotal, discount_amount, shipping_fee, total,
 //     customer: { name, email, phone },
-//     items: [{ id, product_name, size, color, quantity, price }],
+//     shipping_address: { line1, line2, city, region, postal_code, country },
+//     billing_address: { line1, line2, city, region, postal_code, country }, // optional
+//     items: [{ id, product_name, image, size, color, quantity, price, line_total }],
+//     notes, // optional
+//     timeline: [{ status, label, timestamp }], // optional order history
 //   }
-const EditOrder = ({ order }) => {
+const OrderDetails = ({ order }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeUrl, setActiveUrl] = useState("/admin/orders");
   const [backBtnHovered, setBackBtnHovered] = useState(false);
-  const [cancelBtnHovered, setCancelBtnHovered] = useState(false);
   const [saveBtnHovered, setSaveBtnHovered] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const { data, setData, put, processing, errors, isDirty } = useForm({
+  const { data, setData, patch, processing } = useForm({
     status: order.status ?? "pending",
-    payment_status: order.payment_status ?? "unpaid",
-    tracking_number: order.tracking_number ?? "",
-    courier: order.courier ?? "",
-    admin_note: order.admin_note ?? "",
   });
 
   useEffect(() => {
@@ -268,16 +291,30 @@ const EditOrder = ({ order }) => {
 
   const handleNavigate = (url) => { setActiveUrl(url); if (isMobile) setMobileSidebarOpen(false); };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    put(`/admin/orders/${order.order_number}`, {
-      preserveScroll: true,
-      onError: () => window.scrollTo({ top: 0, behavior: "smooth" }),
-    });
+  const hasStatusChanged = data.status !== order.status;
+
+  const handleUpdateStatus = () => {
+    if (!hasStatusChanged) return;
+    patch(`/admin/orders/${order.id}/status`, { preserveScroll: true });
+  };
+
+  const handleCopyOrderNumber = () => {
+    const text = order.order_number || String(order.id);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      });
+    }
   };
 
   const items = order.items ?? [];
+  const address = order.shipping_address;
   const customer = order.customer ?? {};
+
+  const computedSubtotal = order.subtotal != null
+    ? order.subtotal
+    : items.reduce((sum, it) => sum + (Number(it.price) * Number(it.quantity)), 0);
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: tokens.fontBody, backgroundColor: "rgba(245,245,245,0.6)" }}>
@@ -311,159 +348,191 @@ const EditOrder = ({ order }) => {
         <div style={{ borderBottom: `1px solid ${tokens.border}`, backgroundColor: tokens.background, padding: "1.5rem" }}>
           <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", gap: "1rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <a href={`/admin/orders/${order.order_number}`} style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, textDecoration: "none", color: backBtnHovered ? tokens.foreground : tokens.mutedForeground, transition: "color 0.15s ease", whiteSpace: "nowrap" }}
+              <a href="/admin/orders" style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, textDecoration: "none", color: backBtnHovered ? tokens.foreground : tokens.mutedForeground, transition: "color 0.15s ease", whiteSpace: "nowrap" }}
                 onMouseEnter={() => setBackBtnHovered(true)} onMouseLeave={() => setBackBtnHovered(false)}>
                 <IconArrowLeft /> Back
               </a>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" }}>
                   <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 500, margin: 0, color: tokens.foreground }}>
-                    Edit Order {order.order_number}
+                    Order {order.order_number || `#${order.id}`}
                   </h1>
                   <StatusBadge value={order.status} />
+                  {order.payment_status && <StatusBadge value={order.payment_status} />}
                 </div>
-                <p style={{ marginTop: "0.25rem", fontSize: "0.8125rem", color: tokens.mutedForeground }}>
+                <p style={{ marginTop: "0.25rem", fontSize: "0.8125rem", color: tokens.mutedForeground, display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   Placed {formatDate(order.created_at)}
+                  <button type="button" onClick={handleCopyOrderNumber}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", background: "none", border: "none", padding: 0, color: tokens.mutedForeground, cursor: "pointer", fontSize: "0.75rem", fontFamily: tokens.fontBody }}>
+                    <IconCopy /> {copied ? "Copied" : "Copy ID"}
+                  </button>
                 </p>
               </div>
             </div>
-            <div style={{ display: "flex", gap: "0.75rem" }}>
-              <a href={`/admin/orders/${order.order_number}`}
-                style={{ display: "inline-flex", alignItems: "center", padding: "0.5rem 1.25rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: `1px solid ${tokens.border}`, backgroundColor: cancelBtnHovered ? tokens.secondary : "transparent", color: tokens.foreground, textDecoration: "none", cursor: "pointer", transition: "background-color 0.2s ease", whiteSpace: "nowrap" }}
-                onMouseEnter={() => setCancelBtnHovered(true)} onMouseLeave={() => setCancelBtnHovered(false)}>
-                Cancel
-              </a>
-              <button onClick={handleSubmit} disabled={processing || !isDirty}
-                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1.5rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none", backgroundColor: tokens.foreground, color: tokens.background, cursor: processing || !isDirty ? "not-allowed" : "pointer", opacity: processing ? 0.7 : !isDirty ? 0.4 : saveBtnHovered ? 0.9 : 1, transition: "opacity 0.2s ease", whiteSpace: "nowrap" }}
-                onMouseEnter={() => setSaveBtnHovered(true)} onMouseLeave={() => setSaveBtnHovered(false)}>
+
+            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+              <CustomSelect value={data.status} onChange={(val) => setData("status", val)} options={orderStatusOptions} placeholder="Select status" style={{ minWidth: "160px" }} />
+              <button
+                onClick={handleUpdateStatus}
+                disabled={processing || !hasStatusChanged}
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1.5rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none", backgroundColor: tokens.foreground, color: tokens.background, cursor: !hasStatusChanged || processing ? "not-allowed" : "pointer", opacity: processing ? 0.7 : !hasStatusChanged ? 0.4 : saveBtnHovered ? 0.9 : 1, transition: "opacity 0.2s ease", whiteSpace: "nowrap" }}
+                onMouseEnter={() => setSaveBtnHovered(true)} onMouseLeave={() => setSaveBtnHovered(false)}
+              >
                 {processing && <IconLoader />}
-                {processing ? "Saving…" : "Save Changes"}
+                {processing ? "Updating…" : "Update Status"}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Form content */}
+        {/* Content */}
         <main style={{ flex: 1, padding: "1.5rem" }}>
-          <form onSubmit={handleSubmit}>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.5rem", alignItems: "start" }}>
-              {/* Left column — editable fields */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                <div style={cardStyle}>
-                  <div style={cardHeaderStyle}>
-                    <h3 style={cardTitleStyle}>Order Status</h3>
-                  </div>
-                  <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <div>
-                      <label style={labelStyle}>Status</label>
-                      <CustomSelect value={data.status} onChange={(val) => setData("status", val)} options={orderStatusOptions} placeholder="Select status" error={errors.status} />
-                      {errors.status && <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.status}</p>}
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Payment Status</label>
-                      <CustomSelect value={data.payment_status} onChange={(val) => setData("payment_status", val)} options={paymentStatusOptions} placeholder="Select payment status" error={errors.payment_status} />
-                      {errors.payment_status && <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.payment_status}</p>}
-                    </div>
-                  </div>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr", gap: "1.5rem", alignItems: "start" }}>
+            {/* Left column */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              {/* Items */}
+              <div style={cardStyle}>
+                <div style={cardHeaderStyle}>
+                  <h3 style={cardTitleStyle}><IconPackage /> Items ({items.length})</h3>
                 </div>
-
-                <div style={cardStyle}>
-                  <div style={cardHeaderStyle}>
-                    <h3 style={cardTitleStyle}><IconTruck /> Fulfillment</h3>
-                  </div>
-                  <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                      <div>
-                        <label htmlFor="courier" style={labelStyle}>Courier</label>
-                        <input id="courier" type="text" value={data.courier} onChange={(e) => setData("courier", e.target.value)} placeholder="e.g. DHL"
-                          style={inputStyle} onFocus={(e) => (e.target.style.borderColor = tokens.foreground)} onBlur={(e) => (e.target.style.borderColor = tokens.border)} />
+                <div>
+                  {items.length === 0 && (
+                    <p style={{ padding: "1.5rem", fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0 }}>No items found for this order.</p>
+                  )}
+                  {items.map((item, index) => (
+                    <div key={item.id ?? index} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1rem 1.5rem", borderBottom: index < items.length - 1 ? `1px solid ${tokens.border}` : "none" }}>
+                      <div style={{ width: "56px", height: "72px", flexShrink: 0, borderRadius: tokens.radius, overflow: "hidden", backgroundColor: tokens.secondary }}>
+                        {item.image ? (
+                          <img src={item.image} alt={item.product_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: tokens.mutedForeground }}>
+                            <IconPackage />
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <label htmlFor="tracking_number" style={labelStyle}>Tracking Number</label>
-                        <input id="tracking_number" type="text" value={data.tracking_number} onChange={(e) => setData("tracking_number", e.target.value)} placeholder="e.g. 1Z999AA10123456784"
-                          style={inputStyle} onFocus={(e) => (e.target.style.borderColor = tokens.foreground)} onBlur={(e) => (e.target.style.borderColor = tokens.border)} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.product_name}</p>
+                        <p style={{ margin: "0.25rem 0 0", fontSize: "0.8125rem", color: tokens.mutedForeground }}>
+                          {[item.size, item.color].filter(Boolean).join(" / ") || "—"} · Qty {item.quantity}
+                        </p>
+                      </div>
+                      <div style={{ textAlign: "right", flexShrink: 0 }}>
+                        <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground }}>
+                          {money(item.line_total != null ? item.line_total : Number(item.price) * Number(item.quantity))}
+                        </p>
+                        <p style={{ margin: "0.25rem 0 0", fontSize: "0.75rem", color: tokens.mutedForeground }}>{money(item.price)} each</p>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <div style={cardStyle}>
-                  <div style={cardHeaderStyle}>
-                    <h3 style={cardTitleStyle}>Internal Note</h3>
-                  </div>
-                  <div style={{ padding: "1.5rem" }}>
-                    <textarea value={data.admin_note} onChange={(e) => setData("admin_note", e.target.value)} placeholder="Notes visible to admin staff only"
-                      style={textareaStyle} onFocus={(e) => (e.target.style.borderColor = tokens.foreground)} onBlur={(e) => (e.target.style.borderColor = tokens.border)} />
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Right column — read-only reference */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              {/* Order timeline (optional) */}
+              {Array.isArray(order.timeline) && order.timeline.length > 0 && (
                 <div style={cardStyle}>
                   <div style={cardHeaderStyle}>
-                    <h3 style={cardTitleStyle}><IconUser /> Customer</h3>
+                    <h3 style={cardTitleStyle}>Order Timeline</h3>
                   </div>
-                  <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground }}>{customer.name || "Guest"}</p>
-                    <p style={{ margin: 0, fontSize: "0.8125rem", color: tokens.mutedForeground }}>{customer.email || "—"}</p>
-                    <p style={{ margin: 0, fontSize: "0.8125rem", color: tokens.mutedForeground }}>{customer.phone || "—"}</p>
-                  </div>
-                </div>
-
-                <div style={cardStyle}>
-                  <div style={cardHeaderStyle}>
-                    <h3 style={cardTitleStyle}><IconPackage /> Items ({items.length})</h3>
-                  </div>
-                  <div>
-                    {items.length === 0 && (
-                      <p style={{ padding: "1.5rem", fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0 }}>No items found for this order.</p>
-                    )}
-                    {items.map((item, index) => (
-                      <div key={item.id ?? index} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", padding: "0.875rem 1.5rem", borderBottom: index < items.length - 1 ? `1px solid ${tokens.border}` : "none" }}>
-                        <div style={{ minWidth: 0 }}>
-                          <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 500, color: tokens.foreground, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.product_name}</p>
-                          <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: tokens.mutedForeground }}>
-                            {[item.size, item.color].filter(Boolean).join(" / ") || "—"} · Qty {item.quantity}
-                          </p>
+                  <div style={{ padding: "1.5rem" }}>
+                    {order.timeline.map((event, index) => (
+                      <div key={index} style={{ display: "flex", gap: "0.875rem", position: "relative" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                          <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: tokens.foreground, flexShrink: 0, marginTop: "4px" }} />
+                          {index < order.timeline.length - 1 && <div style={{ width: "1px", flex: 1, backgroundColor: tokens.border, minHeight: "28px" }} />}
                         </div>
-                        <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 500, color: tokens.foreground, flexShrink: 0 }}>{money(Number(item.price) * Number(item.quantity))}</p>
+                        <div style={{ paddingBottom: index < order.timeline.length - 1 ? "1rem" : 0 }}>
+                          <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 500, color: tokens.foreground }}>{event.label || event.status}</p>
+                          <p style={{ margin: "0.125rem 0 0", fontSize: "0.75rem", color: tokens.mutedForeground }}>{formatDate(event.timestamp)}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
+              )}
 
+              {order.notes && (
                 <div style={cardStyle}>
                   <div style={cardHeaderStyle}>
-                    <h3 style={cardTitleStyle}><IconReceipt /> Total</h3>
+                    <h3 style={cardTitleStyle}>Notes</h3>
                   </div>
-                  <div style={{ padding: "1.5rem", display: "flex", justifyContent: "space-between", fontSize: "0.9375rem", fontWeight: 600 }}>
-                    <span style={{ color: tokens.foreground }}>Order Total</span>
+                  <div style={{ padding: "1.5rem" }}>
+                    <p style={{ margin: 0, fontSize: "0.875rem", color: tokens.foreground, lineHeight: 1.6 }}>{order.notes}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right column */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              {/* Customer */}
+              <div style={cardStyle}>
+                <div style={cardHeaderStyle}>
+                  <h3 style={cardTitleStyle}><IconUser /> Customer</h3>
+                </div>
+                <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground }}>{customer.name || "Guest"}</p>
+                  <p style={{ margin: 0, fontSize: "0.8125rem", color: tokens.mutedForeground }}>{customer.email || "—"}</p>
+                  <p style={{ margin: 0, fontSize: "0.8125rem", color: tokens.mutedForeground }}>{customer.phone || "—"}</p>
+                </div>
+              </div>
+
+              {/* Shipping address */}
+              <div style={cardStyle}>
+                <div style={cardHeaderStyle}>
+                  <h3 style={cardTitleStyle}><IconMapPin /> Shipping Address</h3>
+                </div>
+                <div style={{ padding: "1.5rem" }}>
+                  {address ? (
+                    <p style={{ margin: 0, fontSize: "0.8125rem", color: tokens.foreground, lineHeight: 1.7 }}>
+                      {address.line1}<br />
+                      {address.line2 && <>{address.line2}<br /></>}
+                      {[address.city, address.region, address.postal_code].filter(Boolean).join(", ")}<br />
+                      {address.country}
+                    </p>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: "0.8125rem", color: tokens.mutedForeground }}>No shipping address on file.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Order summary */}
+              <div style={cardStyle}>
+                <div style={cardHeaderStyle}>
+                  <h3 style={cardTitleStyle}><IconReceipt /> Order Summary</h3>
+                </div>
+                <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                    <span style={{ color: tokens.mutedForeground }}>Subtotal</span>
+                    <span style={{ color: tokens.foreground }}>{money(computedSubtotal)}</span>
+                  </div>
+                  {Number(order.discount_amount) > 0 && (
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                      <span style={{ color: tokens.mutedForeground }}>Discount</span>
+                      <span style={{ color: tokens.destructive }}>-{money(order.discount_amount)}</span>
+                    </div>
+                  )}
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                    <span style={{ color: tokens.mutedForeground }}>Shipping</span>
+                    <span style={{ color: tokens.foreground }}>{order.shipping_fee ? money(order.shipping_fee) : "Free"}</span>
+                  </div>
+                  <div style={{ height: "1px", backgroundColor: tokens.border, margin: "0.375rem 0" }} />
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9375rem", fontWeight: 600 }}>
+                    <span style={{ color: tokens.foreground }}>Total</span>
                     <span style={{ color: tokens.foreground }}>{money(order.total)}</span>
                   </div>
+                  {order.payment_method && (
+                    <p style={{ margin: "0.5rem 0 0", fontSize: "0.75rem", color: tokens.mutedForeground }}>
+                      Paid via {order.payment_method}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
-
-            {/* Bottom action bar */}
-            <div style={{ marginTop: "1.5rem", padding: "1rem 1.5rem", backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.75rem" }}>
-              <a href={`/admin/orders/${order.order_number}`}
-                style={{ padding: "0.5rem 1.25rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: `1px solid ${tokens.border}`, backgroundColor: cancelBtnHovered ? tokens.secondary : "transparent", color: tokens.foreground, textDecoration: "none", cursor: "pointer", transition: "background-color 0.2s ease" }}
-                onMouseEnter={() => setCancelBtnHovered(true)} onMouseLeave={() => setCancelBtnHovered(false)}>
-                Cancel
-              </a>
-              <button type="submit" disabled={processing || !isDirty}
-                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1.5rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none", backgroundColor: tokens.foreground, color: tokens.background, cursor: processing || !isDirty ? "not-allowed" : "pointer", opacity: processing ? 0.7 : !isDirty ? 0.4 : saveBtnHovered ? 0.9 : 1, transition: "opacity 0.2s ease" }}
-                onMouseEnter={() => setSaveBtnHovered(true)} onMouseLeave={() => setSaveBtnHovered(false)}>
-                {processing && <IconLoader />}
-                {processing ? "Saving…" : "Save Changes"}
-              </button>
-            </div>
-          </form>
+          </div>
         </main>
       </div>
     </div>
   );
 };
 
-export default EditOrder;
+export default OrderDetails;

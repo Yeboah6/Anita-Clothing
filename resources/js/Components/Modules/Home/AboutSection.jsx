@@ -64,7 +64,7 @@ const AboutSection = () => {
           <div style={{ position: "relative" }}>
             <img
               src="images/user.jpeg"
-              alt="Anita Clothing atelier"
+              alt="CuteBloom atelier"
               loading="lazy"
               style={{
                 height: "auto",
@@ -100,7 +100,7 @@ const AboutSection = () => {
               }}
             >
               <p style={{ margin: 0 }}>
-                Founded with a vision to redefine everyday elegance, Anita Clothing
+                Founded with a vision to redefine everyday elegance, CuteBloom
                 creates timeless pieces that transcend seasons and trends.
               </p>
               <p style={{ margin: 0 }}>

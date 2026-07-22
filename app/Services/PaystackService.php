@@ -30,7 +30,7 @@ class PaystackService
         $payload = [
             'email' => $data['email'],
             'amount' => (int) round($data['amount'] * 100),
-            'currency' => $data['currency'] ?? 'NGN',
+            'currency' => $data['currency'] ?? 'GHS',
             'reference' => $data['reference'] ?? Str::uuid()->toString(),
             'callback_url' => $data['callback_url'] ?? route('payment.callback'),
             'metadata' => $data['metadata'] ?? [],

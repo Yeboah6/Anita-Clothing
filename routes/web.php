@@ -65,6 +65,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/checkout/{order}/pay', [PaymentController::class, 'checkout'])->name('checkout.pay');
     Route::post('/checkout/{order}/pay', [PaymentController::class, 'initialize'])->name('checkout.initialize');
+    Route::get('/checkout/{order}/success', [PaymentController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/{order}/failed', [PaymentController::class, 'failed'])->name('checkout.failed');
 
     // Customer & Account Routes
     Route::middleware('role:customer')->group(function () {
@@ -90,6 +92,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('admin.products.destroy');
 
         Route::get('/admin/orders', [OrderController::class, 'Index']);
+        Route::get('/admin/orders/{orderNumber}', [OrderController::class, 'show'])->name('admin.orders.show');
+        Route::get('/admin/orders/{orderNumber}/edit', [OrderController::class, 'edit'])->name('admin.orders.edit');
+
         Route::get('/admin/customers', [CustomerController::class, 'Index']);
         Route::get('/admin/categories', [CategoryController::class, 'Index']);
 

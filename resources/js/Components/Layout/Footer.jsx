@@ -302,7 +302,7 @@ const Footer = () => {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} Anita Clothing. All rights reserved.
+            © {new Date().getFullYear()} CuteBloom. All rights reserved.
           </p>
         </div>
       </div>
