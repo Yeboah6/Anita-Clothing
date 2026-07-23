@@ -564,18 +564,18 @@ const Cart = () => {
                     justifyContent: "space-between",
                     color: tokens.mutedForeground
                   }}>
-                    <span>Shipping</span>
+                    <span>Delivery fee</span>
                     <span>Calculated at checkout</span>
                   </div>
 
-                  <div style={{
+                  {/* <div style={{
                     display: "flex",
                     justifyContent: "space-between",
                     color: tokens.mutedForeground
                   }}>
                     <span>Tax</span>
                     <span>Calculated at checkout</span>
-                  </div>
+                  </div> */}
 
                   <hr style={{
                     border: "none",

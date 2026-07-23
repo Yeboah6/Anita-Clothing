@@ -27,9 +27,6 @@ const tokens = {
   radius: "4px",
 };
 
-
-// const getNewArrivals = () => products.filter((p) => p.isNewArrival);
-
 const ChevronRight = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <polyline points="9 18 15 12 9 6" />
@@ -100,7 +97,6 @@ const ProductCard = ({ product }) => {
 
 // ─── NewArrivalsPage ─────────────────────────────────────────────────────────
 const NewArrivalsPage = ({ products = [] }) => {
-  // const newArrivals = getNewArrivals();
   const [email, setEmail] = useState("");
   const [subscribeBtnHovered, setSubscribeBtnHovered] = useState(false);
   const [breadcrumbHomeHovered, setBreadcrumbHomeHovered] = useState(false);

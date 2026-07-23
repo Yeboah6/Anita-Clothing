@@ -22,7 +22,7 @@ const tokens = {
 };
 
 // ─── AboutSection ────────────────────────────────────────────────────────────
-const AboutSection = () => {
+const AboutSection = ({ collections }) => {
   const [isDesktop, setIsDesktop] = React.useState(false);
 
   useEffect(() => {
@@ -155,7 +155,7 @@ const AboutSection = () => {
                     color: tokens.foreground,
                   }}
                 >
-                  5
+                  {collections}
                 </p>
                 <p
                   style={{

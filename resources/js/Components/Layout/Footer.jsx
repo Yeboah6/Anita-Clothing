@@ -164,7 +164,7 @@ const Footer = () => {
             </h4>
             <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               <HoverLink href="/collections">All Collections</HoverLink>
-              <HoverLink href="/collections?filter=new">New Arrivals</HoverLink>
+              <HoverLink href="/new-arrivals">New Arrivals</HoverLink>
               <HoverLink href="/#about">About Us</HoverLink>
             </nav>
           </div>
@@ -191,8 +191,12 @@ const Footer = () => {
                 color: tokens.mutedForeground,
               }}
             >
-              <p style={{ margin: 0 }}>hello@anitaclothing.com</p>
-              <p style={{ margin: 0 }}>+1 (555) 123-4567</p>
+              <HoverLink href="mailto:hello@anitaclothing.com" ariaLabel="Email">
+                hello@anitaclothing.com
+              </HoverLink>
+              <HoverLink href="tel:+233 27 722 3535" ariaLabel="Email">
+                +233 27 722 3535
+              </HoverLink>
             </div>
             <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
               <HoverLink

@@ -36,9 +36,12 @@ class MainController extends Controller
             ->get()
             ->map(fn ($category) => $this->formatCategory($category));
 
+        $collections = Category::all()->count();
+
         return inertia('Home', [
             'newArrivals' => $newArrivals,
             'categories' => $categories,
+            'collections' => $collections
         ]);
     }
 
