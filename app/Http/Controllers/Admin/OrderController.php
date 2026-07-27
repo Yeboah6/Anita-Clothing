@@ -77,16 +77,16 @@ class OrderController extends Controller
             ->with('success', 'Order updated.');
     }
 
-    public function updateStatus(Request $request, $orderNumber)
+    public function updateStatus(Request $request, Order $orderNumber)
     {
-        $order = Order::where('order_number', $orderNumber)->firstOrFail();
- 
+        $orderStatus = Order::where('order_number', $orderNumber->order_number)->firstOrFail();
+
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['pending', 'processing', 'delivered', 'cancelled'])],
+            'order_status' => ['required', Rule::in(['pending', 'processing', 'delivered', 'cancelled'])],
         ]);
- 
-        $order->update($validated);
- 
+
+        $orderStatus->update($validated);
+
         return back()->with('success', 'Order status updated.');
     }
 }

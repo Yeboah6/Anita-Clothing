@@ -9,13 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 
-// class AdminPaymentController extends Controller
-// {
-//     public function payment() {
-//         return inertia();
-//     }
-// }
-
 class AdminPaymentController extends Controller
 {
     /**
@@ -58,8 +51,6 @@ class AdminPaymentController extends Controller
             'method'    => $request->input('method', 'all'),
         ];
 
-        // Build a request clone with defaults filled in so the same
-        // applyFilters() logic is reused for summary/chart/table queries.
         $request->merge($filters);
 
         $transactions = $this->applyFilters($request)
@@ -101,6 +92,7 @@ class AdminPaymentController extends Controller
             'methodBreakdown' => $methodBreakdown,
             'statusBreakdown' => $statusBreakdown,
             'filters' => $filters,
+            'exportUrl' => route('admin.payments.export', request()->only(['date_from', 'date_to', 'status', 'channel']))
         ]);
     }
 

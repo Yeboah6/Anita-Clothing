@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { router, Link } from "@inertiajs/react";
+// import { route } from 'ziggy-js';
 import AdminSidebar from "@/Components/Admin/AdminSidebar";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
@@ -392,7 +393,7 @@ const Dropdown = ({ label, value, options, onChange }) => {
 };
 
 // ─── PaymentReport Page ───────────────────────────────────────────────────────
-export default function PaymentReport({ transactions, summary, revenueOverTime, methodBreakdown, statusBreakdown, filters }) {
+export default function PaymentReport({ transactions, summary, revenueOverTime, methodBreakdown, statusBreakdown, filters, props }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -434,7 +435,7 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
     });
   };
 
-  const exportUrl = route("admin.payments.export", localFilters);
+  const exportUrl = props.exportUrl;
 
   const methodOptions = [
     { value: "all", label: "All methods" },

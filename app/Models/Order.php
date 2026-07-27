@@ -50,6 +50,11 @@ class Order extends Model
         return $this->belongsTo(Address::class);
     }
 
+    public function getRouteKeyName()
+    {
+        return 'order_number';
+    }
+
     public function getFormattedTotalAttribute(): string
     {
         return '$' . number_format($this->total_amount, 2);

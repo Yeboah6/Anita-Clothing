@@ -19,6 +19,11 @@ class ProfileController extends Controller
 
         $nameParts = explode(' ', $user->name, 2);
 
+        $totalSpent = $orders
+            ->flatMap(fn ($order) => $order->payments)
+            ->where('status', 'completed')
+            ->sum('amount');
+
         return inertia('Customer/AccountProfile', [
             'currentCustomer' => [
                 'name'   => $user->name,
@@ -35,7 +40,7 @@ class ProfileController extends Controller
             ],
             'stats' => [
                 'totalOrders' => $orders->count(),
-                'totalSpent'  => (float) $orders->where('payment_status', 'paid')->sum('total_amount'),
+                'totalSpent'  => (float) $totalSpent,
             ],
         ]);
     }

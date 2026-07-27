@@ -103,6 +103,28 @@ const IconXCircle = () => (
   </svg>
 );
 
+const IconChevronDown = ({ isOpen }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    style={{
+      flexShrink: 0,
+      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+      transition: "transform 0.25s ease",
+    }}
+  >
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
 // ─── Status icon map ─────────────────────────────────────────────────────────
 const statusIcons = {
   pending: IconClock,
@@ -116,10 +138,13 @@ const statusIcons = {
 // Extracted so each order's hover state lives in its own component instance —
 // hooks can't safely live inside .map() on the parent, since the number of
 // hook calls would change whenever the order list changes.
-const OrderCard = ({ order, isDesktop }) => {
+// Accordion behavior: open/closed state is lifted to the parent (AccountOrders)
+// so only one order panel is expanded at a time.
+const OrderCard = ({ order, isDesktop, isOpen, onToggle }) => {
   const [trackBtnHovered, setTrackBtnHovered] = useState(false);
   const [buyAgainBtnHovered, setBuyAgainBtnHovered] = useState(false);
   const [reviewBtnHovered, setReviewBtnHovered] = useState(false);
+  const [headerHovered, setHeaderHovered] = useState(false);
 
   const config = statusConfig[order.status] || statusConfig.pending;
   const StatusIcon = statusIcons[order.status] || IconClock;
@@ -133,18 +158,30 @@ const OrderCard = ({ order, isDesktop }) => {
         overflow: "hidden",
       }}
     >
-      {/* Order header */}
-      <div
+      {/* Order header — click to expand/collapse */}
+      <button
+        onClick={onToggle}
+        aria-expanded={isOpen}
         style={{
+          width: "100%",
           display: "flex",
           flexDirection: isDesktop ? "row" : "column",
           alignItems: isDesktop ? "center" : "flex-start",
           justifyContent: "space-between",
           gap: "0.75rem",
           padding: "1.5rem",
-          borderBottom: `1px solid ${tokens.border}`,
-          backgroundColor: tokens.secondary,
+          borderBottom: isOpen ? `1px solid ${tokens.border}` : "none",
+          backgroundColor: headerHovered ? "#efefef" : tokens.secondary,
+          border: "none",
+          borderBottomLeftRadius: 0,
+          borderBottomRightRadius: 0,
+          cursor: "pointer",
+          fontFamily: tokens.fontBody,
+          textAlign: "left",
+          transition: "background-color 0.2s ease",
         }}
+        onMouseEnter={() => setHeaderHovered(true)}
+        onMouseLeave={() => setHeaderHovered(false)}
       >
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "1.5rem" }}>
           <div>
@@ -166,164 +203,178 @@ const OrderCard = ({ order, isDesktop }) => {
             <p style={{ fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>₵{Number(order.total).toFixed(2)}</p>
           </div>
         </div>
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.375rem",
-            padding: "0.125rem 0.625rem",
-            borderRadius: "9999px",
-            fontSize: "0.75rem",
-            fontWeight: 500,
-            ...config.style,
-          }}
-        >
-          <StatusIcon />
-          {config.label}
-        </span>
-      </div>
 
-      {/* Items */}
-      <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-        {order.items.map((item, idx) => (
-          <div key={idx} style={{ display: "flex", gap: "1rem" }}>
-            <div
-              style={{
-                width: isDesktop ? "80px" : "64px",
-                flexShrink: 0,
-                overflow: "hidden",
-                backgroundColor: tokens.secondary,
-                borderRadius: tokens.radius,
-              }}
-            >
-              <div style={{ paddingBottom: "133.33%", position: "relative" }}>
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  <div style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: tokens.mutedForeground,
-                    fontSize: "0.625rem",
-                  }}>
-                    No image
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.375rem",
+              padding: "0.125rem 0.625rem",
+              borderRadius: "9999px",
+              fontSize: "0.75rem",
+              fontWeight: 500,
+              ...config.style,
+            }}
+          >
+            <StatusIcon />
+            {config.label}
+          </span>
+          <IconChevronDown isOpen={isOpen} />
+        </div>
+      </button>
+
+      {/* Collapsible content — grid-rows trick animates to auto height */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateRows: isOpen ? "1fr" : "0fr",
+          transition: "grid-template-rows 0.3s ease",
+        }}
+      >
+        <div style={{ overflow: "hidden" }}>
+          <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {order.items.map((item, idx) => (
+              <div key={idx} style={{ display: "flex", gap: "1rem" }}>
+                <div
+                  style={{
+                    width: isDesktop ? "80px" : "64px",
+                    flexShrink: 0,
+                    overflow: "hidden",
+                    backgroundColor: tokens.secondary,
+                    borderRadius: tokens.radius,
+                  }}
+                >
+                  <div style={{ paddingBottom: "133.33%", position: "relative" }}>
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: tokens.mutedForeground,
+                        fontSize: "0.625rem",
+                      }}>
+                        No image
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-              <div>
-                <p style={{ fontWeight: 500, color: tokens.foreground, margin: 0, fontSize: "0.875rem" }}>
-                  {item.name}
+                </div>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <div>
+                    <p style={{ fontWeight: 500, color: tokens.foreground, margin: 0, fontSize: "0.875rem" }}>
+                      {item.name}
+                    </p>
+                    <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, margin: "4px 0 0" }}>
+                      {[item.color, item.size].filter(Boolean).join(" / ")}{item.color || item.size ? " / " : ""}Qty {item.quantity}
+                    </p>
+                  </div>
+                </div>
+                <p style={{ fontWeight: 500, color: tokens.foreground, margin: 0, fontSize: "0.875rem", alignSelf: "center" }}>
+                  ₵{Number(item.price).toFixed(2)}
                 </p>
-                <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, margin: "4px 0 0" }}>
-                  {[item.color, item.size].filter(Boolean).join(" / ")}{item.color || item.size ? " / " : ""}Qty {item.quantity}
-                </p>
               </div>
-            </div>
-            <p style={{ fontWeight: 500, color: tokens.foreground, margin: 0, fontSize: "0.875rem", alignSelf: "center" }}>
-              ₵{Number(item.price).toFixed(2)}
-            </p>
+            ))}
+
+            {/* Tracking */}
+            {order.tracking && (
+              <>
+                <hr style={{ margin: 0, border: "none", borderTop: `1px solid ${tokens.border}` }} />
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: isDesktop ? "row" : "column",
+                    alignItems: isDesktop ? "center" : "flex-start",
+                    justifyContent: "space-between",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <p style={{ fontSize: "0.875rem", margin: 0, color: tokens.foreground }}>
+                    <span style={{ color: tokens.mutedForeground }}>Tracking: </span>
+                    <span style={{ fontFamily: "monospace", fontSize: "0.8125rem" }}>{order.tracking}</span>
+                  </p>
+                  <button
+                    style={{
+                      padding: "0.375rem 0.75rem",
+                      fontSize: "0.8125rem",
+                      fontWeight: 500,
+                      fontFamily: tokens.fontBody,
+                      borderRadius: tokens.radius,
+                      border: `1px solid ${tokens.border}`,
+                      backgroundColor: trackBtnHovered ? tokens.secondary : "transparent",
+                      color: tokens.foreground,
+                      cursor: "pointer",
+                      transition: "background-color 0.2s ease",
+                      whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={() => setTrackBtnHovered(true)}
+                    onMouseLeave={() => setTrackBtnHovered(false)}
+                  >
+                    Track Package
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Delivered actions */}
+            {order.status === "delivered" && (
+              <>
+                <hr style={{ margin: 0, border: "none", borderTop: `1px solid ${tokens.border}` }} />
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    style={{
+                      padding: "0.375rem 0.75rem",
+                      fontSize: "0.8125rem",
+                      fontWeight: 500,
+                      fontFamily: tokens.fontBody,
+                      borderRadius: tokens.radius,
+                      border: `1px solid ${tokens.border}`,
+                      backgroundColor: buyAgainBtnHovered ? tokens.secondary : "transparent",
+                      color: tokens.foreground,
+                      cursor: "pointer",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={() => setBuyAgainBtnHovered(true)}
+                    onMouseLeave={() => setBuyAgainBtnHovered(false)}
+                  >
+                    Buy Again
+                  </button>
+                  <button
+                    style={{
+                      padding: "0.375rem 0.75rem",
+                      fontSize: "0.8125rem",
+                      fontWeight: 500,
+                      fontFamily: tokens.fontBody,
+                      borderRadius: tokens.radius,
+                      border: "none",
+                      backgroundColor: reviewBtnHovered ? tokens.secondary : "transparent",
+                      color: tokens.foreground,
+                      cursor: "pointer",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={() => setReviewBtnHovered(true)}
+                    onMouseLeave={() => setReviewBtnHovered(false)}
+                  >
+                    Leave Review
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-        ))}
-
-        {/* Tracking */}
-        {order.tracking && (
-          <>
-            <hr style={{ margin: 0, border: "none", borderTop: `1px solid ${tokens.border}` }} />
-            <div
-              style={{
-                display: "flex",
-                flexDirection: isDesktop ? "row" : "column",
-                alignItems: isDesktop ? "center" : "flex-start",
-                justifyContent: "space-between",
-                gap: "0.5rem",
-              }}
-            >
-              <p style={{ fontSize: "0.875rem", margin: 0, color: tokens.foreground }}>
-                <span style={{ color: tokens.mutedForeground }}>Tracking: </span>
-                <span style={{ fontFamily: "monospace", fontSize: "0.8125rem" }}>{order.tracking}</span>
-              </p>
-              <button
-                style={{
-                  padding: "0.375rem 0.75rem",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  fontFamily: tokens.fontBody,
-                  borderRadius: tokens.radius,
-                  border: `1px solid ${tokens.border}`,
-                  backgroundColor: trackBtnHovered ? tokens.secondary : "transparent",
-                  color: tokens.foreground,
-                  cursor: "pointer",
-                  transition: "background-color 0.2s ease",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={() => setTrackBtnHovered(true)}
-                onMouseLeave={() => setTrackBtnHovered(false)}
-              >
-                Track Package
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* Delivered actions */}
-        {order.status === "delivered" && (
-          <>
-            <hr style={{ margin: 0, border: "none", borderTop: `1px solid ${tokens.border}` }} />
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button
-                style={{
-                  padding: "0.375rem 0.75rem",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  fontFamily: tokens.fontBody,
-                  borderRadius: tokens.radius,
-                  border: `1px solid ${tokens.border}`,
-                  backgroundColor: buyAgainBtnHovered ? tokens.secondary : "transparent",
-                  color: tokens.foreground,
-                  cursor: "pointer",
-                  transition: "background-color 0.2s ease",
-                }}
-                onMouseEnter={() => setBuyAgainBtnHovered(true)}
-                onMouseLeave={() => setBuyAgainBtnHovered(false)}
-              >
-                Buy Again
-              </button>
-              <button
-                style={{
-                  padding: "0.375rem 0.75rem",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  fontFamily: tokens.fontBody,
-                  borderRadius: tokens.radius,
-                  border: "none",
-                  backgroundColor: reviewBtnHovered ? tokens.secondary : "transparent",
-                  color: tokens.foreground,
-                  cursor: "pointer",
-                  transition: "background-color 0.2s ease",
-                }}
-                onMouseEnter={() => setReviewBtnHovered(true)}
-                onMouseLeave={() => setReviewBtnHovered(false)}
-              >
-                Leave Review
-              </button>
-            </div>
-          </>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -336,6 +387,9 @@ const AccountOrders = ({ orders = [] }) => {
 
   const [isDesktop, setIsDesktop] = useState(false);
   const [activePath, setActivePath] = useState("/account/orders");
+  // Accordion state: id of the currently open order, or null if all collapsed.
+  // Defaults to the first order (most recent) being open.
+  const [openOrderId, setOpenOrderId] = useState(null);
 
   useEffect(() => {
     injectFonts();
@@ -346,6 +400,16 @@ const AccountOrders = ({ orders = [] }) => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (orders.length > 0) {
+      setOpenOrderId(orders[0].id);
+    }
+  }, [orders]);
+
+  const toggleOrder = (id) => {
+    setOpenOrderId((current) => (current === id ? null : id));
+  };
 
   const displayName = user
     ? [user.first_name, user.last_name].filter(Boolean).join(" ") || user.name || "there"
@@ -436,7 +500,13 @@ const AccountOrders = ({ orders = [] }) => {
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   {orders.map((order) => (
-                    <OrderCard key={order.id} order={order} isDesktop={isDesktop} />
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      isDesktop={isDesktop}
+                      isOpen={openOrderId === order.id}
+                      onToggle={() => toggleOrder(order.id)}
+                    />
                   ))}
                 </div>
               )}

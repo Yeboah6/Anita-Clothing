@@ -35,7 +35,6 @@ const tokens = {
 const orderStatusOptions = [
   { value: "pending", label: "Pending" },
   { value: "processing", label: "Processing" },
-  // { value: "shipped", label: "Shipped" },
   { value: "delivered", label: "Delivered" },
   { value: "cancelled", label: "Cancelled" },
 ];
@@ -43,7 +42,6 @@ const orderStatusOptions = [
 const statusColors = {
   pending: { bg: "#fef3c7", fg: "#92400e" },
   processing: { bg: "#dbeafe", fg: "#1e40af" },
-  // shipped: { bg: "#e0e7ff", fg: "#3730a3" },
   delivered: { bg: "#dcfce7", fg: "#166534" },
   cancelled: { bg: "#fee2e2", fg: "#991b1b" },
   paid: { bg: "#dcfce7", fg: "#166534" },
@@ -256,7 +254,7 @@ const OrderDetails = ({ order }) => {
   const [copied, setCopied] = useState(false);
 
   const { data, setData, patch, processing } = useForm({
-    status: order.order_status ?? "pending",
+    order_status: order.order_status ?? "pending",
   });
 
   useEffect(() => {
@@ -280,7 +278,7 @@ const OrderDetails = ({ order }) => {
 
   const handleNavigate = (url) => { setActiveUrl(url); if (isMobile) setMobileSidebarOpen(false); };
 
-  const hasStatusChanged = data.status !== order.order_status;
+  const hasStatusChanged = data.order_status !== order.order_status;
 
   const handleUpdateStatus = () => {
     if (!hasStatusChanged) return;
@@ -360,7 +358,7 @@ const OrderDetails = ({ order }) => {
             </div>
 
             <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-              <CustomSelect value={data.status} onChange={(val) => setData("status", val)} options={orderStatusOptions} placeholder="Select status" style={{ minWidth: "160px" }} />
+              <CustomSelect value={data.order_status} onChange={(val) => setData("order_status", val)} options={orderStatusOptions} placeholder="Select status" style={{ minWidth: "160px" }} />
               <button
                 onClick={handleUpdateStatus}
                 disabled={processing || !hasStatusChanged}
