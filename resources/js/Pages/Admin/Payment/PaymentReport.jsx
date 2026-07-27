@@ -441,7 +441,7 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
 
   const methodOptions = [
     { value: "all", label: "All methods" },
-    ...(methodBreakdown || []).map((m) => ({ value: m.method, label: m.method })),
+    ...(methodBreakdown || []).map((m) => ({ value: m.channel, label: m.channel })),
   ];
 
   const statusOptions = [
@@ -705,7 +705,7 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
               />
             </div>
             <Dropdown label="Status" value={localFilters.status} options={statusOptions} onChange={(value) => applyFilters({ status: value })} />
-            <Dropdown label="Method" value={localFilters.method} options={methodOptions} onChange={(value) => applyFilters({ method: value })} />
+            <Dropdown label="Channel" value={localFilters.channel} options={methodOptions} onChange={(value) => applyFilters({ channel: value })} />
           </div>
 
           {/* Chart + breakdown */}
@@ -752,7 +752,7 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${tokens.border}` }}>
-                    {["Transaction", "Customer", "Amount", "Method", "Status", "Date"].map((h) => (
+                    {["Transaction", "Customer", "Amount", "Channel", "Status", "Date"].map((h) => (
                       <th
                         key={h}
                         style={{
@@ -778,12 +778,12 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
                   ) : (
                     transactions.data.map((tx) => (
                       <tr key={tx.id} style={{ borderBottom: `1px solid ${tokens.border}` }}>
-                        <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>{tx.transaction_id}</td>
+                        <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>{tx.reference}</td>
                         <td style={{ padding: "0.75rem 1.5rem", color: tokens.foreground }}>
-                          {tx.user ? `${tx.user.first_name} ${tx.user.last_name}` : "Guest"}
+                          {tx.user ? `${tx.user.name}` : "Guest"}
                         </td>
                         <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>{currency(tx.amount)}</td>
-                        <td style={{ padding: "0.75rem 1.5rem", color: tokens.mutedForeground, textTransform: "capitalize" }}>{tx.method}</td>
+                        <td style={{ padding: "0.75rem 1.5rem", color: tokens.mutedForeground, textTransform: "capitalize" }}>{tx.channel}</td>
                         <td style={{ padding: "0.75rem 1.5rem" }}>
                           <StatusBadge status={tx.status} />
                         </td>

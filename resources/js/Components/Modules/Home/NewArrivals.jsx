@@ -24,58 +24,6 @@ const tokens = {
   radius: "4px",
 };
 
-// ─── Data ────────────────────────────────────────────────────────────────────
-// const products = [
-//   {
-//     id: "1",
-//     name: "Silk Midi Dress",
-//     price: 289,
-//     images: ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80"],
-//     category: "dresses",
-//     isNewArrival: true,
-//   },
-//   {
-//     id: "2",
-//     name: "Cashmere Wrap Coat",
-//     price: 495,
-//     images: ["https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80"],
-//     category: "outerwear",
-//     isNewArrival: true,
-//   },
-//   {
-//     id: "3",
-//     name: "Linen Palazzo Pants",
-//     price: 165,
-//     images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
-//     category: "bottoms",
-//     isNewArrival: true,
-//   },
-//   {
-//     id: "4",
-//     name: "Silk Camisole",
-//     price: 125,
-//     images: ["https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=800&q=80"],
-//     category: "tops",
-//     isNewArrival: true,
-//   },
-//   {
-//     id: "5",
-//     name: "Leather Crossbody Bag",
-//     price: 245,
-//     images: ["https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80"],
-//     category: "accessories",
-//     isNewArrival: true,
-//   },
-//   {
-//     id: "7",
-//     name: "Pleated Maxi Skirt",
-//     price: 195,
-//     images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80"],
-//     category: "bottoms",
-//     isNewArrival: true,
-//   },
-// ];
-
 const getNewArrivals = () => products.filter((p) => p.isNewArrival);
 
 // ─── ProductCard ─────────────────────────────────────────────────────────────
