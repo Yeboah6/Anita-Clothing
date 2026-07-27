@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { router } from "@inertiajs/react";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
 
@@ -101,6 +102,8 @@ const NewArrivalsPage = ({ products = [] }) => {
   const [subscribeBtnHovered, setSubscribeBtnHovered] = useState(false);
   const [breadcrumbHomeHovered, setBreadcrumbHomeHovered] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error', message: string }
 
   useEffect(() => {
     injectFonts();
@@ -119,7 +122,35 @@ const NewArrivalsPage = ({ products = [] }) => {
 
   const handleSubscribe = (e) => {
     e.preventDefault();
-    setEmail("");
+    setSubmitting(true);
+    setFeedback(null);
+
+    router.post(
+      "/newsletter/subscribe",
+      { email },
+      {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: (page) => {
+          const status = page.props.flash?.newsletter_status;
+          setFeedback({
+            type: "success",
+            message:
+              status === "already_subscribed"
+                ? "You're already on the list!"
+                : "Thanks for subscribing!",
+          });
+          setEmail("");
+        },
+        onError: (errors) => {
+          setFeedback({
+            type: "error",
+            message: errors.email || "Something went wrong. Please try again.",
+          });
+        },
+        onFinish: () => setSubmitting(false),
+      }
+    );
   };
 
   return (
@@ -216,6 +247,7 @@ const NewArrivalsPage = ({ products = [] }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={submitting}
                   style={{
                     height: "44px",
                     borderRadius: tokens.radius,
@@ -233,6 +265,7 @@ const NewArrivalsPage = ({ products = [] }) => {
                 />
                 <button
                   type="submit"
+                  disabled={submitting}
                   style={{
                     height: "44px",
                     borderRadius: tokens.radius,
@@ -243,16 +276,27 @@ const NewArrivalsPage = ({ products = [] }) => {
                     fontWeight: 500,
                     fontFamily: tokens.fontBody,
                     color: tokens.background,
-                    cursor: "pointer",
-                    opacity: subscribeBtnHovered ? 0.9 : 1,
+                    cursor: submitting ? "not-allowed" : "pointer",
+                    opacity: submitting ? 0.7 : subscribeBtnHovered ? 0.9 : 1,
                     transition: "opacity 0.2s ease",
                   }}
                   onMouseEnter={() => setSubscribeBtnHovered(true)}
                   onMouseLeave={() => setSubscribeBtnHovered(false)}
                 >
-                  Subscribe
+                  {submitting ? "Subscribing..." : "Subscribe"}
                 </button>
               </form>
+              {feedback && (
+                <p
+                  style={{
+                    marginTop: "0.75rem",
+                    fontSize: "0.8125rem",
+                    color: feedback.type === "success" ? "#16a34a" : "#ef4444",
+                  }}
+                >
+                  {feedback.message}
+                </p>
+              )}
             </div>
           </div>
         </section>

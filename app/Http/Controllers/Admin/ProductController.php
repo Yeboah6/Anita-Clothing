@@ -13,6 +13,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Str;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Jobs\NotifySubscribersOfNewProduct;
 
 class ProductController extends Controller
 {
@@ -94,6 +95,10 @@ class ProductController extends Controller
 
             return $product;
         });
+
+        if ($product->status === 'active') {
+            NotifySubscribersOfNewProduct::dispatch($product)->afterCommit();
+        }
 
         return redirect()
             ->route('admin.products.index')

@@ -348,9 +348,7 @@ const Checkout = () => {
 
   const subtotal = items.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const delivery = 9.99;
-  // const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal + delivery;
+  const total = subtotal;
 
   // Success state
   if (isSubmitted) {
@@ -368,7 +366,7 @@ const Checkout = () => {
               You will receive a confirmation email shortly at {formData.email}.
             </p>
             <p style={{ marginTop: "0.5rem", color: tokens.mutedForeground, fontSize: "0.875rem" }}>
-              Order Total: ${total.toFixed(2)}
+              Order Total: ₵{total.toFixed(2)}
             </p>
             <a
               href="/collections"
@@ -696,7 +694,7 @@ const Checkout = () => {
                       transition: "opacity 0.2s ease",
                     }}
                   >
-                    {isSubmitting ? "Processing..." : `Place Order • $${total.toFixed(2)}`}
+                    {isSubmitting ? "Processing..." : `Place Order • ₵${total.toFixed(2)}`}
                   </button>
                 </form>
               </div>
@@ -749,11 +747,11 @@ const Checkout = () => {
                             {[item.color, item.size].filter(Boolean).join(" / ") || "—"}
                           </p>
                           <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: 0 }}>
-                            Qty: {item.quantity} × ${Number(item.price).toFixed(2)}
+                            Qty: {item.quantity} × ₵{Number(item.price).toFixed(2)}
                           </p>
                         </div>
                         <p style={{ fontWeight: 500, fontSize: "0.875rem", color: tokens.foreground, margin: 0, alignSelf: "center", whiteSpace: "nowrap" }}>
-                          GHS {(Number(item.price) * item.quantity).toFixed(2)}
+                          ₵{(Number(item.price) * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     ))}
@@ -764,35 +762,24 @@ const Checkout = () => {
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
                       <span style={{ color: tokens.mutedForeground }}>Subtotal ({totalItems} items)</span>
-                      <span style={{ color: tokens.foreground }}>${subtotal.toFixed(2)}</span>
+                      <span style={{ color: tokens.foreground }}>₵{subtotal.toFixed(2)}</span>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-                      <span style={{ color: tokens.mutedForeground }}>Delivery</span>
-                      <span style={{ color: delivery === 0 ? tokens.green : tokens.foreground }}>
-                        {`$${delivery.toFixed(2)}`}
-                      </span>
-                    </div>
-                    {/* <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-                      <span style={{ color: tokens.mutedForeground }}>Tax (8%)</span>
-                      <span style={{ color: tokens.foreground }}>${tax.toFixed(2)}</span>
-                    </div> */}
                   </div>
 
                   <hr style={{ margin: "1rem 0", border: "none", borderTop: `1px solid ${tokens.border}` }} />
 
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.125rem", fontWeight: 500 }}>
                     <span style={{ color: tokens.foreground }}>Total</span>
-                    <span style={{ color: tokens.foreground }}>${total.toFixed(2)}</span>
+                    <span style={{ color: tokens.foreground }}>₵{total.toFixed(2)}</span>
                   </div>
 
-                  {/* {delivery === 0 && ( */}
                     <p style={{ 
                       marginTop: "0.5rem", 
                       fontSize: "0.75rem", 
                       color: tokens.green,
                       textAlign: "center" 
                     }}>
-                      🎉 Delivery in Accra is from 100 to 150!
+                      🎉 Delivery in Accra is from 30 to 35!
                     </p>
                     <p style={{ 
                       marginTop: "0.5rem", 
@@ -802,7 +789,6 @@ const Checkout = () => {
                     }}>
                       🎉 Delivery outside Accra is based on station fare!
                     </p>
-                   {/* )} */}
                 </div>
               </div>
             </div>

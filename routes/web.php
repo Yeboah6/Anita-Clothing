@@ -17,6 +17,7 @@ use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\NewsletterController;
 
 
 Route::get('/', [MainController::class, 'index'])->name('home');
@@ -44,9 +45,16 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'storeLogin']);
+
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 Route::get('/forgot-password', [AuthController::class, 'ForgotPassword']);
+
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'store'])->name('newsletter.subscribe');
+Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 Route::middleware('auth')->group(function () {
     // Logout

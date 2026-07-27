@@ -7,7 +7,7 @@
         <title>{{ config('app.name', 'CuteBloom') }}</title>
         <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
-        @routes
+        {{-- @routes --}}
         @viteReactRefresh
         @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
         @inertiaHead

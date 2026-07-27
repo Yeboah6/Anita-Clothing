@@ -88,4 +88,9 @@ class User extends Authenticatable
             ->where('payment_status', 'paid')
             ->sum('total_amount');
     }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+    }
 }

@@ -176,7 +176,7 @@ const ProductCard = ({ product }) => {
       </div>
       <div style={{ marginTop: "1rem" }}>
         <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 500, margin: "0 0 4px", color: hovered ? tokens.mutedForeground : tokens.foreground, transition: "color 0.2s ease" }}>{product.name}</h3>
-        <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0, fontFamily: tokens.fontBody }}>${product.price}</p>
+        <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0, fontFamily: tokens.fontBody }}>₵{product.price}</p>
       </div>
     </a>
   );
@@ -534,35 +534,35 @@ const ProductDetail = ({ product }) => {
 
                 {/* Add to Bag */}
                 <button
-  onClick={handleAddToBag}
-  disabled={(isAuthenticated && !canAdd) || isAddingToCart}
-  style={{
-    width: "100%", height: "48px", fontSize: "0.9375rem", fontWeight: 500,
-    fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none",
-    backgroundColor: tokens.foreground, color: tokens.background,
-    cursor: ((isAuthenticated && !canAdd) || isAddingToCart) ? "not-allowed" : "pointer",
-    opacity: ((isAuthenticated && !canAdd) || isAddingToCart) ? 0.5 : 1,
-    transition: "opacity 0.2s ease",
-    position: "relative",
-  }}
->
-  {isAddingToCart ? (
-    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-      <span style={{
-        width: "16px", height: "16px", border: "2px solid transparent",
-        borderTop: `2px solid ${tokens.background}`, borderRadius: "50%",
-        animation: "spin 0.6s linear infinite", display: "inline-block"
-      }} />
-      Adding...
-    </span>
-  ) : !isAuthenticated ? (
-    "Log In to Add to Bag"
-  ) : !canAdd ? (
-    "Select Options"
-  ) : (
-    `Add to Bag${quantity > 1 ? ` — ${quantity} items` : ''}`
-  )}
-</button>
+                  onClick={handleAddToBag}
+                  disabled={(isAuthenticated && !canAdd) || isAddingToCart}
+                  style={{
+                    width: "100%", height: "48px", fontSize: "0.9375rem", fontWeight: 500,
+                    fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none",
+                    backgroundColor: tokens.foreground, color: tokens.background,
+                    cursor: ((isAuthenticated && !canAdd) || isAddingToCart) ? "not-allowed" : "pointer",
+                    opacity: ((isAuthenticated && !canAdd) || isAddingToCart) ? 0.5 : 1,
+                    transition: "opacity 0.2s ease",
+                    position: "relative",
+                  }}
+                >
+                  {isAddingToCart ? (
+                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                      <span style={{
+                        width: "16px", height: "16px", border: "2px solid transparent",
+                        borderTop: `2px solid ${tokens.background}`, borderRadius: "50%",
+                        animation: "spin 0.6s linear infinite", display: "inline-block"
+                      }} />
+                      Adding...
+                    </span>
+                  ) : !isAuthenticated ? (
+                    "Log In to Add to Bag"
+                  ) : !canAdd ? (
+                    "Select Options"
+                  ) : (
+                    `Add to Bag${quantity > 1 ? ` — ${quantity} items` : ''}`
+                  )}
+                </button>
 
                 {/* Add to Wishlist (secondary, full-width) */}
                 <button
@@ -595,18 +595,18 @@ const ProductDetail = ({ product }) => {
                       : "Add to Wishlist"}
                 </button>
 
-{!canAdd && !isAddingToCart && isAuthenticated && (
-  <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
-    Please select {needsSize && !selectedSize ? "a size" : ""}{needsSize && !selectedSize && needsColor && !selectedColor ? " and " : ""}{needsColor && !selectedColor ? "a color" : ""} to add to bag
-  </p>
-)}
-{!isAuthenticated && !isAddingToCart && (
-  <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
-    <a href={`/login?redirect=${encodeURIComponent(typeof window !== "undefined" ? window.location.pathname : "")}`} style={{ color: tokens.foreground, textDecoration: "underline" }}>
-      Log in
-    </a>{" "}to purchase this item
-  </p>
-)}
+                {!canAdd && !isAddingToCart && isAuthenticated && (
+                  <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
+                    Please select {needsSize && !selectedSize ? "a size" : ""}{needsSize && !selectedSize && needsColor && !selectedColor ? " and " : ""}{needsColor && !selectedColor ? "a color" : ""} to add to bag
+                  </p>
+                )}
+                {!isAuthenticated && !isAddingToCart && (
+                  <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
+                    <a href={`/login?redirect=${encodeURIComponent(typeof window !== "undefined" ? window.location.pathname : "")}`} style={{ color: tokens.foreground, textDecoration: "underline" }}>
+                      Log in
+                    </a>{" "}to purchase this item
+                  </p>
+                )}
               </div>
             </div>
           </div>

@@ -20,7 +20,7 @@ export default function Payment({ order, paystackPublicKey }) {
 
   const handlePay = () => {
     setLoading(true);
-    post(route("checkout.initialize", order.id), {
+    post(`/checkout/${order.id}/pay`, {
       onFinish: () => setLoading(false),
     });
   };
@@ -69,7 +69,7 @@ export default function Payment({ order, paystackPublicKey }) {
           >
             <span style={{ color: tokens.mutedForeground }}>Total</span>
             <span style={{ fontWeight: 600, color: tokens.foreground }}>
-              GHS{Number(order.total_amount).toLocaleString()}
+              ₵{Number(order.total_amount).toLocaleString()}
             </span>
           </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useForm, usePage } from "@inertiajs/react";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
 
@@ -30,29 +31,6 @@ const tokens = {
 };
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
-const IconShoppingBag = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <path d="M16 10a4 4 0 0 1-8 0" />
-  </svg>
-);
-
-const IconMenu = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <line x1="3" y1="12" x2="21" y2="12" />
-    <line x1="3" y1="18" x2="21" y2="18" />
-  </svg>
-);
-
-const IconX = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
 const IconMail = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -77,27 +55,6 @@ const IconCheckCircle = () => (
 const IconLoader = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "spin 1s linear infinite" }}>
     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-  </svg>
-);
-
-const InstagramIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-  </svg>
-);
-
-const FacebookIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
-
-const MailFooterIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="4" width="20" height="16" rx="2" />
-    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
   </svg>
 );
 
@@ -129,14 +86,23 @@ const labelStyle = {
 // ─── Forgot Password Page ────────────────────────────────────────────────────
 const ForgotPassword = () => {
   const [isDesktop, setIsDesktop] = useState(false);
-  const [email, setEmail] = useState("");
-  const [touched, setTouched] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [sendBtnHovered, setSendBtnHovered] = useState(false);
   const [backHovered, setBackHovered] = useState(false);
   const [resendBtnHovered, setResendBtnHovered] = useState(false);
   const [tryAnotherBtnHovered, setTryAnotherBtnHovered] = useState(false);
+
+  // Tracks whether we've shown the success screen for the current submission.
+  // Needed because Inertia's `wasSuccessful` stays true across re-renders
+  // (e.g. after a resend), so we drive the view off local state instead,
+  // set only inside onSuccess.
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+
+  const { data, setData, post, processing, errors, clearErrors } = useForm({
+    email: "",
+  });
+
+  const { status } = usePage().props;
 
   useEffect(() => {
     injectFonts();
@@ -147,39 +113,30 @@ const ForgotPassword = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const error = touched && !email.trim()
-    ? "Email is required"
-    : touched && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-      ? "Please enter a valid email"
-      : "";
-
-  const isValid = email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    setTouched(true);
 
-    if (isValid) {
-      setIsSubmitting(true);
-      // Simulate API call
-      setTimeout(() => {
-        setIsSubmitting(false);
+    post("/forgot-password", {
+      preserveScroll: true,
+      onSuccess: () => {
+        setSubmittedEmail(data.email);
         setIsSubmitted(true);
-      }, 1500);
-    }
+      },
+    });
   };
 
   const handleResend = () => {
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-    }, 1500);
+    post("/forgot-password", {
+      preserveScroll: true,
+      data: { email: submittedEmail },
+    });
   };
 
   const handleTryAnother = () => {
     setIsSubmitted(false);
-    setEmail("");
-    setTouched(false);
+    setSubmittedEmail("");
+    setData("email", "");
+    clearErrors();
   };
 
   // Success state
@@ -196,14 +153,14 @@ const ForgotPassword = () => {
               Check your email
             </h1>
             <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0, lineHeight: 1.6 }}>
-              We've sent a password reset link to <strong style={{ color: tokens.foreground }}>{email}</strong>. 
+              We've sent a password reset link to <strong style={{ color: tokens.foreground }}>{submittedEmail}</strong>.
               Please check your inbox and follow the instructions.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "2rem" }}>
               <button
                 onClick={handleResend}
-                disabled={isSubmitting}
+                disabled={processing}
                 style={{
                   width: "100%",
                   height: "44px",
@@ -214,14 +171,14 @@ const ForgotPassword = () => {
                   border: "none",
                   backgroundColor: tokens.foreground,
                   color: tokens.background,
-                  cursor: isSubmitting ? "not-allowed" : "pointer",
-                  opacity: isSubmitting ? 0.7 : resendBtnHovered ? 0.9 : 1,
+                  cursor: processing ? "not-allowed" : "pointer",
+                  opacity: processing ? 0.7 : resendBtnHovered ? 0.9 : 1,
                   transition: "opacity 0.2s ease",
                 }}
                 onMouseEnter={() => setResendBtnHovered(true)}
                 onMouseLeave={() => setResendBtnHovered(false)}
               >
-                {isSubmitting ? "Sending..." : "Resend email"}
+                {processing ? "Sending..." : "Resend email"}
               </button>
               <button
                 onClick={handleTryAnother}
@@ -297,6 +254,13 @@ const ForgotPassword = () => {
             </p>
           </div>
 
+          {/* Flash status from the server (e.g. rate-limit throttle message) */}
+          {status && (
+            <p style={{ fontSize: "0.8125rem", color: tokens.foreground, backgroundColor: tokens.secondary, padding: "0.75rem 1rem", borderRadius: tokens.radius, marginBottom: "1rem", lineHeight: 1.5 }}>
+              {status}
+            </p>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div>
@@ -304,34 +268,30 @@ const ForgotPassword = () => {
               <input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setTouched(true);
-                }}
-                onBlur={() => setTouched(true)}
+                value={data.email}
+                onChange={(e) => setData("email", e.target.value)}
                 placeholder="your@email.com"
                 autoComplete="email"
                 autoFocus
                 style={{
                   ...inputStyle,
-                  borderColor: error ? tokens.destructive : tokens.border,
+                  borderColor: errors.email ? tokens.destructive : tokens.border,
                 }}
                 onFocus={(e) => {
-                  if (!error) e.target.style.borderColor = tokens.foreground;
+                  if (!errors.email) e.target.style.borderColor = tokens.foreground;
                 }}
                 onBlur={(e) => {
-                  if (!error) e.target.style.borderColor = tokens.border;
+                  if (!errors.email) e.target.style.borderColor = tokens.border;
                 }}
               />
-              {error && (
-                <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{error}</p>
+              {errors.email && (
+                <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.email}</p>
               )}
             </div>
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={processing}
               style={{
                 width: "100%",
                 height: "48px",
@@ -343,8 +303,8 @@ const ForgotPassword = () => {
                 border: "none",
                 backgroundColor: tokens.foreground,
                 color: tokens.background,
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-                opacity: isSubmitting ? 0.7 : sendBtnHovered ? 0.9 : 1,
+                cursor: processing ? "not-allowed" : "pointer",
+                opacity: processing ? 0.7 : sendBtnHovered ? 0.9 : 1,
                 transition: "opacity 0.2s ease",
                 display: "flex",
                 alignItems: "center",
@@ -354,7 +314,7 @@ const ForgotPassword = () => {
               onMouseEnter={() => setSendBtnHovered(true)}
               onMouseLeave={() => setSendBtnHovered(false)}
             >
-              {isSubmitting ? (
+              {processing ? (
                 <>
                   <IconLoader />
                   Sending...

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { router, usePage } from "@inertiajs/react";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -34,9 +35,20 @@ const InstagramIcon = () => (
   </svg>
 );
 
-const FacebookIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+const TikTokIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M14 3v10.5a3.5 3.5 0 1 1-3.5-3.5" />
+    <path d="M14 3c1 2 3 4 6 4" />
   </svg>
 );
 
@@ -79,6 +91,8 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const [btnHovered, setBtnHovered] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
   useEffect(() => {
     injectFonts();
@@ -94,8 +108,35 @@ const Footer = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Newsletter signup:", email);
-    setEmail("");
+    setSubmitting(true);
+    setFeedback(null);
+
+    router.post(
+      "/newsletter/subscribe",
+      { email },
+      {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: (page) => {
+          const status = page.props.flash?.newsletter_status;
+          setFeedback({
+            type: "success",
+            message:
+              status === "already_subscribed"
+                ? "You're already on the list!"
+                : "Thanks for subscribing!",
+          });
+          setEmail("");
+        },
+        onError: (errors) => {
+          setFeedback({
+            type: "error",
+            message: errors.email || "Something went wrong. Please try again.",
+          });
+        },
+        onFinish: () => setSubmitting(false),
+      }
+    );
   };
 
   return (
@@ -191,8 +232,8 @@ const Footer = () => {
                 color: tokens.mutedForeground,
               }}
             >
-              <HoverLink href="mailto:hello@anitaclothing.com" ariaLabel="Email">
-                hello@anitaclothing.com
+              <HoverLink href="mailto:serwaaakoto392@gmail.com" ariaLabel="Email">
+                serwaaakoto392@gmail.com
               </HoverLink>
               <HoverLink href="tel:+233 27 722 3535" ariaLabel="Email">
                 +233 27 722 3535
@@ -200,7 +241,7 @@ const Footer = () => {
             </div>
             <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
               <HoverLink
-                href="https://instagram.com"
+                href="https://instagram.com/ser_nita21"
                 target="_blank"
                 rel="noopener noreferrer"
                 ariaLabel="Instagram"
@@ -208,15 +249,12 @@ const Footer = () => {
                 <InstagramIcon />
               </HoverLink>
               <HoverLink
-                href="https://facebook.com"
+                href="https://tiktok.com/@cutebloom"
                 target="_blank"
                 rel="noopener noreferrer"
-                ariaLabel="Facebook"
+                ariaLabel="TikTok"
               >
-                <FacebookIcon />
-              </HoverLink>
-              <HoverLink href="mailto:hello@anitaclothing.com" ariaLabel="Email">
-                <MailIcon />
+                <TikTokIcon />
               </HoverLink>
             </div>
           </div>
@@ -251,6 +289,7 @@ const Footer = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={submitting}
                 style={{
                   flex: 1,
                   padding: "0.5rem 0.75rem",
@@ -268,6 +307,7 @@ const Footer = () => {
               />
               <button
                 type="submit"
+                disabled={submitting}
                 style={{
                   padding: "0.5rem 1rem",
                   fontSize: "0.875rem",
@@ -277,16 +317,28 @@ const Footer = () => {
                   color: "#ffffff",
                   border: "none",
                   borderRadius: tokens.radius,
-                  cursor: "pointer",
-                  opacity: btnHovered ? 0.9 : 1,
+                  cursor: submitting ? "not-allowed" : "pointer",
+                  opacity: submitting ? 0.7 : btnHovered ? 0.9 : 1,
                   transition: "opacity 0.2s ease",
+                  whiteSpace: "nowrap",
                 }}
                 onMouseEnter={() => setBtnHovered(true)}
                 onMouseLeave={() => setBtnHovered(false)}
               >
-                Join
+                {submitting ? "Joining..." : "Join"}
               </button>
             </form>
+            {feedback && (
+              <p
+                style={{
+                  fontSize: "0.8125rem",
+                  margin: 0,
+                  color: feedback.type === "success" ? "#16a34a" : "#ef4444",
+                }}
+              >
+                {feedback.message}
+              </p>
+            )}
           </div>
         </div>
 

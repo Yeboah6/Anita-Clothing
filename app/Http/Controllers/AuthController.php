@@ -13,6 +13,10 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use App\Mail\WelcomeMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AuthController extends Controller
 {
@@ -34,6 +38,8 @@ class AuthController extends Controller
         ]);
 
         event(new Registered($user));
+
+        Mail::to($user->email)->send(new WelcomeMail($user));
 
         Auth::login($user);
 
@@ -71,8 +77,48 @@ class AuthController extends Controller
         return redirect('/login')->with('success', 'You have been logged out.');
     }
 
-
     public function ForgotPassword() {
         return inertia('Auth/ForgotPassword');
     }
+
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        // Respond the same way regardless of outcome — don't leak whether an email is registered
+        return back()->with('status', __($status));
+    }
+
+    public function showResetPasswordForm(Request $request, string $token)
+    {
+        return inertia('Auth/ResetPassword', [
+            'token' => $token,
+            'email' => $request->query('email', ''),
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token'    => 'required',
+            'email'    => 'required|email',
+            'password' => ['required', 'confirmed', PasswordRule::min(8)],
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill(['password' => Hash::make($password)])->save();
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('success', 'Password reset. Please sign in.');
+        }
+
+        throw ValidationException::withMessages(['email' => [__($status)]]);
+    }
+    
 }

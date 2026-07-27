@@ -142,7 +142,7 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
               {[item.size, item.color].filter(Boolean).join(" / ") || "—"}
             </p>
             <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, margin: "0.25rem 0 0" }}>
-              ${Number(item.price).toFixed(2)} each
+              ₵{Number(item.price).toFixed(2)} each
             </p>
           </div>
           <button
@@ -231,7 +231,7 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
             color: tokens.foreground,
             margin: 0
           }}>
-            ${lineTotal}
+            ₵{lineTotal}
           </p>
         </div>
       </div>
@@ -556,7 +556,7 @@ const Cart = () => {
                     color: tokens.mutedForeground
                   }}>
                     <span>Subtotal ({totalItems} items)</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>₵{subtotal.toFixed(2)}</span>
                   </div>
 
                   <div style={{
@@ -567,15 +567,6 @@ const Cart = () => {
                     <span>Delivery fee</span>
                     <span>Calculated at checkout</span>
                   </div>
-
-                  {/* <div style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    color: tokens.mutedForeground
-                  }}>
-                    <span>Tax</span>
-                    <span>Calculated at checkout</span>
-                  </div> */}
 
                   <hr style={{
                     border: "none",
@@ -591,7 +582,7 @@ const Cart = () => {
                     color: tokens.foreground
                   }}>
                     <span>Estimated Total</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>₵{subtotal.toFixed(2)}</span>
                   </div>
                 </div>
 
