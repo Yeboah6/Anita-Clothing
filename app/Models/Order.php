@@ -45,6 +45,11 @@ class Order extends Model
         return $this->hasOne(Payment::class, 'order_id');
     }
 
+    public function address()
+    {
+        return $this->belongsTo(Address::class);
+    }
+
     public function getFormattedTotalAttribute(): string
     {
         return '$' . number_format($this->total_amount, 2);

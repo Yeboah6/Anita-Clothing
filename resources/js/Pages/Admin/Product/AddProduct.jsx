@@ -653,7 +653,7 @@ const AddProduct = ({ categories }) => {
                     {/* Price & Discount */}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
                       <div>
-                        <label htmlFor="price" style={labelStyle}>Price ($) *</label>
+                        <label htmlFor="price" style={labelStyle}>Price (₵) *</label>
                         <input
                           id="price" type="number" step="0.01" min="0"
                           value={data.price} onChange={handleChange("price")} onBlur={handleBlur("price")}
@@ -664,7 +664,7 @@ const AddProduct = ({ categories }) => {
                         {fieldError("price") && <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{fieldError("price")}</p>}
                       </div>
                       <div>
-                        <label htmlFor="discount_amount" style={labelStyle}>Discount ($)</label>
+                        <label htmlFor="discount_amount" style={labelStyle}>Discount (₵)</label>
                         <input
                           id="discount_amount" type="number" step="0.01" min="0"
                           value={data.discount_amount} onChange={handleChange("discount_amount")}

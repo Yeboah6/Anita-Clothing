@@ -11,27 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('address_id')
-              ->nullable()
-              ->constrained('addresses')
-              ->onDelete('set null');
-            $table->string('order_number')->unique();
-            $table->string('email');
-            $table->string('phone');
+            $table->string('label')->nullable(); // e.g. "Home", "Work"
             $table->string('first_name');
             $table->string('last_name');
+            $table->string('phone');
             $table->string('address');
             $table->string('apartment')->nullable();
             $table->string('city');
             $table->string('state');
             $table->string('zip');
-            $table->text('notes')->nullable();
-            $table->decimal('subtotal', 10, 2);
-            $table->decimal('total_amount', 10, 2);
-            $table->string('order_status')->default('pending');
+            $table->string('country')->default('Ghana');
+            $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
     }
@@ -41,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('addresses');
     }
 };

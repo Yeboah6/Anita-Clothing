@@ -1,6 +1,6 @@
 // ─── AccountSidebar.jsx ──────────────────────────────────────────────────────
 import React, { useState } from "react";
-import { useForm } from "@inertiajs/react";
+import { Link, useForm } from "@inertiajs/react";
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const tokens = {
@@ -57,24 +57,19 @@ const accountNavItems = [
   { to: "/account/profile", label: "Profile", icon: IconUser, end: true },
   { to: "/account/orders", label: "Orders", icon: IconShoppingBag },
   { to: "/account/wishlist", label: "Wishlist", icon: IconHeart },
-  { to: "/account/addresses", label: "Addresses & Payment", icon: IconMapPin },
+  { to: "/account/addresses", label: "Addresses", icon: IconMapPin },
 ];
 
 // ─── NavLink Component ───────────────────────────────────────────────────────
-const AccountNavLink = ({ href, isActive, icon: Icon, label, onClick }) => {
+// Uses Inertia's <Link> so clicking actually triggers a real Inertia visit
+// (fetches new page props and re-renders) instead of just updating the URL bar.
+const AccountNavLink = ({ href, isActive, icon: Icon, label }) => {
   const [hovered, setHovered] = useState(false);
 
-  const handleClick = (e) => {
-    if (onClick) {
-      e.preventDefault();
-      onClick(href);
-    }
-  };
-
   return (
-    <a
+    <Link
       href={href}
-      onClick={handleClick}
+      preserveScroll
       style={{
         display: "flex",
         alignItems: "center",
@@ -103,7 +98,7 @@ const AccountNavLink = ({ href, isActive, icon: Icon, label, onClick }) => {
         <Icon />
       </span>
       <span className="account-sidebar-label">{label}</span>
-    </a>
+    </Link>
   );
 };
 
@@ -158,9 +153,12 @@ const LogoutButton = () => {
 };
 
 // ─── AccountSidebar Component ────────────────────────────────────────────────
+// `activePath` is still accepted for highlighting the current nav item.
+// `onNavigate` is no longer needed for navigation itself (Link handles that),
+// but is accepted for backwards compatibility in case a parent page still
+// wants to know when navigation happens (e.g. to close a mobile menu).
 const AccountSidebar = ({
   activePath = "/account",
-  onNavigate,
   showSignOut = true,
   className = "",
 }) => {
@@ -191,7 +189,6 @@ const AccountSidebar = ({
             isActive={checkIsActive(item)}
             icon={item.icon}
             label={item.label}
-            onClick={onNavigate}
           />
         ))}
 

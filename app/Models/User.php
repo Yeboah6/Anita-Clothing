@@ -67,6 +67,16 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+    
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active';

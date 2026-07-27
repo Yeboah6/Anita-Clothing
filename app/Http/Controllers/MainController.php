@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Wishlist;
 use Inertia\Inertia;
 
 class MainController extends Controller
@@ -98,6 +99,27 @@ class MainController extends Controller
         return inertia('ProductDetail', [
             'product' => $this->formatProductDetail($product),
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate(['product_id' => 'required|exists:products,id']);
+
+        Wishlist::firstOrCreate([
+            'user_id' => $request->user()->id,
+            'product_id' => $request->product_id,
+        ]);
+
+        return response()->json(['status' => 'added']);
+    }
+
+    public function destroy(Request $request, $productId)
+    {
+        Wishlist::where('user_id', $request->user()->id)
+            ->where('product_id', $productId)
+            ->delete();
+
+        return response()->json(['status' => 'removed']);
     }
 
     public function category(string $slug)

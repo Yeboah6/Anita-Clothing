@@ -177,10 +177,10 @@ const ProductRow = ({ product, onDelete }) => {
         {product.category}
       </td>
       <td style={{ padding: "0.75rem 1.5rem", color: tokens.foreground }}>
-        ${Number(product.price).toFixed(2)}
+        ₵{Number(product.price).toFixed(2)}
         {product.discount_amount > 0 && (
           <span style={{ marginLeft: "0.375rem", fontSize: "0.75rem", color: tokens.mutedForeground, textDecoration: "line-through" }}>
-            ${(Number(product.price) - Number(product.discount_amount)).toFixed(2)}
+            ₵{(Number(product.price) - Number(product.discount_amount)).toFixed(2)}
           </span>
         )}
       </td>

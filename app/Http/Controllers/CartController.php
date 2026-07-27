@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Order;
+use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -107,6 +108,11 @@ class CartController extends Controller
                 'email' => $user->email ?? '',
                 'phone' => $user->phone ?? $user->mobile ?? $user->contact_number ?? '',
             ];
+
+            $addresses = Address::where('user_id', $user->id)
+                ->orderByDesc('is_default')
+                ->orderByDesc('created_at')
+                ->get();
     
             // Get cart items with product details
             $cartItems = Cart::where('user_id', $user->id)
@@ -166,6 +172,7 @@ class CartController extends Controller
                 'total' => round($subtotal, 2),
             ],
             'userInfo' => $userInfo,
+            'addresses' => $addresses,
         ]);
     }
 

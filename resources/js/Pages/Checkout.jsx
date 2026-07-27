@@ -45,6 +45,20 @@ const CheckCircle2 = ({ size = 64, color = tokens.green }) => (
   </svg>
 );
 
+const IconMapPin = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
+const IconPlus = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
 // ─── Form Input Styles ───────────────────────────────────────────────────────
 const inputStyle = {
   height: "44px",
@@ -70,14 +84,109 @@ const labelStyle = {
   display: "block",
 };
 
+// Helper: build the flat formData shape this page uses from an Address row
+const addressToFormFields = (addr) => ({
+  firstName: addr.first_name || "",
+  lastName: addr.last_name || "",
+  phone: addr.phone || "",
+  address: addr.address || "",
+  apartment: addr.apartment || "",
+  city: addr.city || "",
+  state: addr.state || "",
+  zip: addr.zip || "",
+});
+
+const getDefaultAddress = (addresses) =>
+  addresses.find((a) => a.is_default) || addresses[0] || null;
+
+// ─── Saved Address Card ───────────────────────────────────────────────────────
+const SavedAddressOption = ({ addr, selected, onSelect }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(addr.id)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "0.75rem",
+        width: "100%",
+        textAlign: "left",
+        padding: "1rem",
+        borderRadius: tokens.radius,
+        border: `1px solid ${selected ? tokens.foreground : tokens.border}`,
+        backgroundColor: selected ? tokens.secondary : hovered ? "rgba(245,245,245,0.5)" : tokens.background,
+        cursor: "pointer",
+        transition: "border-color 0.15s ease, background-color 0.15s ease",
+      }}
+    >
+      <span
+        style={{
+          marginTop: "2px",
+          width: "16px",
+          height: "16px",
+          flexShrink: 0,
+          borderRadius: "50%",
+          border: `1.5px solid ${selected ? tokens.foreground : tokens.border}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {selected && (
+          <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: tokens.foreground }} />
+        )}
+      </span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+          <span style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground }}>
+            {addr.label || "Address"}
+          </span>
+          {addr.is_default && (
+            <span
+              style={{
+                display: "inline-block",
+                padding: "0.0625rem 0.4375rem",
+                borderRadius: "9999px",
+                fontSize: "0.625rem",
+                fontWeight: 500,
+                backgroundColor: tokens.background,
+                color: tokens.foreground,
+                border: `1px solid ${tokens.border}`,
+              }}
+            >
+              Default
+            </span>
+          )}
+        </span>
+        <span style={{ display: "block", fontSize: "0.8125rem", color: tokens.mutedForeground, lineHeight: 1.5 }}>
+          {[addr.first_name, addr.last_name].filter(Boolean).join(" ")}
+          <br />
+          {addr.address}{addr.apartment ? `, ${addr.apartment}` : ""}
+          <br />
+          {addr.city}, {addr.state} {addr.zip}
+        </span>
+      </span>
+    </button>
+  );
+};
+
 // ─── Checkout Page ───────────────────────────────────────────────────────────
 const Checkout = () => {
-  const { serverCart, userInfo } = usePage().props;
+  const { serverCart, userInfo, addresses = [] } = usePage().props;
   const [items, setItems] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Which saved address is active — an address id, or "new" for manual entry
+  const initialDefaultAddress = getDefaultAddress(addresses);
+  const [selectedAddressId, setSelectedAddressId] = useState(
+    initialDefaultAddress ? initialDefaultAddress.id : "new"
+  );
 
   const [formData, setFormData] = useState({
     email: userInfo?.email || "",
@@ -90,6 +199,7 @@ const Checkout = () => {
     state: "",
     zip: "",
     notes: "",
+    ...(initialDefaultAddress ? addressToFormFields(initialDefaultAddress) : {}),
   });
 
   // Initialize cart from server data
@@ -123,6 +233,38 @@ const Checkout = () => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }));
     }
+  };
+
+  // Selecting a saved address fills the delivery fields; selecting "new"
+  // clears them for manual entry.
+  const handleSelectAddress = (id) => {
+    setSelectedAddressId(id);
+    setErrors({});
+
+    if (id === "new") {
+      setFormData((prev) => ({
+        ...prev,
+        firstName: userInfo?.first_name || "",
+        lastName: userInfo?.last_name || "",
+        address: "",
+        apartment: "",
+        city: "",
+        state: "",
+        zip: "",
+      }));
+      return;
+    }
+
+    const addr = addresses.find((a) => a.id === id);
+    if (!addr) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      ...addressToFormFields(addr),
+      // Keep whatever email/phone the user already has unless the address
+      // has its own phone on file.
+      phone: addr.phone || prev.phone,
+    }));
   };
 
   const validateForm = () => {
@@ -174,6 +316,7 @@ const Checkout = () => {
   try {
     const response = await axios.post('/checkout', {
       ...formData,
+      address_id: selectedAddressId !== "new" ? selectedAddressId : null,
       items: items.map(item => ({
         product_id: item.product_id,
         size: item.size,
@@ -185,7 +328,7 @@ const Checkout = () => {
 
     if (response.data?.redirect) {
       window.location.href = response.data.redirect;
-      return; // stop here — page is navigating away
+      return;
     }
 
     // Fallback in case redirect is ever missing
@@ -280,6 +423,8 @@ const Checkout = () => {
     );
   }
 
+  const showManualFields = selectedAddressId === "new" || addresses.length === 0;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
       <Header />
@@ -362,107 +507,159 @@ const Checkout = () => {
 
                   {/* Delivery Address */}
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <h2 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>
-                      Delivery Address
-                    </h2>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                      <div>
-                        <label htmlFor="firstName" style={labelStyle}>First Name *</label>
-                        <input 
-                          id="firstName" value={formData.firstName} onChange={handleInputChange("firstName")} 
-                          style={{
-                            ...inputStyle,
-                            borderColor: errors.firstName ? tokens.destructive : tokens.border,
-                          }}
-                          onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
-                          onBlur={(e) => (e.target.style.borderColor = errors.firstName ? tokens.destructive : tokens.border)}
-                        />
-                        {errors.firstName && (
-                          <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.firstName}</p>
-                        )}
-                      </div>
-                      <div>
-                        <label htmlFor="lastName" style={labelStyle}>Last Name *</label>
-                        <input 
-                          id="lastName" value={formData.lastName} onChange={handleInputChange("lastName")} 
-                          style={{
-                            ...inputStyle,
-                            borderColor: errors.lastName ? tokens.destructive : tokens.border,
-                          }}
-                          onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
-                          onBlur={(e) => (e.target.style.borderColor = errors.lastName ? tokens.destructive : tokens.border)}
-                        />
-                        {errors.lastName && (
-                          <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.lastName}</p>
-                        )}
-                      </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <h2 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>
+                        Delivery Address
+                      </h2>
                     </div>
-                    <div>
-                      <label htmlFor="address" style={labelStyle}>Address *</label>
-                      <input 
-                        id="address" placeholder="Street address" value={formData.address} onChange={handleInputChange("address")} 
-                        style={{
-                          ...inputStyle,
-                          borderColor: errors.address ? tokens.destructive : tokens.border,
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
-                        onBlur={(e) => (e.target.style.borderColor = errors.address ? tokens.destructive : tokens.border)}
-                      />
-                      {errors.address && (
-                        <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.address}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label htmlFor="apartment" style={labelStyle}>Apartment, suite, etc. (optional)</label>
-                      <input id="apartment" placeholder="Apt 4B" value={formData.apartment} onChange={handleInputChange("apartment")} style={inputStyle} onFocus={(e) => (e.target.style.borderColor = tokens.foreground)} onBlur={(e) => (e.target.style.borderColor = tokens.border)} />
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
-                      <div>
-                        <label htmlFor="city" style={labelStyle}>City *</label>
-                        <input 
-                          id="city" value={formData.city} onChange={handleInputChange("city")} 
+
+                    {/* Saved address picker */}
+                    {addresses.length > 0 && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                        {addresses.map((addr) => (
+                          <SavedAddressOption
+                            key={addr.id}
+                            addr={addr}
+                            selected={selectedAddressId === addr.id}
+                            onSelect={handleSelectAddress}
+                          />
+                        ))}
+
+                        <button
+                          type="button"
+                          onClick={() => handleSelectAddress("new")}
                           style={{
-                            ...inputStyle,
-                            borderColor: errors.city ? tokens.destructive : tokens.border,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            padding: "0.75rem 1rem",
+                            fontSize: "0.8125rem",
+                            fontWeight: 500,
+                            fontFamily: tokens.fontBody,
+                            borderRadius: tokens.radius,
+                            border: `1px dashed ${selectedAddressId === "new" ? tokens.foreground : tokens.border}`,
+                            backgroundColor: selectedAddressId === "new" ? tokens.secondary : "transparent",
+                            color: tokens.foreground,
+                            cursor: "pointer",
+                            transition: "background-color 0.15s ease, border-color 0.15s ease",
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
-                          onBlur={(e) => (e.target.style.borderColor = errors.city ? tokens.destructive : tokens.border)}
-                        />
-                        {errors.city && (
-                          <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.city}</p>
-                        )}
+                        >
+                          <IconPlus />
+                          Use a different address
+                        </button>
                       </div>
-                      <div>
-                        <label htmlFor="state" style={labelStyle}>State *</label>
-                        <input 
-                          id="state" value={formData.state} onChange={handleInputChange("state")} 
-                          style={{
-                            ...inputStyle,
-                            borderColor: errors.state ? tokens.destructive : tokens.border,
-                          }}
-                          onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
-                          onBlur={(e) => (e.target.style.borderColor = errors.state ? tokens.destructive : tokens.border)}
-                        />
-                        {errors.state && (
-                          <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.state}</p>
+                    )}
+
+                    {/* Manual entry fields — shown when there are no saved
+                        addresses, or "Use a different address" is selected */}
+                    {showManualFields && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                        {addresses.length > 0 && (
+                          <p style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
+                            <IconMapPin />
+                            Enter a new delivery address below
+                          </p>
                         )}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                          <div>
+                            <label htmlFor="firstName" style={labelStyle}>First Name *</label>
+                            <input 
+                              id="firstName" value={formData.firstName} onChange={handleInputChange("firstName")} 
+                              style={{
+                                ...inputStyle,
+                                borderColor: errors.firstName ? tokens.destructive : tokens.border,
+                              }}
+                              onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
+                              onBlur={(e) => (e.target.style.borderColor = errors.firstName ? tokens.destructive : tokens.border)}
+                            />
+                            {errors.firstName && (
+                              <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.firstName}</p>
+                            )}
+                          </div>
+                          <div>
+                            <label htmlFor="lastName" style={labelStyle}>Last Name *</label>
+                            <input 
+                              id="lastName" value={formData.lastName} onChange={handleInputChange("lastName")} 
+                              style={{
+                                ...inputStyle,
+                                borderColor: errors.lastName ? tokens.destructive : tokens.border,
+                              }}
+                              onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
+                              onBlur={(e) => (e.target.style.borderColor = errors.lastName ? tokens.destructive : tokens.border)}
+                            />
+                            {errors.lastName && (
+                              <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.lastName}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label htmlFor="address" style={labelStyle}>Address *</label>
+                          <input 
+                            id="address" placeholder="Street address" value={formData.address} onChange={handleInputChange("address")} 
+                            style={{
+                              ...inputStyle,
+                              borderColor: errors.address ? tokens.destructive : tokens.border,
+                            }}
+                            onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
+                            onBlur={(e) => (e.target.style.borderColor = errors.address ? tokens.destructive : tokens.border)}
+                          />
+                          {errors.address && (
+                            <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.address}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label htmlFor="apartment" style={labelStyle}>Apartment, suite, etc. (optional)</label>
+                          <input id="apartment" placeholder="Apt 4B" value={formData.apartment} onChange={handleInputChange("apartment")} style={inputStyle} onFocus={(e) => (e.target.style.borderColor = tokens.foreground)} onBlur={(e) => (e.target.style.borderColor = tokens.border)} />
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+                          <div>
+                            <label htmlFor="city" style={labelStyle}>City *</label>
+                            <input 
+                              id="city" value={formData.city} onChange={handleInputChange("city")} 
+                              style={{
+                                ...inputStyle,
+                                borderColor: errors.city ? tokens.destructive : tokens.border,
+                              }}
+                              onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
+                              onBlur={(e) => (e.target.style.borderColor = errors.city ? tokens.destructive : tokens.border)}
+                            />
+                            {errors.city && (
+                              <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.city}</p>
+                            )}
+                          </div>
+                          <div>
+                            <label htmlFor="state" style={labelStyle}>State *</label>
+                            <input 
+                              id="state" value={formData.state} onChange={handleInputChange("state")} 
+                              style={{
+                                ...inputStyle,
+                                borderColor: errors.state ? tokens.destructive : tokens.border,
+                              }}
+                              onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
+                              onBlur={(e) => (e.target.style.borderColor = errors.state ? tokens.destructive : tokens.border)}
+                            />
+                            {errors.state && (
+                              <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.state}</p>
+                            )}
+                          </div>
+                          <div>
+                            <label htmlFor="zip" style={labelStyle}>ZIP Code *</label>
+                            <input 
+                              id="zip" value={formData.zip} onChange={handleInputChange("zip")} 
+                              style={{
+                                ...inputStyle,
+                                borderColor: errors.zip ? tokens.destructive : tokens.border,
+                              }}
+                              onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
+                              onBlur={(e) => (e.target.style.borderColor = errors.zip ? tokens.destructive : tokens.border)}
+                            />
+                            {errors.zip && (
+                              <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.zip}</p>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <label htmlFor="zip" style={labelStyle}>ZIP Code *</label>
-                        <input 
-                          id="zip" value={formData.zip} onChange={handleInputChange("zip")} 
-                          style={{
-                            ...inputStyle,
-                            borderColor: errors.zip ? tokens.destructive : tokens.border,
-                          }}
-                          onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
-                          onBlur={(e) => (e.target.style.borderColor = errors.zip ? tokens.destructive : tokens.border)}
-                        />
-                        {errors.zip && (
-                          <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.zip}</p>
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Order Notes */}

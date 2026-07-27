@@ -47,7 +47,7 @@ const salesData = [
 
 
 const stats = [
-  { label: "Total Revenue", value: "$108,000", change: "+12.4%", trend: "up" },
+  { label: "Total Revenue", value: "₵108,000", change: "+12.4%", trend: "up" },
   { label: "Orders", value: "1,284", change: "+8.2%", trend: "up" },
   { label: "Customers", value: "742", change: "+3.1%", trend: "up" },
   { label: "Products", value: "124", change: "-2", trend: "down" },

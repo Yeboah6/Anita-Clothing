@@ -236,7 +236,7 @@ const CustomSelect = ({ value, onChange, options, placeholder, style }) => {
 const cardStyle = { backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius };
 const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: `1px solid ${tokens.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" };
 const cardTitleStyle = { display: "flex", alignItems: "center", gap: "0.5rem", fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 500, margin: 0, color: tokens.foreground };
-const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
+const money = (n) => `₵${(Number(n) || 0).toFixed(2)}`;
 const formatDate = (d) => {
   if (!d) return "—";
   const date = new Date(d);
@@ -246,17 +246,6 @@ const formatDate = (d) => {
 };
 
 // ─── OrderDetails Page ─────────────────────────────────────────────────────────
-// Expects Inertia props:
-//   order: {
-//     id, order_number, status, payment_status, payment_method,
-//     created_at, subtotal, discount_amount, shipping_fee, total,
-//     customer: { name, email, phone },
-//     shipping_address: { line1, line2, city, region, postal_code, country },
-//     billing_address: { line1, line2, city, region, postal_code, country }, // optional
-//     items: [{ id, product_name, image, size, color, quantity, price, line_total }],
-//     notes, // optional
-//     timeline: [{ status, label, timestamp }], // optional order history
-//   }
 const OrderDetails = ({ order }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);

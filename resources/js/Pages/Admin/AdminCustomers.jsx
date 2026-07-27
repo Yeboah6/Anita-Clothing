@@ -338,13 +338,13 @@ const AdminCustomers = () => {
             <div style={{ padding: "1rem", backgroundColor: tokens.secondary, borderRadius: tokens.radius }}>
               <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: "0 0 0.25rem" }}>Total Revenue</p>
               <p style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>
-                ${customerStats.totalRevenue.toLocaleString()}
+                ₵{customerStats.totalRevenue.toLocaleString()}
               </p>
             </div>
             <div style={{ padding: "1rem", backgroundColor: tokens.secondary, borderRadius: tokens.radius }}>
               <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: "0 0 0.25rem" }}>Average Order Value</p>
               <p style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>
-                ${customerStats.averageOrderValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ₵{customerStats.averageOrderValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           </div>
@@ -452,7 +452,7 @@ const AdminCustomers = () => {
                             {customer.orders}
                           </td>
                           <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>
-                            ${customer.spent.toLocaleString()}
+                            ₵{customer.spent.toLocaleString()}
                           </td>
                           <td style={{ padding: "0.75rem 1.5rem" }}>
                             <span

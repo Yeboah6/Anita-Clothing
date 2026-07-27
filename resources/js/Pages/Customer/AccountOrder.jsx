@@ -163,7 +163,7 @@ const OrderCard = ({ order, isDesktop }) => {
             <p style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", color: tokens.mutedForeground, margin: 0 }}>
               Total
             </p>
-            <p style={{ fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>${Number(order.total).toFixed(2)}</p>
+            <p style={{ fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>₵{Number(order.total).toFixed(2)}</p>
           </div>
         </div>
         <span
@@ -235,7 +235,7 @@ const OrderCard = ({ order, isDesktop }) => {
               </div>
             </div>
             <p style={{ fontWeight: 500, color: tokens.foreground, margin: 0, fontSize: "0.875rem", alignSelf: "center" }}>
-              ${Number(item.price).toFixed(2)}
+              ₵{Number(item.price).toFixed(2)}
             </p>
           </div>
         ))}

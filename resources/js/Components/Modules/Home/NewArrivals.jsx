@@ -91,7 +91,7 @@ const ProductCard = ({ product }) => {
             fontFamily: tokens.fontBody,
           }}
         >
-          ${product.price}
+          ₵{product.price}
         </p>
       </div>
     </a>

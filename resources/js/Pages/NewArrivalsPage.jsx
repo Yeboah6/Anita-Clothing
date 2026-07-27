@@ -88,7 +88,7 @@ const ProductCard = ({ product }) => {
           {product.name}
         </h3>
         <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0, fontFamily: tokens.fontBody }}>
-          ${product.price}
+          ₵{product.price}
         </p>
       </div>
     </a>

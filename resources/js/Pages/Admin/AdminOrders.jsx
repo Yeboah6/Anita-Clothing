@@ -28,18 +28,6 @@ const tokens = {
   destructive: "#ef4444",
 };
 
-// ─── Data ────────────────────────────────────────────────────────────────────
-const mockOrders = [
-  { id: "ORD-1042", customer: "Emma Laurent", email: "emma.l@example.com", date: "2026-01-28", total: 414, status: "pending", items: 2 },
-  { id: "ORD-1041", customer: "Sofia Marchetti", email: "sofia.m@example.com", date: "2026-01-28", total: 289, status: "processing", items: 1 },
-  { id: "ORD-1040", customer: "Olivia Chen", email: "olivia.c@example.com", date: "2026-01-27", total: 660, status: "shipped", items: 3 },
-  { id: "ORD-1039", customer: "Amelia Wright", email: "amelia.w@example.com", date: "2026-01-27", total: 165, status: "delivered", items: 1 },
-  { id: "ORD-1038", customer: "Isabella Romano", email: "isabella.r@example.com", date: "2026-01-26", total: 495, status: "delivered", items: 1 },
-  { id: "ORD-1037", customer: "Charlotte Dubois", email: "charlotte.d@example.com", date: "2026-01-26", total: 270, status: "shipped", items: 2 },
-  { id: "ORD-1036", customer: "Mia Andersson", email: "mia.a@example.com", date: "2026-01-25", total: 125, status: "delivered", items: 1 },
-  { id: "ORD-1035", customer: "Harper Kim", email: "harper.k@example.com", date: "2026-01-25", total: 580, status: "cancelled", items: 2 },
-];
-
 const statusOptions = [
   { value: "all", label: "All statuses" },
   { value: "pending", label: "Pending" },
@@ -229,7 +217,7 @@ const OrderRow = ({ order }) => {
         {order.items}
       </td>
       <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>
-        ${order.total}
+        ₵{order.total}
       </td>
       <td style={{ padding: "0.75rem 1.5rem" }}>
         <span

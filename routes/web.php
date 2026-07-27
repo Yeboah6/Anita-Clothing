@@ -60,6 +60,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
 
+    Route::post('/wishlist', [MainController::class, 'store']);
+    Route::delete('/wishlist/{productId}', [MainController::class, 'destroy']);
+
     Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
     Route::post('/checkout', [CartController::class, 'processCheckout'])->name('checkout.process');
 
@@ -76,7 +79,15 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/account/orders', [CustomerOrderController::class, 'Index']);
         Route::get('/account/wishlist', [WishlistController::class, 'Index']);
+
         Route::get('/account/addresses', [AddressController::class, 'Index']);
+        Route::get('/account/addresses/add', [AddressController::class, 'create'])->name('account.addresses.add');
+        Route::post('/account/addresses/add', [AddressController::class, 'store'])->name('account.addresses.store');
+        Route::get('/account/addresses', [AddressController::class, 'index']);
+        Route::get('/account/addresses/{address}/edit', [AddressController::class, 'edit']);
+        Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy']);
+        Route::put('/account/addresses/{address}', [AddressController::class, 'update']);
+
     });
 
     // Admin Routes

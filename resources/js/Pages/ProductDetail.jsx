@@ -28,6 +28,7 @@ const tokens = {
   border: "#e6e6e6",
   radius: "4px",
   green: "#16a34a",
+  destructive: "#ef4444",
 };
 
 // Same palette used on the admin product forms — DB stores color names only,
@@ -64,6 +65,23 @@ const IconPlus = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="12" y1="5" x2="12" y2="19" />
     <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+const IconHeart = ({ filled }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="1.75"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z" />
   </svg>
 );
 
@@ -203,6 +221,11 @@ const ProductDetail = ({ product }) => {
   const [breadcrumbHover, setBreadcrumbHover] = useState({ home: false, collections: false, category: false });
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
+  // Wishlist state — seeded from the product prop if the backend tells us
+  // whether this product is already saved for the current user.
+  const [isWishlisted, setIsWishlisted] = useState(!!product?.isWishlisted);
+  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
+
   useEffect(() => {
     injectFonts();
     const handleResize = () => setIsDesktop(window.innerWidth >= 768);
@@ -215,6 +238,12 @@ const ProductDetail = ({ product }) => {
   useEffect(() => {
     setQuantity(1);
   }, [product?.id]);
+
+  // Keep wishlist state in sync if the underlying product prop changes
+  // (e.g. navigating between products via related items).
+  useEffect(() => {
+    setIsWishlisted(!!product?.isWishlisted);
+  }, [product?.id, product?.isWishlisted]);
 
   const showToast = (msg, type = "success") => {
     setToastMessage(msg);
@@ -285,6 +314,39 @@ const ProductDetail = ({ product }) => {
       showToast("Failed to add item to cart. Please try again.", "error");
     } finally {
       setIsAddingToCart(false);
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (isTogglingWishlist) return;
+
+    if (!isAuthenticated) {
+      showToast("Please log in to save items to your wishlist", "error");
+      setTimeout(() => {
+        window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      }, 1200);
+      return;
+    }
+
+    const nextState = !isWishlisted;
+    setIsTogglingWishlist(true);
+    // Optimistic update — flip immediately, roll back on failure.
+    setIsWishlisted(nextState);
+
+    try {
+      if (nextState) {
+        await axios.post("/wishlist", { product_id: product.id });
+        showToast(`${product.name} added to wishlist`);
+      } else {
+        await axios.delete(`/wishlist/${product.id}`);
+        showToast(`${product.name} removed from wishlist`);
+      }
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+      setIsWishlisted(!nextState);
+      showToast("Failed to update wishlist. Please try again.", "error");
+    } finally {
+      setIsTogglingWishlist(false);
     }
   };
 
@@ -366,13 +428,41 @@ const ProductDetail = ({ product }) => {
                     New Arrival
                   </span>
                 )}
-                <div>
-                  <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.875rem, 4vw, 2.5rem)", fontWeight: 500, margin: 0, color: tokens.foreground }}>
-                    {product.name}
-                  </h1>
-                  <p style={{ marginTop: "0.5rem", fontSize: "1.25rem", color: tokens.foreground }}>
-                    ${product.price}
-                  </p>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+                  <div>
+                    <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.875rem, 4vw, 2.5rem)", fontWeight: 500, margin: 0, color: tokens.foreground }}>
+                      {product.name}
+                    </h1>
+                    <p style={{ marginTop: "0.5rem", fontSize: "1.25rem", color: tokens.foreground }}>
+                      ₵{product.price}
+                    </p>
+                  </div>
+
+                  {/* Wishlist toggle */}
+                  <button
+                    onClick={handleToggleWishlist}
+                    disabled={isTogglingWishlist}
+                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                    aria-pressed={isWishlisted}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "44px",
+                      height: "44px",
+                      flexShrink: 0,
+                      borderRadius: "50%",
+                      border: `1px solid ${isWishlisted ? tokens.foreground : tokens.border}`,
+                      backgroundColor: tokens.background,
+                      color: isWishlisted ? tokens.destructive : tokens.foreground,
+                      cursor: isTogglingWishlist ? "default" : "pointer",
+                      opacity: isTogglingWishlist ? 0.6 : 1,
+                      transition: "border-color 0.15s ease, color 0.15s ease, transform 0.15s ease",
+                      transform: isWishlisted ? "scale(1.03)" : "scale(1)",
+                    }}
+                  >
+                    <IconHeart filled={isWishlisted} />
+                  </button>
                 </div>
                 <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, lineHeight: 1.7, margin: 0 }}>
                   {product.description}
@@ -473,6 +563,38 @@ const ProductDetail = ({ product }) => {
     `Add to Bag${quantity > 1 ? ` — ${quantity} items` : ''}`
   )}
 </button>
+
+                {/* Add to Wishlist (secondary, full-width) */}
+                <button
+                  onClick={handleToggleWishlist}
+                  disabled={isTogglingWishlist}
+                  style={{
+                    width: "100%",
+                    height: "48px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    fontSize: "0.9375rem",
+                    fontWeight: 500,
+                    fontFamily: tokens.fontBody,
+                    borderRadius: tokens.radius,
+                    border: `1px solid ${tokens.foreground}`,
+                    backgroundColor: "transparent",
+                    color: tokens.foreground,
+                    cursor: isTogglingWishlist ? "default" : "pointer",
+                    opacity: isTogglingWishlist ? 0.6 : 1,
+                    transition: "opacity 0.2s ease, background-color 0.15s ease",
+                  }}
+                >
+                  <IconHeart filled={isWishlisted} />
+                  {isTogglingWishlist
+                    ? "Updating..."
+                    : isWishlisted
+                      ? "Remove from Wishlist"
+                      : "Add to Wishlist"}
+                </button>
+
 {!canAdd && !isAddingToCart && isAuthenticated && (
   <p style={{ textAlign: "center", fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
     Please select {needsSize && !selectedSize ? "a size" : ""}{needsSize && !selectedSize && needsColor && !selectedColor ? " and " : ""}{needsColor && !selectedColor ? "a color" : ""} to add to bag

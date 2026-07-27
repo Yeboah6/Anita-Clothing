@@ -80,10 +80,6 @@ const successBannerStyle = {
 };
 
 // ─── AccountProfile Page ─────────────────────────────────────────────────────
-// Expects Inertia props:
-//   currentCustomer: { name, email, phone, joined, avatar }
-//   profileForm:     { firstName, lastName, email, phone }
-//   stats:           { totalOrders, totalSpent }
 const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats }) => {
   const [isDesktop, setIsDesktop] = useState(false);
   const [activePath, setActivePath] = useState("/account");
@@ -256,7 +252,7 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                       Spent
                     </p>
                     <p style={{ marginTop: "0.5rem", fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 500, color: tokens.foreground }}>
-                      ${stats.totalSpent.toLocaleString()}
+                      ₵{stats.totalSpent.toLocaleString()}
                     </p>
                   </div>
                   <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, padding: "1rem" }}>

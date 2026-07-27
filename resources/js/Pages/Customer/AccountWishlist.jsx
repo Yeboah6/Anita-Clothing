@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { usePage } from "@inertiajs/react";
 import AccountSidebar from '@/Components/Customer/AccountSidebar';
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
@@ -29,49 +31,17 @@ const tokens = {
   destructive: "#ef4444",
 };
 
-// ─── Mock Data ───────────────────────────────────────────────────────────────
-const mockCurrentCustomer = {
-  name: "Sofia Marchetti",
-  email: "sofia.m@example.com",
-  avatar: "SM",
-};
-
-const products = [
-  { id: "1", name: "Silk Midi Dress", price: 289, images: ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&q=80"], category: "dresses" },
-  { id: "2", name: "Cashmere Wrap Coat", price: 495, images: ["https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400&q=80"], category: "outerwear" },
-  { id: "3", name: "Linen Palazzo Pants", price: 165, images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&q=80"], category: "bottoms" },
-  { id: "4", name: "Silk Camisole", price: 125, images: ["https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=400&q=80"], category: "tops" },
-  { id: "5", name: "Leather Crossbody Bag", price: 245, images: ["https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=400&q=80"], category: "accessories" },
-  { id: "6", name: "Tailored Wool Blazer", price: 345, images: ["https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=400&q=80"], category: "outerwear" },
-  { id: "7", name: "Pleated Maxi Skirt", price: 195, images: ["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&q=80"], category: "bottoms" },
-  { id: "8", name: "Oversized Cotton Shirt", price: 145, images: ["https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&q=80"], category: "tops" },
-];
-
-const mockWishlist = ["2", "4", "5", "7"];
-
 // ─── Get active path from URL ────────────────────────────────────────────────
-const getActivePath = () => {
-  const path = window.location.pathname;
-  return path;
+const getActivePath = () => window.location.pathname;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const getInitials = (name) => {
+  if (!name) return "";
+  const parts = name.trim().split(/\s+/);
+  return parts.slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("");
 };
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
-const IconShoppingBagHeader = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <path d="M16 10a4 4 0 0 1-8 0" />
-  </svg>
-);
-
-const IconMenu = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <line x1="3" y1="12" x2="21" y2="12" />
-    <line x1="3" y1="18" x2="21" y2="18" />
-  </svg>
-);
-
 const IconX = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="18" y1="6" x2="6" y2="18" />
@@ -85,43 +55,44 @@ const IconHeart = () => (
   </svg>
 );
 
-const InstagramIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-  </svg>
-);
-
-const FacebookIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
-
-const MailIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="4" width="20" height="16" rx="2" />
-    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-  </svg>
-);
-
-const IconXLarge = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
+// ─── Toast Component ─────────────────────────────────────────────────────────
+const Toast = ({ message, visible, type = "success" }) => {
+  if (!visible) return null;
+  return (
+    <div style={{
+      position: "fixed", bottom: "2rem", left: "50%", transform: "translateX(-50%)", zIndex: 100,
+      backgroundColor: type === "error" ? tokens.destructive : tokens.foreground,
+      color: tokens.background, padding: "0.75rem 1.5rem",
+      borderRadius: tokens.radius, fontFamily: tokens.fontBody, fontSize: "0.875rem",
+      fontWeight: 500, boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    }}>
+      {message}
+    </div>
+  );
+};
 
 // ─── Wishlist Product Card ───────────────────────────────────────────────────
-const WishlistCard = ({ product, onRemove }) => {
+// `item` is a wishlist row shaped like: { id, product_id, product: {...} }
+const WishlistCard = ({ item, onRemove, onAddToBag, removingId, addingId }) => {
   const [hovered, setHovered] = useState(false);
   const [removeBtnHovered, setRemoveBtnHovered] = useState(false);
   const [addBtnHovered, setAddBtnHovered] = useState(false);
 
+  const product = item.product;
+  const isRemoving = removingId === item.id;
+  const isAdding = addingId === product.id;
+
+  // Images may come back as plain URL strings, or as objects like
+  // { id, url, ... } depending on how the product was serialized —
+  // handle both shapes rather than assuming one.
+  const rawImage = product.images?.[0] ?? product.image ?? null;
+  const image = typeof rawImage === "string" ? rawImage : rawImage?.url ?? null;
+
+  if (!product) return null;
+
   return (
     <div
-      style={{ position: "relative" }}
+      style={{ position: "relative", opacity: isRemoving ? 0.4 : 1, transition: "opacity 0.2s ease" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -130,8 +101,9 @@ const WishlistCard = ({ product, onRemove }) => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (onRemove) onRemove(product.id);
+          onRemove(item);
         }}
+        disabled={isRemoving}
         aria-label="Remove from wishlist"
         style={{
           position: "absolute",
@@ -147,7 +119,7 @@ const WishlistCard = ({ product, onRemove }) => {
           border: "none",
           backgroundColor: removeBtnHovered ? tokens.background : "rgba(255,255,255,0.9)",
           color: tokens.foreground,
-          cursor: "pointer",
+          cursor: isRemoving ? "default" : "pointer",
           opacity: hovered || removeBtnHovered ? 1 : 0,
           transition: "opacity 0.2s ease, background-color 0.15s ease",
           boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
@@ -160,7 +132,7 @@ const WishlistCard = ({ product, onRemove }) => {
 
       {/* Product link */}
       <a
-        href={`/product/${product.id}`}
+        href={`/product/${product.slug ?? product.id}`}
         style={{ display: "block", textDecoration: "none", color: "inherit" }}
       >
         {/* Image */}
@@ -173,20 +145,26 @@ const WishlistCard = ({ product, onRemove }) => {
             borderRadius: tokens.radius,
           }}
         >
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            loading="lazy"
-            style={{
-              position: "absolute",
-              inset: 0,
-              height: "100%",
-              width: "100%",
-              objectFit: "cover",
-              transition: "transform 500ms ease",
-              transform: hovered ? "scale(1.05)" : "scale(1)",
-            }}
-          />
+          {image ? (
+            <img
+              src={image}
+              alt={product.name}
+              loading="lazy"
+              style={{
+                position: "absolute",
+                inset: 0,
+                height: "100%",
+                width: "100%",
+                objectFit: "cover",
+                transition: "transform 500ms ease",
+                transform: hovered ? "scale(1.05)" : "scale(1)",
+              }}
+            />
+          ) : (
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: tokens.mutedForeground, fontSize: "0.75rem" }}>
+              No image
+            </div>
+          )}
         </div>
 
         {/* Info */}
@@ -206,13 +184,15 @@ const WishlistCard = ({ product, onRemove }) => {
             margin: 0,
             fontFamily: tokens.fontBody,
           }}>
-            ${product.price}
+            ₵{product.price}
           </p>
         </div>
       </a>
 
       {/* Add to Bag button */}
       <button
+        onClick={() => onAddToBag(product)}
+        disabled={isAdding}
         style={{
           width: "100%",
           marginTop: "0.75rem",
@@ -224,24 +204,36 @@ const WishlistCard = ({ product, onRemove }) => {
           border: `1px solid ${tokens.border}`,
           backgroundColor: addBtnHovered ? tokens.secondary : "transparent",
           color: tokens.foreground,
-          cursor: "pointer",
-          transition: "background-color 0.2s ease",
+          cursor: isAdding ? "default" : "pointer",
+          opacity: isAdding ? 0.6 : 1,
+          transition: "background-color 0.2s ease, opacity 0.2s ease",
         }}
         onMouseEnter={() => setAddBtnHovered(true)}
         onMouseLeave={() => setAddBtnHovered(false)}
       >
-        Add to Bag
+        {isAdding ? "Adding..." : "Add to Bag"}
       </button>
     </div>
   );
 };
 
 // ─── AccountWishlist Page ────────────────────────────────────────────────────
-const AccountWishlist = () => {
+// Expects the controller to pass real data, e.g.:
+//   return inertia('Customer/AccountWishlist', [
+//       'wishlistItems' => Wishlist::with('product')->where('user_id', auth()->id())->get(),
+//       'user' => auth()->user()->only(['id', 'name', 'email', 'role']),
+//   ]);
+const AccountWishlist = ({ wishlistItems = [], user }) => {
+  const { auth } = usePage().props;
+  const currentUser = user ?? auth?.user ?? null;
+
   const [isDesktop, setIsDesktop] = useState(false);
   const [activePath, setActivePath] = useState("/account/wishlist");
-  const [wishlistIds, setWishlistIds] = useState(mockWishlist);
   const [browseBtnHovered, setBrowseBtnHovered] = useState(false);
+  const [items, setItems] = useState(wishlistItems);
+  const [removingId, setRemovingId] = useState(null);
+  const [addingId, setAddingId] = useState(null);
+  const [toast, setToast] = useState({ message: "", type: "success", visible: false });
 
   useEffect(() => {
     injectFonts();
@@ -253,27 +245,63 @@ const AccountWishlist = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const wishlistProducts = products.filter((p) => wishlistIds.includes(p.id));
+  // Keep local list in sync if the server prop changes (e.g. after an Inertia reload)
+  useEffect(() => {
+    setItems(wishlistItems);
+  }, [wishlistItems]);
 
-  const handleRemove = (productId) => {
-    setWishlistIds((prev) => prev.filter((id) => id !== productId));
+  const showToast = (message, type = "success") => {
+    setToast({ message, type, visible: true });
+    setTimeout(() => setToast((t) => ({ ...t, visible: false })), 3000);
   };
 
   const handleNavigate = (url) => {
-    // SPA-style navigation
     window.history.pushState({}, "", url);
     setActivePath(url);
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
-  const getGridColumns = () => {
-    if (isDesktop) return "1fr 1fr 1fr";
-    return "1fr 1fr";
+  const handleRemove = async (item) => {
+    setRemovingId(item.id);
+    // Optimistic: pull it from the list, restore on failure
+    const previous = items;
+    setItems((prev) => prev.filter((i) => i.id !== item.id));
+
+    try {
+      await axios.delete(`/wishlist/${item.product.id}`);
+    } catch (error) {
+      console.error("Error removing wishlist item:", error);
+      setItems(previous);
+      showToast("Failed to remove item. Please try again.", "error");
+    } finally {
+      setRemovingId(null);
+    }
   };
+
+  const handleAddToBag = async (product) => {
+    setAddingId(product.id);
+    try {
+      await axios.post("/cart", {
+        product_id: product.id,
+        size: null,
+        color: null,
+        quantity: 1,
+      });
+      showToast(`${product.name} added to bag`);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      showToast("Failed to add item to bag. Please try again.", "error");
+    } finally {
+      setAddingId(null);
+    }
+  };
+
+  const getGridColumns = () => (isDesktop ? "1fr 1fr 1fr" : "1fr 1fr");
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
       <Header />
+      <Toast message={toast.message} visible={toast.visible} type={toast.type} />
 
       <main style={{ flex: 1, backgroundColor: "rgba(245,245,245,0.6)" }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "2rem 1rem" }}>
@@ -299,12 +327,12 @@ const AccountWishlist = () => {
                   fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 600, flexShrink: 0,
                 }}
               >
-                {mockCurrentCustomer.avatar}
+                {getInitials(currentUser?.name)}
               </div>
               <div>
                 <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0 }}>Welcome back,</p>
                 <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 500, margin: "0.25rem 0 0", color: tokens.foreground }}>
-                  {mockCurrentCustomer.name}
+                  {currentUser?.name || ""}
                 </h1>
               </div>
             </div>
@@ -330,13 +358,13 @@ const AccountWishlist = () => {
                   Wishlist
                 </h2>
                 <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
-                  {wishlistProducts.length > 0
-                    ? `${wishlistProducts.length} pieces saved for later`
+                  {items.length > 0
+                    ? `${items.length} piece${items.length === 1 ? "" : "s"} saved for later`
                     : "Pieces you've saved for later"}
                 </p>
               </div>
 
-              {wishlistProducts.length === 0 ? (
+              {items.length === 0 ? (
                 /* Empty state */
                 <div
                   style={{
@@ -394,11 +422,14 @@ const AccountWishlist = () => {
                     gap: isDesktop ? "1.5rem" : "1rem",
                   }}
                 >
-                  {wishlistProducts.map((product) => (
+                  {items.map((item) => (
                     <WishlistCard
-                      key={product.id}
-                      product={product}
+                      key={item.id}
+                      item={item}
                       onRemove={handleRemove}
+                      onAddToBag={handleAddToBag}
+                      removingId={removingId}
+                      addingId={addingId}
                     />
                   ))}
                 </div>
