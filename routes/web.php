@@ -105,6 +105,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/orders', [OrderController::class, 'Index']);
         Route::get('/admin/orders/{orderNumber}', [OrderController::class, 'show'])->name('admin.orders.show');
         Route::get('/admin/orders/{orderNumber}/edit', [OrderController::class, 'edit'])->name('admin.orders.edit');
+        Route::put('/admin/orders/{orderNumber}', [OrderController::class, 'update'])->name('admin.orders.update');
+        Route::put('/admin/orders/{orderNumber}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.update');
 
         Route::get('/admin/customers', [CustomerController::class, 'Index']);
         Route::get('/admin/categories', [CategoryController::class, 'Index']);

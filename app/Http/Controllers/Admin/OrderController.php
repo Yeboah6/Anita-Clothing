@@ -62,10 +62,8 @@ class OrderController extends Controller
     {
         $order = Order::where('order_number', $orderNumber)->firstOrFail();
  
-        // ASSUMPTION: these are the editable fields per EditOrder.jsx.
-        // Drop any rule here whose column doesn't exist yet on `orders`.
         $validated = $request->validate([
-            'status'          => ['required', Rule::in(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])],
+            'status'          => ['required', Rule::in(['pending', 'processing', 'delivered', 'cancelled'])],
             'payment_status'  => ['nullable', Rule::in(['unpaid', 'paid', 'refunded'])],
             'tracking_number' => ['nullable', 'string', 'max:100'],
             'courier'         => ['nullable', 'string', 'max:100'],
@@ -84,7 +82,7 @@ class OrderController extends Controller
         $order = Order::where('order_number', $orderNumber)->firstOrFail();
  
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])],
+            'status' => ['required', Rule::in(['pending', 'processing', 'delivered', 'cancelled'])],
         ]);
  
         $order->update($validated);
