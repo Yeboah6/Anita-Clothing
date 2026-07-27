@@ -35,7 +35,7 @@ const tokens = {
 const orderStatusOptions = [
   { value: "pending", label: "Pending" },
   { value: "processing", label: "Processing" },
-  { value: "shipped", label: "Shipped" },
+  // { value: "shipped", label: "Shipped" },
   { value: "delivered", label: "Delivered" },
   { value: "cancelled", label: "Cancelled" },
 ];
@@ -43,7 +43,7 @@ const orderStatusOptions = [
 const statusColors = {
   pending: { bg: "#fef3c7", fg: "#92400e" },
   processing: { bg: "#dbeafe", fg: "#1e40af" },
-  shipped: { bg: "#e0e7ff", fg: "#3730a3" },
+  // shipped: { bg: "#e0e7ff", fg: "#3730a3" },
   delivered: { bg: "#dcfce7", fg: "#166534" },
   cancelled: { bg: "#fee2e2", fg: "#991b1b" },
   paid: { bg: "#dcfce7", fg: "#166534" },
@@ -267,7 +267,7 @@ const OrderDetails = ({ order }) => {
   const [copied, setCopied] = useState(false);
 
   const { data, setData, patch, processing } = useForm({
-    status: order.status ?? "pending",
+    status: order.order_status ?? "pending",
   });
 
   useEffect(() => {
@@ -291,7 +291,7 @@ const OrderDetails = ({ order }) => {
 
   const handleNavigate = (url) => { setActiveUrl(url); if (isMobile) setMobileSidebarOpen(false); };
 
-  const hasStatusChanged = data.status !== order.status;
+  const hasStatusChanged = data.status !== order.order_status;
 
   const handleUpdateStatus = () => {
     if (!hasStatusChanged) return;
@@ -476,10 +476,10 @@ const OrderDetails = ({ order }) => {
                 </div>
               </div>
 
-              {/* Shipping address */}
+              {/* Delivery address */}
               <div style={cardStyle}>
                 <div style={cardHeaderStyle}>
-                  <h3 style={cardTitleStyle}><IconMapPin /> Shipping Address</h3>
+                  <h3 style={cardTitleStyle}><IconMapPin /> Delivery Address</h3>
                 </div>
                 <div style={{ padding: "1.5rem" }}>
                   {address ? (
@@ -490,7 +490,7 @@ const OrderDetails = ({ order }) => {
                       {address.country}
                     </p>
                   ) : (
-                    <p style={{ margin: 0, fontSize: "0.8125rem", color: tokens.mutedForeground }}>No shipping address on file.</p>
+                    <p style={{ margin: 0, fontSize: "0.8125rem", color: tokens.mutedForeground }}>No delivery address on file.</p>
                   )}
                 </div>
               </div>
@@ -505,14 +505,14 @@ const OrderDetails = ({ order }) => {
                     <span style={{ color: tokens.mutedForeground }}>Subtotal</span>
                     <span style={{ color: tokens.foreground }}>{money(computedSubtotal)}</span>
                   </div>
-                  {Number(order.discount_amount) > 0 && (
+                  {/* {Number(order.discount_amount) > 0 && (
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
                       <span style={{ color: tokens.mutedForeground }}>Discount</span>
                       <span style={{ color: tokens.destructive }}>-{money(order.discount_amount)}</span>
                     </div>
-                  )}
+                  )} */}
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
-                    <span style={{ color: tokens.mutedForeground }}>Shipping</span>
+                    <span style={{ color: tokens.mutedForeground }}>Delivery</span>
                     <span style={{ color: tokens.foreground }}>{order.shipping_fee ? money(order.shipping_fee) : "Free"}</span>
                   </div>
                   <div style={{ height: "1px", backgroundColor: tokens.border, margin: "0.375rem 0" }} />

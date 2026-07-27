@@ -1,7 +1,7 @@
 import './bootstrap';
 import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
-// import { ZiggyVue } from 'ziggy-js';
+import { ZiggyVue } from 'ziggy-js';
 
 createInertiaApp({
     resolve: name => {

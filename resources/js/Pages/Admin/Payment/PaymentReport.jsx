@@ -18,9 +18,6 @@ const injectFonts = () => {
 };
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
-// Matches AdminProducts.jsx exactly, plus a pink accent for the revenue chart
-// and primary export action (brand color, not present in AdminProducts' own
-// token set since that page uses black for its primary actions).
 const tokens = {
   fontDisplay: "'Cormorant Garamond', serif",
   fontBody: "'Inter', sans-serif",

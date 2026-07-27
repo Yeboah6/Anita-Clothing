@@ -173,7 +173,7 @@ public function processCheckout(Request $request)
 {
     $validated = $request->validate([
         'email' => 'required|email',
-        'phone' => 'nullable|string',
+        'phone' => 'required|string',
         'firstName' => 'required|string|max:255',
         'lastName' => 'required|string|max:255',
         'address' => 'required|string|max:255',
@@ -212,8 +212,8 @@ public function processCheckout(Request $request)
         $subtotal += $finalPrice * $item['quantity'];
     }
     
-    // Calculate shipping and tax
-    // $shipping = $subtotal > 100 ? 0 : 9.99;
+    // Calculate delivery and tax
+    // $delivery = $subtotal > 100 ? 0 : 9.99;
     // $tax = round($subtotal * 0.08, 2);
     $total = $subtotal;
     
@@ -231,7 +231,7 @@ public function processCheckout(Request $request)
         'zip' => $validated['zip'],
         'notes' => $validated['notes'] ?? null,
         'subtotal' => $subtotal,
-        // 'shipping' => $shipping,
+        // 'delivery' => $delivery,
         // 'tax' => $tax,
         'total_amount' => $total,
         'status' => 'pending',

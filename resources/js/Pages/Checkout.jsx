@@ -205,9 +205,9 @@ const Checkout = () => {
 
   const subtotal = items.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const shipping = subtotal > 100 ? 0 : 9.99; // Free shipping over $100
+  const delivery = 9.99;
   // const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal + shipping;
+  const total = subtotal + delivery;
 
   // Success state
   if (isSubmitted) {
@@ -349,7 +349,7 @@ const Checkout = () => {
                       )}
                     </div>
                     <div>
-                      <label htmlFor="phone" style={labelStyle}>Phone (optional)</label>
+                      <label htmlFor="phone" style={labelStyle}>Phone *</label>
                       <input
                         id="phone" type="tel" placeholder="+1 (555) 000-0000"
                         value={formData.phone} onChange={handleInputChange("phone")}
@@ -360,10 +360,10 @@ const Checkout = () => {
                     </div>
                   </div>
 
-                  {/* Shipping Address */}
+                  {/* Delivery Address */}
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                     <h2 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>
-                      Shipping Address
+                      Delivery Address
                     </h2>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                       <div>
@@ -556,7 +556,7 @@ const Checkout = () => {
                           </p>
                         </div>
                         <p style={{ fontWeight: 500, fontSize: "0.875rem", color: tokens.foreground, margin: 0, alignSelf: "center", whiteSpace: "nowrap" }}>
-                          ${(Number(item.price) * item.quantity).toFixed(2)}
+                          GHS {(Number(item.price) * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     ))}
@@ -570,9 +570,9 @@ const Checkout = () => {
                       <span style={{ color: tokens.foreground }}>${subtotal.toFixed(2)}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-                      <span style={{ color: tokens.mutedForeground }}>Shipping</span>
-                      <span style={{ color: shipping === 0 ? tokens.green : tokens.foreground }}>
-                        {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                      <span style={{ color: tokens.mutedForeground }}>Delivery</span>
+                      <span style={{ color: delivery === 0 ? tokens.green : tokens.foreground }}>
+                        {`$${delivery.toFixed(2)}`}
                       </span>
                     </div>
                     {/* <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
@@ -588,16 +588,24 @@ const Checkout = () => {
                     <span style={{ color: tokens.foreground }}>${total.toFixed(2)}</span>
                   </div>
 
-                  {shipping === 0 && (
+                  {/* {delivery === 0 && ( */}
                     <p style={{ 
                       marginTop: "0.5rem", 
                       fontSize: "0.75rem", 
                       color: tokens.green,
                       textAlign: "center" 
                     }}>
-                      🎉 Free shipping on orders over $100!
+                      🎉 Delivery in Accra is from 100 to 150!
                     </p>
-                  )}
+                    <p style={{ 
+                      marginTop: "0.5rem", 
+                      fontSize: "0.75rem", 
+                      color: tokens.green,
+                      textAlign: "center" 
+                    }}>
+                      🎉 Delivery outside Accra is based on station fare!
+                    </p>
+                   {/* )} */}
                 </div>
               </div>
             </div>

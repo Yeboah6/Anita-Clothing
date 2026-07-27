@@ -44,7 +44,7 @@ const ProductCard = ({ product }) => {
           overflow: "hidden",
           backgroundColor: tokens.secondary,
           position: "relative",
-          paddingBottom: "133.33%", // 4/3 * 100
+          paddingBottom: "125%", // 4/3 * 100
         }}
       >
         {image ? (
