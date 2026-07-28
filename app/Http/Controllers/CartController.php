@@ -9,6 +9,8 @@ use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmation;
 
 class CartController extends Controller
 {
@@ -187,8 +189,8 @@ public function processCheckout(Request $request)
         'apartment' => 'nullable|string|max:255',
         'city' => 'required|string|max:255',
         'state' => 'required|string|max:255',
-        'zip' => 'required|string|max:20',
-        'notes' => 'nullable|string',
+        'zip' => 'nullable|string|max:20',
+        'notes' => 'nullable|string|max:255',
         'items' => 'required|array',
         'items.*.product_id' => 'required|exists:products,id',
         'items.*.size' => 'nullable|string',
@@ -219,9 +221,6 @@ public function processCheckout(Request $request)
         $subtotal += $finalPrice * $item['quantity'];
     }
     
-    // Calculate delivery and tax
-    // $delivery = $subtotal > 100 ? 0 : 9.99;
-    // $tax = round($subtotal * 0.08, 2);
     $total = $subtotal;
     
     // Create order
@@ -236,12 +235,11 @@ public function processCheckout(Request $request)
         'city' => $validated['city'],
         'state' => $validated['state'],
         'zip' => $validated['zip'],
-        'notes' => $validated['notes'] ?? null,
+        'notes' => $validated['notes'],
         'subtotal' => $subtotal,
-        // 'delivery' => $delivery,
-        // 'tax' => $tax,
         'total_amount' => $total,
         'status' => 'pending',
+        'payment_status' => 'unpaid',
         'order_number' => 'ORD-' . strtoupper(uniqid()),
     ]);
     
@@ -249,7 +247,6 @@ public function processCheckout(Request $request)
     foreach ($validated['items'] as $item) {
         $order->items()->create([
             'product_id' => $item['product_id'],
-            // 'name' => Product::find($item['product_id'])->name ?? 'Product',
             'price' => $item['price'],
             'quantity' => $item['quantity'],
             'size' => $item['size'] ?? null,
@@ -264,13 +261,14 @@ public function processCheckout(Request $request)
     
     // You might want to send confirmation email here
     // Mail::to($validated['email'])->send(new OrderConfirmation($order));
+    Mail::to($order->email ?? $order->user->email)->send(new OrderConfirmation($order));
     
     return response()->json([
         'success' => true,
         'message' => 'Order placed successfully!',
         'order_id' => $order->id,
         'order_number' => $order->order_number,
-        'redirect' => route('checkout.pay', ['order' => $order->id]),
+        'redirect' => route('checkout.pay', ['order' => $order->order_number]),
     ]);
 }
 

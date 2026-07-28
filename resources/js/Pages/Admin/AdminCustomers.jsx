@@ -557,7 +557,7 @@ const AdminCustomers = () => {
                                 color: tokens.foreground,
                                 transition: "background-color 0.15s ease",
                               }}
-                              onMouseEnter={() => setMailHovered(true)}
+                              onMouseEnter={() => setMailfHovered(true)}
                               onMouseLeave={() => setMailHovered(false)}
                             >
                               <IconMail />

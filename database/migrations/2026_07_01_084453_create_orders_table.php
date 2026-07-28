@@ -32,7 +32,7 @@ return new class extends Migration
             $table->decimal('subtotal', 10, 2);
             $table->decimal('total_amount', 10, 2);
             $table->string('order_status')->default('pending');
-            $table->string('payment_status')->default('pending');
+            $table->string('payment_status')->default('unpaid');
             $table->timestamps();
         });
     }

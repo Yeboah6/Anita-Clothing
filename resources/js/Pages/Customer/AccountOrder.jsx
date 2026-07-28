@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { usePage } from "@inertiajs/react";
+import axios from "axios";
+import { usePage, router  } from "@inertiajs/react";
 import AccountSidebar from '@/Components/Customer/AccountSidebar';
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
@@ -140,9 +141,18 @@ const OrderCard = ({ order, isDesktop, isOpen, onToggle }) => {
   const [buyAgainBtnHovered, setBuyAgainBtnHovered] = useState(false);
   const [reviewBtnHovered, setReviewBtnHovered] = useState(false);
   const [headerHovered, setHeaderHovered] = useState(false);
+  const [payBtnHovered, setPayBtnHovered] = useState(false);
+
+  const isUnpaid = order.payment_status === "unpaid";
+
 
   const config = statusConfig[order.order_status] || statusConfig.pending;
   const StatusIcon = statusIcons[order.order_status] || IconClock;
+
+  const handleCompletePayment = (e) => {
+    e.stopPropagation(); // don't toggle the accordion
+    router.visit(`/checkout/${order.id}/pay`);
+  };
 
   return (
     <div
@@ -215,6 +225,23 @@ const OrderCard = ({ order, isDesktop, isOpen, onToggle }) => {
             <StatusIcon />
             {config.label}
           </span>
+          {isUnpaid && (
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "0.125rem 0.625rem",
+                borderRadius: "9999px",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                backgroundColor: "#fef2f2",
+                color: "#991b1b",
+                border: "1px solid #fecaca",
+              }}
+            >
+              Payment Due
+            </span>
+          )}
           <IconChevronDown isOpen={isOpen} />
         </div>
       </button>
@@ -319,6 +346,34 @@ const OrderCard = ({ order, isDesktop, isOpen, onToggle }) => {
                     onMouseLeave={() => setTrackBtnHovered(false)}
                   >
                     Track Package
+                  </button>
+                </div>
+              </>
+            )}
+
+            {isUnpaid && (
+              <>
+                <hr style={{ margin: 0, border: "none", borderTop: `1px solid ${tokens.border}` }} />
+                <div style={{ display: "flex", flexDirection: isDesktop ? "row" : "column", alignItems: isDesktop ? "center" : "flex-start", justifyContent: "space-between", gap: "0.75rem" }}>
+                  <p style={{ fontSize: "0.875rem", margin: 0, color: tokens.foreground }}>
+                    This order hasn't been paid for yet.
+                  </p>
+                  <button
+                    onClick={handleCompletePayment}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      fontSize: "0.8125rem",
+                      fontWeight: 500,
+                      fontFamily: tokens.fontBody,
+                      borderRadius: tokens.radius,
+                      border: "none",
+                      backgroundColor: tokens.foreground,
+                      color: tokens.background,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Complete Payment
                   </button>
                 </div>
               </>

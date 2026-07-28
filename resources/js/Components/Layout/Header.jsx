@@ -401,7 +401,7 @@ const UserDropdown = ({ user, isAdmin = false, isMobile = false, isCustomer = fa
               Orders
             </a>
             <a
-              href="/account/settings"
+              href="/account/addresses"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -416,7 +416,7 @@ const UserDropdown = ({ user, isAdmin = false, isMobile = false, isCustomer = fa
               }}
             >
               <IconSettings />
-              Settings
+              Addresses
             </a>
           </>
         )}
@@ -574,26 +574,23 @@ const UserDropdown = ({ user, isAdmin = false, isMobile = false, isCustomer = fa
               </a>
 
               <a
-                href="/account/settings"
-                onClick={() => setIsOpen(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.5rem 0.75rem",
-                  textDecoration: "none",
-                  color: tokens.foreground,
-                  fontSize: "0.8125rem",
-                  fontFamily: tokens.fontBody,
-                  borderRadius: tokens.radius,
-                  transition: "background-color 0.15s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = tokens.border}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-              >
-                <IconSettings />
-                Settings
-              </a>
+              href="/account/addresses"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.5rem 0.75rem",
+                textDecoration: "none",
+                color: tokens.foreground,
+                fontSize: "0.875rem",
+                fontFamily: tokens.fontBody,
+                borderRadius: tokens.radius,
+                transition: "background-color 0.15s ease",
+              }}
+            >
+              <IconSettings />
+              Addresses
+            </a>
             </>
           )}
 

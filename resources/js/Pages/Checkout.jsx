@@ -251,6 +251,7 @@ const Checkout = () => {
         city: "",
         state: "",
         zip: "",
+        notes: "",
       }));
       return;
     }

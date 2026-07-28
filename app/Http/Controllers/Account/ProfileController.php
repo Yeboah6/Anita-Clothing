@@ -14,16 +14,16 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-
-        $orders = $user->orders()->latest()->get();
-
+    
+        $orders = $user->orders()->with('payment')->latest()->get();
+    
         $nameParts = explode(' ', $user->name, 2);
-
+    
         $totalSpent = $orders
-            ->flatMap(fn ($order) => $order->payments)
-            ->where('status', 'completed')
+            ->pluck('payment')
+            ->filter(fn ($payment) => $payment && $payment->status === 'success')
             ->sum('amount');
-
+    
         return inertia('Customer/AccountProfile', [
             'currentCustomer' => [
                 'name'   => $user->name,

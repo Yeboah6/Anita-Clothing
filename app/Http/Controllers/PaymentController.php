@@ -24,7 +24,7 @@ class PaymentController extends Controller
     {
         return Inertia::render('Checkout/Payment', [
             'order' => [
-                'id' => $order->id,
+                'id' => $order->order_number,
                 'total_amount' => $order->total_amount,
                 'currency' => 'GHS',
             ],
@@ -110,15 +110,16 @@ class PaymentController extends Controller
             ]);
 
             if ($status === 'success') {
-                $payment->order->update(['status' => 'paid']);
+                $payment->order->update(['payment_status' => 'paid']);
+                $payment->order->update(['order_status' => 'processing']);
             }
         });
 
         if ($status === 'success') {
-            return redirect()->route('checkout.success', $payment->order_id);
+            return redirect()->route('checkout.success', $payment->order->order_number);
         }
 
-        return redirect()->route('checkout.failed', $payment->order_id);
+        return redirect()->route('checkout.failed', $payment->order->order_number);
     }
 
     /**
@@ -149,7 +150,7 @@ class PaymentController extends Controller
                         'gateway_response' => $data,
                         'paid_at' => now(),
                     ]);
-                    $payment->order->update(['status' => 'paid']);
+                    $payment->order->update(['payment_status' => 'paid']);
                 });
             }
         }
@@ -159,14 +160,14 @@ class PaymentController extends Controller
 
     public function success(Order $order)
     {
-        $payment = Payment::where('order_id', $order->id)
+        $payment = Payment::where('order_id', $order->order_number)
             ->where('status', 'success')
             ->latest()
             ->first();
     
         return Inertia::render('Checkout/Success', [
             'order' => [
-                'id' => $order->id,
+                'id' => $order->order_number,
                 'total_amount' => $order->total_amount,
             ],
             'payment' => $payment ? [
@@ -182,7 +183,7 @@ class PaymentController extends Controller
      */
     public function failed(Order $order)
     {
-        $payment = Payment::where('order_id', $order->id)
+        $payment = Payment::where('order_id', $order->order_number)
             ->latest()
             ->first();
 

@@ -58,6 +58,6 @@ class Order extends Model
 
     public function getFormattedTotalAttribute(): string
     {
-        return '$' . number_format($this->total_amount, 2);
+        return '₵' . number_format($this->total_amount, 2);
     }
 }

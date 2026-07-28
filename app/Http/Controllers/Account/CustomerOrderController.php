@@ -13,7 +13,7 @@ class CustomerOrderController extends Controller
     public function index()
     {
         $user = Auth::user();
-
+    
         $orders = Order::where('user_id', $user->id)
             ->with('items.product.images')
             ->latest()
@@ -21,18 +21,20 @@ class CustomerOrderController extends Controller
             ->map(function ($order) {
                 return [
                     'id' => $order->order_number,
+                    'order_id' => $order->id, // real PK, for payment retry calls
                     'date' => $order->created_at->format('Y-m-d'),
                     'total' => $order->total_amount,
-                    'order_status' => $order->order_status, // ⚠️ see note below
+                    'order_status' => $order->order_status,
+                    'payment_status' => $order->payment_status, // e.g. 'paid' | 'unpaid' | 'failed'
                     'tracking' => $order->tracking_number ?? null,
                     'items' => $order->items->map(function ($item) {
                         $imageUrl = null;
-
+    
                         if ($item->product) {
                             $firstImage = $item->product->images->first();
-                            $imageUrl = $firstImage->url ?? null; // ProductImage's url accessor
+                            $imageUrl = $firstImage->url ?? null;
                         }
-
+    
                         return [
                             'name' => $item->name,
                             'size' => $item->size,
@@ -44,7 +46,7 @@ class CustomerOrderController extends Controller
                     }),
                 ];
             });
-
+    
         return Inertia::render('Customer/AccountOrder', [
             'orders' => $orders,
         ]);

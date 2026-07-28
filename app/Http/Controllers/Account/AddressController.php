@@ -93,4 +93,11 @@ class AddressController extends Controller
 
         return redirect('/account/addresses')->with('success', 'Address updated.');
     }
+
+    public function destroy(Request $request, Address $address)
+    {
+        Address::where('id', $address->id)->delete();
+
+        return redirect('/account/addresses')->with('success', 'Address has been removed.');
+    }
 }

@@ -167,7 +167,7 @@ const AddAddress = ({ user }) => {
     city: "",
     state: "",
     zip: "",
-    country: "United States",
+    country: "Ghana",
     is_default: false,
   });
 

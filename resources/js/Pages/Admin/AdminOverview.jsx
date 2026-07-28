@@ -29,23 +29,6 @@ const tokens = {
   destructive: "#ef4444",
 };
 
-// ─── Data ────────────────────────────────────────────────────────────────────
-const salesData = [
-  { month: "Jan", revenue: 8200 },
-  { month: "Feb", revenue: 9100 },
-  { month: "Mar", revenue: 8500 },
-  { month: "Apr", revenue: 9800 },
-  { month: "May", revenue: 10200 },
-  { month: "Jun", revenue: 11500 },
-  { month: "Jul", revenue: 10800 },
-  { month: "Aug", revenue: 12300 },
-  { month: "Sep", revenue: 11800 },
-  { month: "Oct", revenue: 13200 },
-  { month: "Nov", revenue: 14100 },
-  { month: "Dec", revenue: 15200 },
-];
-
-
 const stats = [
   { label: "Total Revenue", value: "₵108,000", change: "+12.4%", trend: "up" },
   { label: "Orders", value: "1,284", change: "+8.2%", trend: "up" },
@@ -60,6 +43,19 @@ const IconDollarSign = () => (
     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
   </svg>
 );
+
+const IconCedi = () => (
+  <span
+    style={{
+      fontSize: "16px",
+      fontWeight: "bold",
+      lineHeight: 1,
+    }}
+  >
+    ₵
+  </span>
+);
+
 
 const IconShoppingBag = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -168,7 +164,7 @@ const SimpleAreaChart = ({ data }) => {
             <g key={i}>
               <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke={tokens.border} strokeDasharray="3 3" />
               <text x={padding.left - 8} y={y + 4} textAnchor="end" fontSize="11" fill={tokens.mutedForeground} fontFamily={tokens.fontBody}>
-                ${(value / 1000).toFixed(0)}k
+                ₵{(value / 1000).toFixed(0)}k
               </text>
             </g>
           );
@@ -204,7 +200,7 @@ const SimpleAreaChart = ({ data }) => {
             <circle cx={tooltip.x} cy={tooltip.y} r="4" fill={tokens.foreground} />
             <rect x={tooltip.x > width / 2 ? tooltip.x - 90 : tooltip.x + 10} y={tooltip.y - 35} width="80" height="30" rx="4" fill={tokens.background} stroke={tokens.border} />
             <text x={tooltip.x > width / 2 ? tooltip.x - 50 : tooltip.x + 50} y={tooltip.y - 16} textAnchor="middle" fontSize="11" fill={tokens.foreground} fontWeight="500" fontFamily={tokens.fontBody}>
-              ${tooltip.revenue.toLocaleString()}
+              ₵{tooltip.revenue.toLocaleString()}
             </text>
           </g>
         )}
@@ -438,7 +434,7 @@ const AdminOverview = ({ stats, salesData, topProducts, recentOrders }) => {
               const TrendIcon = stat.trend === "up" ? IconArrowUpRight : IconArrowDownRight;
               const trendColor = stat.trend === "up" ? tokens.green : tokens.destructive;
               const iconMap = {
-                "Total Revenue": IconDollarSign,
+                "Total Revenue": IconCedi,
                 "Orders": IconShoppingBag,
                 "Customers": IconUsers,
                 "Products": IconPackage,
@@ -497,7 +493,7 @@ const AdminOverview = ({ stats, salesData, topProducts, recentOrders }) => {
                       </div>
                     </div>
                     <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: 0 }}>
-                      ${product.revenue.toLocaleString()}
+                      ₵{product.revenue.toLocaleString()}
                     </p>
                   </div>
                 ))}
@@ -537,7 +533,7 @@ const AdminOverview = ({ stats, salesData, topProducts, recentOrders }) => {
                           </span>
                         </td>
                         <td style={{ padding: "0.75rem 1.5rem", textAlign: "right", fontWeight: 500, color: tokens.foreground }}>
-                          ${order.total}
+                          ₵{order.total}
                         </td>
                       </tr>
                     );
