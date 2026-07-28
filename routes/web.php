@@ -117,6 +117,8 @@ Route::middleware('auth')->group(function () {
         Route::patch('/admin/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.update-status');
 
         Route::get('/admin/customers', [CustomerController::class, 'Index']);
+        Route::get('/admin/customers/{id}', [CustomerController::class, 'show'])->name('admin.customers.show');
+        Route::get('/admin/customers/{id}/edit', [CustomerController::class, 'edit'])->name('admin.customers.edit');
         Route::get('/admin/categories', [CategoryController::class, 'Index']);
 
         Route::get('/admin/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');

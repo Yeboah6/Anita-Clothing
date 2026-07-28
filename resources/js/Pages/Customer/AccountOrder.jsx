@@ -135,19 +135,14 @@ const statusIcons = {
 };
 
 // ─── OrderCard ────────────────────────────────────────────────────────────────
-// Extracted so each order's hover state lives in its own component instance —
-// hooks can't safely live inside .map() on the parent, since the number of
-// hook calls would change whenever the order list changes.
-// Accordion behavior: open/closed state is lifted to the parent (AccountOrders)
-// so only one order panel is expanded at a time.
 const OrderCard = ({ order, isDesktop, isOpen, onToggle }) => {
   const [trackBtnHovered, setTrackBtnHovered] = useState(false);
   const [buyAgainBtnHovered, setBuyAgainBtnHovered] = useState(false);
   const [reviewBtnHovered, setReviewBtnHovered] = useState(false);
   const [headerHovered, setHeaderHovered] = useState(false);
 
-  const config = statusConfig[order.status] || statusConfig.pending;
-  const StatusIcon = statusIcons[order.status] || IconClock;
+  const config = statusConfig[order.order_status] || statusConfig.pending;
+  const StatusIcon = statusIcons[order.order_status] || IconClock;
 
   return (
     <div
@@ -330,7 +325,7 @@ const OrderCard = ({ order, isDesktop, isOpen, onToggle }) => {
             )}
 
             {/* Delivered actions */}
-            {order.status === "delivered" && (
+            {order.order_status === "delivered" && (
               <>
                 <hr style={{ margin: 0, border: "none", borderTop: `1px solid ${tokens.border}` }} />
                 <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -387,8 +382,6 @@ const AccountOrders = ({ orders = [] }) => {
 
   const [isDesktop, setIsDesktop] = useState(false);
   const [activePath, setActivePath] = useState("/account/orders");
-  // Accordion state: id of the currently open order, or null if all collapsed.
-  // Defaults to the first order (most recent) being open.
   const [openOrderId, setOpenOrderId] = useState(null);
 
   useEffect(() => {

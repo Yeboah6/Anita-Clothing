@@ -492,16 +492,16 @@ const OrderDetails = ({ order }) => {
                     <span style={{ color: tokens.mutedForeground }}>Subtotal</span>
                     <span style={{ color: tokens.foreground }}>{money(computedSubtotal)}</span>
                   </div>
-                  {/* {Number(order.discount_amount) > 0 && (
+                  {Number(order.discount_amount) > 0 && (
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
                       <span style={{ color: tokens.mutedForeground }}>Discount</span>
                       <span style={{ color: tokens.destructive }}>-{money(order.discount_amount)}</span>
                     </div>
-                  )} */}
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                  )}
+                  {/* <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
                     <span style={{ color: tokens.mutedForeground }}>Delivery</span>
                     <span style={{ color: tokens.foreground }}>{order.shipping_fee ? money(order.shipping_fee) : "Free"}</span>
-                  </div>
+                  </div> */}
                   <div style={{ height: "1px", backgroundColor: tokens.border, margin: "0.375rem 0" }} />
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9375rem", fontWeight: 600 }}>
                     <span style={{ color: tokens.foreground }}>Total</span>

@@ -73,6 +73,31 @@ const IconMail = () => (
   </svg>
 );
 
+const IconPencil = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+    <path d="m15 5 4 4" />
+  </svg>
+);
+
+const IconEye = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
 // ─── Status badge style helper ───────────────────────────────────────────────
 const getStatusStyle = (status) => {
   if (status === "active") {
@@ -93,6 +118,8 @@ const getStatusStyle = (status) => {
 const AdminCustomers = () => {
 
   const { customers: rawCustomers = [], stats = {} } = usePage().props;
+  const [viewHovered, setViewHovered] = useState(false);
+  const [editHovered, setEditHovered] = useState(false);
 
   const Customers = rawCustomers.map(customer => ({
     id: `CUS-${customer.id}`,
@@ -470,6 +497,50 @@ const AdminCustomers = () => {
                             </span>
                           </td>
                           <td style={{ padding: "0.75rem 1.5rem", textAlign: "right" }}>
+                            <a
+                              href={`/admin/customers/${customer.id}`}
+                              aria-label="View"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "36px",
+                                height: "36px",
+                                borderRadius: tokens.radius,
+                                border: "none",
+                                background: viewHovered ? tokens.secondary : "transparent",
+                                cursor: "pointer",
+                                color: tokens.foreground,
+                                transition: "background-color 0.15s ease",
+                                textDecoration: "none",
+                              }}
+                              onMouseEnter={() => setViewHovered(true)}
+                              onMouseLeave={() => setViewHovered(false)}
+                            >
+                              <IconEye />
+                            </a>
+                            <a
+                              href={`/admin/customers/${customer.id}/edit`}
+                              aria-label="Edit"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "36px",
+                                height: "36px",
+                                borderRadius: tokens.radius,
+                                border: "none",
+                                background: editHovered ? tokens.secondary : "transparent",
+                                cursor: "pointer",
+                                color: tokens.foreground,
+                                transition: "background-color 0.15s ease",
+                                textDecoration: "none",
+                              }}
+                              onMouseEnter={() => setEditHovered(true)}
+                              onMouseLeave={() => setEditHovered(false)}
+                            >
+                              <IconPencil />
+                            </a>
                             <button
                               onClick={() => handleEmailCustomer(customer.email)}
                               aria-label={`Email ${customer.name}`}

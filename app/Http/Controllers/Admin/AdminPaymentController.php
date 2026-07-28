@@ -92,6 +92,7 @@ class AdminPaymentController extends Controller
             'methodBreakdown' => $methodBreakdown,
             'statusBreakdown' => $statusBreakdown,
             'filters' => $filters,
+            'indexUrl' => route('admin.payments.index'),
             'exportUrl' => route('admin.payments.export', request()->only(['date_from', 'date_to', 'status', 'channel']))
         ]);
     }

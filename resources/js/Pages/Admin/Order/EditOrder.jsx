@@ -213,7 +213,7 @@ const labelStyle = { fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.f
 const inputStyle = { height: "40px", width: "100%", padding: "0 0.75rem", fontSize: "0.875rem", fontFamily: tokens.fontBody, backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, color: tokens.foreground, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s ease" };
 const textareaStyle = { width: "100%", padding: "0.75rem", fontSize: "0.875rem", fontFamily: tokens.fontBody, backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, color: tokens.foreground, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s ease", resize: "vertical", minHeight: "90px" };
 
-const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
+const money = (n) => `₵${(Number(n) || 0).toFixed(2)}`;
 const formatDate = (d) => {
   if (!d) return "—";
   const date = new Date(d);
@@ -223,13 +223,6 @@ const formatDate = (d) => {
 };
 
 // ─── EditOrder Page ───────────────────────────────────────────────────────────
-// Expects Inertia props:
-//   order: {
-//     id, order_number, status, payment_status, tracking_number, courier, admin_note,
-//     created_at, total,
-//     customer: { name, email, phone },
-//     items: [{ id, product_name, size, color, quantity, price }],
-//   }
 const EditOrder = ({ order }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -240,7 +233,7 @@ const EditOrder = ({ order }) => {
   const [saveBtnHovered, setSaveBtnHovered] = useState(false);
 
   const { data, setData, put, processing, errors, isDirty } = useForm({
-    status: order.status ?? "pending",
+    order_status: order.order_status ?? "pending",
     payment_status: order.payment_status ?? "unpaid",
     tracking_number: order.tracking_number ?? "",
     courier: order.courier ?? "",
@@ -320,7 +313,7 @@ const EditOrder = ({ order }) => {
                   <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 500, margin: 0, color: tokens.foreground }}>
                     Edit Order {order.order_number}
                   </h1>
-                  <StatusBadge value={order.status} />
+                  <StatusBadge value={order.order_status} />
                 </div>
                 <p style={{ marginTop: "0.25rem", fontSize: "0.8125rem", color: tokens.mutedForeground }}>
                   Placed {formatDate(order.created_at)}
@@ -356,8 +349,8 @@ const EditOrder = ({ order }) => {
                   <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
                     <div>
                       <label style={labelStyle}>Status</label>
-                      <CustomSelect value={data.status} onChange={(val) => setData("status", val)} options={orderStatusOptions} placeholder="Select status" error={errors.status} />
-                      {errors.status && <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.status}</p>}
+                      <CustomSelect value={data.order_status} onChange={(val) => setData("order_status", val)} options={orderStatusOptions} placeholder="Select status" error={errors.order_status} />
+                      {errors.order_status && <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.order_status}</p>}
                     </div>
                     <div>
                       <label style={labelStyle}>Payment Status</label>

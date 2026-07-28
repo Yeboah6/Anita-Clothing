@@ -28,6 +28,7 @@ class Order extends Model
         'shipping',
         'tax',
         'order_status',
+        'payment_status',
     ];
 
     public function user() 

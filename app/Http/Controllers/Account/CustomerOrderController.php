@@ -23,7 +23,7 @@ class CustomerOrderController extends Controller
                     'id' => $order->order_number,
                     'date' => $order->created_at->format('Y-m-d'),
                     'total' => $order->total_amount,
-                    'status' => $order->status, // ⚠️ see note below
+                    'order_status' => $order->order_status, // ⚠️ see note below
                     'tracking' => $order->tracking_number ?? null,
                     'items' => $order->items->map(function ($item) {
                         $imageUrl = null;

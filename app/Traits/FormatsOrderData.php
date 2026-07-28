@@ -16,19 +16,15 @@ trait FormatsOrderData
         return [
             'id'               => $order->id,
             'order_number'     => $order->order_number,
-            'status'           => $order->status,
-            // ASSUMPTION: `payment_status` column exists on orders.
-            // If it doesn't yet, either add a migration or drop this key.
+            'order_status'           => $order->order_status,
             'payment_status'   => $order->payment_status ?? null,
             'payment_method'   => $order->payment_method ?? null,
 
             'subtotal'         => (float) ($order->subtotal ?? $this->calculateSubtotal($order)),
             'discount_amount'  => (float) ($order->discount_amount ?? 0),
-            'shipping_fee'     => (float) ($order->shipping_fee ?? 0),
-            'total'            => (float) $order->total,
+            // 'shipping_fee'     => (float) ($order->shipping_fee ?? 0),
+            'total'            => (float) $order->total_amount,
 
-            // ASSUMPTION: fulfillment columns. Drop these keys (and the
-            // Fulfillment card in EditOrder.jsx) if you haven't added them yet.
             'tracking_number'  => $order->tracking_number ?? null,
             'courier'          => $order->courier ?? null,
             'admin_note'       => $order->admin_note ?? null,
@@ -36,7 +32,7 @@ trait FormatsOrderData
             'created_at'       => $order->created_at,
 
             'customer'         => $this->formatOrderCustomer($order),
-            'shipping_address' => $this->formatOrderAddress($order),
+            'delivery_address' => $this->formatOrderAddress($order),
             'items'            => $order->items->map(fn ($item) => $this->formatOrderItem($item))->values(),
         ];
     }
@@ -70,15 +66,15 @@ trait FormatsOrderData
     }
 
     /**
-     * ASSUMPTION: shipping address is stored as a JSON/array column called
-     * `shipping_address` on the orders table with keys line1/line2/city/
+     * ASSUMPTION: delivery address is stored as a JSON/array column called
+     * `delivery_address` on the orders table with keys line1/line2/city/
      * region/postal_code/country. If yours uses separate flat columns
-     * (shipping_city, shipping_postal_code, etc.) or a related
+     * (delivery_city, delivery_postal_code, etc.) or a related
      * `addresses` table, replace the body of this method accordingly.
      */
     protected function formatOrderAddress(Order $order): ?array
     {
-        $address = $order->shipping_address;
+        $address = $order->delivery_address;
 
         if (!$address) {
             return null;
