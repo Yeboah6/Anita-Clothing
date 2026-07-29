@@ -59,6 +59,10 @@ class AuthController extends Controller
 
         // Redirect based on user role
         $user = Auth::user();
+
+        if ($user->role === 'customer') {
+           $user->update(['status' => 'active']);
+        }
         
         return match ($user->role) {
             'admin' => redirect()->intended('/admin'),

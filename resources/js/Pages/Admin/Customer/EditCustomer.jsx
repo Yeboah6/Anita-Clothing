@@ -157,7 +157,7 @@ const AdminEditCustomer = () => {
     });
   };
 
-  const handleDelete = () => {
+  const handleSuspend = () => {
     router.delete(`/admin/customers/${customer.id}`, {
       onSuccess: () => router.visit("/admin/customers"),
     });
@@ -381,6 +381,7 @@ const AdminEditCustomer = () => {
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
+                    <option value="suspended">Suspended</option>
                   </select>
                 </Field>
 
@@ -393,7 +394,6 @@ const AdminEditCustomer = () => {
                     style={{ ...inputStyle(errors.role, focusedField === "role"), cursor: "pointer" }}
                   >
                     <option value="customer">Customer</option>
-                    <option value="admin">Admin</option>
                   </select>
                 </Field>
               </div>
@@ -487,13 +487,15 @@ const AdminEditCustomer = () => {
               {/* Danger zone */}
               <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, padding: "1.5rem" }}>
                 <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.0625rem", fontWeight: 500, margin: "0 0 0.5rem", color: tokens.foreground }}>
-                  Danger Zone
+                  {data.status === "suspended" ? "Account Suspended" : "Suspend Account"}
                 </h3>
                 <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, margin: "0 0 1rem" }}>
-                  Permanently remove this customer account. This cannot be undone.
+                  {data.status === "suspended"
+                    ? "This customer is currently suspended and cannot log in. Their orders, addresses, and order history remain intact."
+                    : "Suspending blocks this customer from logging in. Their orders, addresses, and order history are kept intact — nothing is deleted."}
                 </p>
 
-                {!showDeleteConfirm ? (
+                {data.status === "suspended" ? null : !showDeleteConfirm ? (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
                     style={{
@@ -512,12 +514,12 @@ const AdminEditCustomer = () => {
                       cursor: "pointer",
                     }}
                   >
-                    <IconTrash /> Delete Customer
+                    <IconTrash /> Suspend Customer
                   </button>
                 ) : (
                   <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button
-                      onClick={handleDelete}
+                      onClick={handleSuspend}
                       style={{
                         height: "36px",
                         padding: "0 1rem",
@@ -531,7 +533,7 @@ const AdminEditCustomer = () => {
                         cursor: "pointer",
                       }}
                     >
-                      Confirm Delete
+                      Confirm Suspension
                     </button>
                     <button
                       onClick={() => setShowDeleteConfirm(false)}

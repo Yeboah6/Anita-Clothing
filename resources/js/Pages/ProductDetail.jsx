@@ -201,11 +201,9 @@ const Toast = ({ message, visible, type = "success" }) => {
 // ─── ProductDetail Page ──────────────────────────────────────────────────────
 const ProductDetail = ({ product }) => {
 
-  // Pull the authenticated user from Inertia's shared props
   const { props } = usePage();
   const user = props?.auth?.user ?? null;
   
-  // Determine user type based on role
   const isAuthenticated = !!user;
   const admin = user?.role === 'admin';
   const customer = user?.role === 'customer';
@@ -221,8 +219,6 @@ const ProductDetail = ({ product }) => {
   const [breadcrumbHover, setBreadcrumbHover] = useState({ home: false, collections: false, category: false });
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  // Wishlist state — seeded from the product prop if the backend tells us
-  // whether this product is already saved for the current user.
   const [isWishlisted, setIsWishlisted] = useState(!!product?.isWishlisted);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
 
@@ -239,8 +235,6 @@ const ProductDetail = ({ product }) => {
     setQuantity(1);
   }, [product?.id]);
 
-  // Keep wishlist state in sync if the underlying product prop changes
-  // (e.g. navigating between products via related items).
   useEffect(() => {
     setIsWishlisted(!!product?.isWishlisted);
   }, [product?.id, product?.isWishlisted]);
@@ -517,6 +511,8 @@ const ProductDetail = ({ product }) => {
                     </div>
                   </div>
                 )}
+
+                <p>Stock Left: {product.stock_quantity}</p>
 
                 {/* Quantity Selector */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>

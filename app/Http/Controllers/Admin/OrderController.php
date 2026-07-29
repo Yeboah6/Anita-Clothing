@@ -65,9 +65,6 @@ class OrderController extends Controller
         $validated = $request->validate([
             'order_status'          => ['required', Rule::in(['pending', 'processing', 'delivered', 'cancelled'])],
             'payment_status'  => ['nullable', Rule::in(['unpaid', 'paid', 'refunded'])],
-            'tracking_number' => ['nullable', 'string', 'max:100'],
-            'courier'         => ['nullable', 'string', 'max:100'],
-            'admin_note'      => ['nullable', 'string', 'max:2000'],
         ]);
  
         $order->update($validated);

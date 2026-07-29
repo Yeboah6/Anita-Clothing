@@ -91,6 +91,7 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const [btnHovered, setBtnHovered] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
@@ -98,7 +99,9 @@ const Footer = () => {
     injectFonts();
 
     const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
+      const width = window.innerWidth;
+      setIsDesktop(width >= 1024);
+      setIsTablet(width >= 640 && width < 1024);
     };
 
     handleResize();
@@ -139,6 +142,12 @@ const Footer = () => {
     );
   };
 
+  const getGridColumns = () => {
+    if (isDesktop) return "1fr 1fr 1fr 1fr";
+    if (isTablet) return "1fr 1fr";
+    return "1fr";
+  };
+
   return (
     <footer
       style={{
@@ -151,18 +160,24 @@ const Footer = () => {
         style={{
           maxWidth: "1280px",
           margin: "0 auto",
-          padding: "3rem 1rem",
+          padding: isDesktop ? "3rem 1rem" : "2rem 1.25rem",
         }}
       >
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: isDesktop ? "1fr 1fr 1fr 1fr" : "1fr 1fr",
-            gap: "2rem",
+            gridTemplateColumns: getGridColumns(),
+            gap: isDesktop ? "2rem" : "1.75rem",
+            textAlign: isDesktop ? "left" : "center",
           }}
         >
           {/* Brand */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: "0.75rem",
+            alignItems: isDesktop ? "flex-start" : "center"
+          }}>
             <a
               href="/"
               style={{
@@ -172,10 +187,15 @@ const Footer = () => {
               }}
             >
               <img
-              src="/images/logo.png"
-              alt="CuteBloom Logo"
-              style={{ height: "55px", width: "auto", borderRadius: tokens.radius, objectFit: "cover" }}
-            />
+                src="/images/logo.png"
+                alt="CuteBloom Logo"
+                style={{ 
+                  height: isDesktop ? "55px" : "48px", 
+                  width: "auto", 
+                  borderRadius: tokens.radius, 
+                  objectFit: "cover" 
+                }}
+              />
             </a>
             <p
               style={{
@@ -183,15 +203,42 @@ const Footer = () => {
                 color: tokens.mutedForeground,
                 lineHeight: 1.6,
                 margin: 0,
+                maxWidth: "320px",
               }}
             >
               Timeless elegance for the modern woman. Curated collections that
               celebrate understated luxury.
             </p>
+            {/* Social icons for mobile */}
+            {!isDesktop && (
+              <div style={{ display: "flex", gap: "1.25rem", marginTop: "0.25rem" }}>
+                <HoverLink
+                  href="https://instagram.com/ser_nita21"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ariaLabel="Instagram"
+                >
+                  <InstagramIcon />
+                </HoverLink>
+                <HoverLink
+                  href="https://tiktok.com/@cutebloom"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ariaLabel="TikTok"
+                >
+                  <TikTokIcon />
+                </HoverLink>
+              </div>
+            )}
           </div>
 
           {/* Quick Links */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: "0.75rem",
+            alignItems: isDesktop ? "flex-start" : "center"
+          }}>
             <h4
               style={{
                 fontFamily: tokens.fontDisplay,
@@ -203,7 +250,7 @@ const Footer = () => {
             >
               Quick Links
             </h4>
-            <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: isDesktop ? "flex-start" : "center" }}>
               <HoverLink href="/collections">All Collections</HoverLink>
               <HoverLink href="/new-arrivals">New Arrivals</HoverLink>
               <HoverLink href="/#about">About Us</HoverLink>
@@ -211,7 +258,12 @@ const Footer = () => {
           </div>
 
           {/* Contact */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: "0.75rem",
+            alignItems: isDesktop ? "flex-start" : "center"
+          }}>
             <h4
               style={{
                 fontFamily: tokens.fontDisplay,
@@ -230,37 +282,45 @@ const Footer = () => {
                 gap: "0.5rem",
                 fontSize: "0.875rem",
                 color: tokens.mutedForeground,
+                alignItems: isDesktop ? "flex-start" : "center",
               }}
             >
               <HoverLink href="mailto:serwaaakoto392@gmail.com" ariaLabel="Email">
                 serwaaakoto392@gmail.com
               </HoverLink>
-              <HoverLink href="tel:+233 27 722 3535" ariaLabel="Email">
+              <HoverLink href="tel:+233 27 722 3535" ariaLabel="Phone">
                 +233 27 722 3535
               </HoverLink>
             </div>
-            <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
-              <HoverLink
-                href="https://instagram.com/ser_nita21"
-                target="_blank"
-                rel="noopener noreferrer"
-                ariaLabel="Instagram"
-              >
-                <InstagramIcon />
-              </HoverLink>
-              <HoverLink
-                href="https://tiktok.com/@cutebloom"
-                target="_blank"
-                rel="noopener noreferrer"
-                ariaLabel="TikTok"
-              >
-                <TikTokIcon />
-              </HoverLink>
-            </div>
+            {isDesktop && (
+              <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
+                <HoverLink
+                  href="https://instagram.com/ser_nita21"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ariaLabel="Instagram"
+                >
+                  <InstagramIcon />
+                </HoverLink>
+                <HoverLink
+                  href="https://tiktok.com/@cutebloom"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ariaLabel="TikTok"
+                >
+                  <TikTokIcon />
+                </HoverLink>
+              </div>
+            )}
           </div>
 
           {/* Newsletter */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: "0.75rem",
+            alignItems: isDesktop ? "flex-start" : "center"
+          }}>
             <h4
               style={{
                 fontFamily: tokens.fontDisplay,
@@ -278,11 +338,21 @@ const Footer = () => {
                 color: tokens.mutedForeground,
                 lineHeight: 1.6,
                 margin: 0,
+                maxWidth: "320px",
               }}
             >
               Subscribe for exclusive offers and new arrivals.
             </p>
-            <form onSubmit={handleSubmit} style={{ display: "flex", gap: "0.5rem" }}>
+            <form 
+              onSubmit={handleSubmit} 
+              style={{ 
+                display: "flex", 
+                gap: "0.5rem",
+                width: "100%",
+                maxWidth: isDesktop ? "none" : "320px",
+                flexDirection: isDesktop ? "row" : "column",
+              }}
+            >
               <input
                 type="email"
                 placeholder="Your email"
@@ -292,7 +362,7 @@ const Footer = () => {
                 disabled={submitting}
                 style={{
                   flex: 1,
-                  padding: "0.5rem 0.75rem",
+                  padding: "0.625rem 0.75rem",
                   fontSize: "0.875rem",
                   fontFamily: tokens.fontBody,
                   backgroundColor: tokens.background,
@@ -301,6 +371,8 @@ const Footer = () => {
                   color: tokens.foreground,
                   outline: "none",
                   transition: "border-color 0.2s ease",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
                 onBlur={(e) => (e.target.style.borderColor = tokens.border)}
@@ -309,7 +381,7 @@ const Footer = () => {
                 type="submit"
                 disabled={submitting}
                 style={{
-                  padding: "0.5rem 1rem",
+                  padding: "0.625rem 1rem",
                   fontSize: "0.875rem",
                   fontWeight: 500,
                   fontFamily: tokens.fontBody,
@@ -321,6 +393,7 @@ const Footer = () => {
                   opacity: submitting ? 0.7 : btnHovered ? 0.9 : 1,
                   transition: "opacity 0.2s ease",
                   whiteSpace: "nowrap",
+                  width: !isDesktop ? "100%" : "auto",
                 }}
                 onMouseEnter={() => setBtnHovered(true)}
                 onMouseLeave={() => setBtnHovered(false)}
@@ -334,6 +407,7 @@ const Footer = () => {
                   fontSize: "0.8125rem",
                   margin: 0,
                   color: feedback.type === "success" ? "#16a34a" : "#ef4444",
+                  textAlign: isDesktop ? "left" : "center",
                 }}
               >
                 {feedback.message}
@@ -345,15 +419,15 @@ const Footer = () => {
         {/* Copyright */}
         <div
           style={{
-            marginTop: "3rem",
+            marginTop: isDesktop ? "3rem" : "2rem",
             borderTop: `1px solid ${tokens.border}`,
-            paddingTop: "2rem",
+            paddingTop: isDesktop ? "2rem" : "1.5rem",
             textAlign: "center",
           }}
         >
           <p
             style={{
-              fontSize: "0.875rem",
+              fontSize: "0.8125rem",
               color: tokens.mutedForeground,
               margin: 0,
             }}

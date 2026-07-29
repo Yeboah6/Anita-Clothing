@@ -6,42 +6,49 @@ use App\Models\Order;
 
 trait FormatsOrderData
 {
-    /**
-     * Format a single Order for the admin ShowOrder / EditOrder pages.
-     * Expects $order to already have `items.product` and `user` eager-loaded,
-     * e.g. Order::with('items.product', 'user')->...
-     */
     protected function formatOrderForAdmin(Order $order): array
     {
         return [
-            'id'               => $order->id,
-            'order_number'     => $order->order_number,
-            'order_status'           => $order->order_status,
-            'payment_status'   => $order->payment_status ?? null,
-            'payment_method'   => $order->payment_method ?? null,
+            'id' => $order->id,
+            'order_number' => $order->order_number,
+            'status' => $order->order_status,
+            'order_status' => $order->order_status,
+            'payment_status' => $order->payment_status,
+            'created_at' => $order->created_at,
+            'notes' => $order->note,
+            'subtotal' => $order->subtotal,
+            'discount_amount' => $order->discount_amount ?? 0,
+            'total' => $order->total_amount,
+            'payment_method' => optional($order->payment)->provider,
 
-            'subtotal'         => (float) ($order->subtotal ?? $this->calculateSubtotal($order)),
-            'discount_amount'  => (float) ($order->discount_amount ?? 0),
-            // 'shipping_fee'     => (float) ($order->shipping_fee ?? 0),
-            'total'            => (float) $order->total_amount,
+            'customer' => [
+                'name' => trim(($order->first_name ?? '') . ' ' . ($order->last_name ?? '')) ?: optional($order->user)->name,
+                'email' => $order->email ?? optional($order->user)->email,
+                'phone' => $order->phone ?? optional($order->user)->phone,
+            ],
 
-            'tracking_number'  => $order->tracking_number ?? null,
-            'courier'          => $order->courier ?? null,
-            'admin_note'       => $order->admin_note ?? null,
+            'shipping_address' => [
+                'line1' => $order->address,
+                'line2' => $order->apartment,
+                'city' => $order->city,
+                'region' => $order->state,
+                'postal_code' => $order->zip,
+                'country' => 'Ghana',
+            ],
 
-            'created_at'       => $order->created_at,
-
-            'customer'         => $this->formatOrderCustomer($order),
-            'delivery_address' => $this->formatOrderAddress($order),
-            'items'            => $order->items->map(fn ($item) => $this->formatOrderItem($item))->values(),
+            'items' => $order->items->map(fn ($item) => [
+                'id' => $item->id,
+                'product_name' => $item->product->name ?? $item->product_name ?? 'Product',
+                'image' => $item->product->images->first()->url ?? null,
+                'size' => $item->size,
+                'color' => $item->color,
+                'quantity' => $item->quantity,
+                'price' => $item->price,
+                'line_total' => $item->price * $item->quantity,
+            ]),
         ];
     }
 
-    /**
-     * Customer block. Registration collects first_name/last_name separately
-     * (see AccountProfile / registration flow), so join them here rather
-     * than assuming a single `name` column exists on users.
-     */
     protected function formatOrderCustomer(Order $order): array
     {
         if ($order->user) {
@@ -54,10 +61,6 @@ trait FormatsOrderData
             ];
         }
 
-        // ASSUMPTION: guest checkout stores contact details directly on the
-        // order (guest_name / guest_email / guest_phone). Adjust to match
-        // however guest orders are actually captured, or remove this branch
-        // if guest checkout isn't supported.
         return [
             'name'  => $order->guest_name ?? 'Guest',
             'email' => $order->guest_email ?? null,
@@ -65,23 +68,14 @@ trait FormatsOrderData
         ];
     }
 
-    /**
-     * ASSUMPTION: delivery address is stored as a JSON/array column called
-     * `delivery_address` on the orders table with keys line1/line2/city/
-     * region/postal_code/country. If yours uses separate flat columns
-     * (delivery_city, delivery_postal_code, etc.) or a related
-     * `addresses` table, replace the body of this method accordingly.
-     */
     protected function formatOrderAddress(Order $order): ?array
     {
-        $address = $order->delivery_address;
+        $address = $order->address;
 
         if (!$address) {
             return null;
         }
 
-        // Support both a cast array and a raw JSON string just in case
-        // the column isn't cast to `array` on the model yet.
         if (is_string($address)) {
             $address = json_decode($address, true) ?? [];
         }
@@ -96,11 +90,6 @@ trait FormatsOrderData
         ];
     }
 
-    /**
-     * Single order item row. `size`/`color` are read off the order_item
-     * itself (a snapshot at purchase time) rather than the live product/
-     * variant, since variants can change or be deleted after the sale.
-     */
     protected function formatOrderItem($item): array
     {
         $product = $item->product;
@@ -109,7 +98,6 @@ trait FormatsOrderData
             'id'           => $item->id,
             'product_id'   => $item->product_id,
             'product_name' => $product->name ?? 'Product no longer available',
-            // ProductImage already appends a `url` accessor — reuse it.
             'image'        => $product?->images?->first()?->url ?? null,
             'size'         => $item->size ?? null,
             'color'        => $item->color ?? null,

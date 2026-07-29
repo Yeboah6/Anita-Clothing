@@ -37,14 +37,23 @@ const ChevronRight = () => (
 // ─── ProductCard ─────────────────────────────────────────────────────────────
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const image = product.images?.[0];
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <a
       href={`/product/${product.slug ?? product.id}`}
       style={{ display: "block", textDecoration: "none", color: "inherit" }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => !isMobile && setHovered(true)}
+      onMouseLeave={() => !isMobile && setHovered(false)}
+      onTouchStart={() => setIsMobile(true)}
     >
       <div
         style={{
@@ -75,20 +84,20 @@ const ProductCard = ({ product }) => {
           </div>
         )}
       </div>
-      <div style={{ marginTop: "1rem" }}>
+      <div style={{ marginTop: "0.75rem" }}>
         <h3
           style={{
             fontFamily: tokens.fontDisplay,
-            fontSize: "1.125rem",
+            fontSize: "clamp(0.938rem, 2.5vw, 1.125rem)",
             fontWeight: 500,
             margin: "0 0 4px",
-            color: hovered ? tokens.mutedForeground : tokens.foreground,
-            transition: "color 0.2s ease",
+            color: tokens.foreground,
+            lineHeight: 1.3,
           }}
         >
           {product.name}
         </h3>
-        <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0, fontFamily: tokens.fontBody }}>
+        <p style={{ fontSize: "clamp(0.75rem, 2vw, 0.875rem)", color: tokens.mutedForeground, margin: 0, fontFamily: tokens.fontBody }}>
           ₵{product.price}
         </p>
       </div>
@@ -102,13 +111,18 @@ const NewArrivalsPage = ({ products = [] }) => {
   const [subscribeBtnHovered, setSubscribeBtnHovered] = useState(false);
   const [breadcrumbHomeHovered, setBreadcrumbHomeHovered] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error', message: string }
+  const [feedback, setFeedback] = useState(null);
 
   useEffect(() => {
     injectFonts();
 
-    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsDesktop(width >= 1024);
+      setIsTablet(width >= 640 && width < 1024);
+    };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -116,7 +130,7 @@ const NewArrivalsPage = ({ products = [] }) => {
 
   const getGridColumns = () => {
     if (isDesktop) return "1fr 1fr 1fr 1fr";
-    if (window.innerWidth >= 768) return "1fr 1fr 1fr";
+    if (isTablet) return "1fr 1fr 1fr";
     return "1fr 1fr";
   };
 
@@ -160,8 +174,8 @@ const NewArrivalsPage = ({ products = [] }) => {
       <main style={{ flex: 1 }}>
         {/* Breadcrumb */}
         <section style={{ borderBottom: `1px solid ${tokens.border}` }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "1rem" }}>
-            <nav style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: isDesktop ? "1rem" : "0.75rem 1rem" }}>
+            <nav style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "clamp(0.75rem, 2vw, 0.875rem)", color: tokens.mutedForeground }}>
               <a
                 href="/"
                 style={{
@@ -181,13 +195,27 @@ const NewArrivalsPage = ({ products = [] }) => {
         </section>
 
         {/* Hero */}
-        <section style={{ padding: isDesktop ? "4rem 0" : "3rem 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1rem" }}>
+        <section style={{ padding: isDesktop ? "4rem 0" : isTablet ? "2.5rem 0" : "2rem 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.25rem" }}>
             <div style={{ maxWidth: "42rem", margin: "0 auto", textAlign: "center" }}>
-              <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(2.25rem, 5vw, 3.75rem)", fontWeight: 500, letterSpacing: "-0.02em", margin: 0, color: tokens.foreground }}>
+              <h1 style={{ 
+                fontFamily: tokens.fontDisplay, 
+                fontSize: "clamp(1.75rem, 6vw, 3.75rem)", 
+                fontWeight: 500, 
+                letterSpacing: "-0.02em", 
+                margin: 0, 
+                color: tokens.foreground,
+                lineHeight: 1.1,
+              }}>
                 New Arrivals
               </h1>
-              <p style={{ marginTop: "1.5rem", fontSize: "1.125rem", color: tokens.mutedForeground, lineHeight: 1.7 }}>
+              <p style={{ 
+                marginTop: isDesktop ? "1.5rem" : "1rem", 
+                fontSize: "clamp(0.938rem, 2.5vw, 1.125rem)", 
+                color: tokens.mutedForeground, 
+                lineHeight: 1.7,
+                padding: isDesktop ? "0" : "0 0.5rem",
+              }}>
                 Discover the latest additions to our collection. Each piece is crafted with care 
                 and designed to bring timeless elegance to your wardrobe.
               </p>
@@ -196,8 +224,8 @@ const NewArrivalsPage = ({ products = [] }) => {
         </section>
 
         {/* Products Grid */}
-        <section style={{ paddingBottom: isDesktop ? "6rem" : "4rem" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1rem" }}>
+        <section style={{ paddingBottom: isDesktop ? "6rem" : isTablet ? "3rem" : "2.5rem" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.25rem" }}>
             {products.length > 0 ? (
               <div
                 style={{
@@ -211,8 +239,8 @@ const NewArrivalsPage = ({ products = [] }) => {
                 ))}
               </div>
             ) : (
-              <div style={{ padding: "4rem 0", textAlign: "center" }}>
-                <p style={{ color: tokens.mutedForeground }}>
+              <div style={{ padding: isDesktop ? "4rem 0" : "3rem 0", textAlign: "center" }}>
+                <p style={{ color: tokens.mutedForeground, fontSize: "clamp(0.875rem, 2vw, 1rem)" }}>
                   New arrivals coming soon. Check back later!
                 </p>
               </div>
@@ -221,23 +249,42 @@ const NewArrivalsPage = ({ products = [] }) => {
         </section>
 
         {/* Newsletter CTA */}
-        <section style={{ borderTop: `1px solid ${tokens.border}`, backgroundColor: tokens.secondary, padding: isDesktop ? "4rem 0" : "3rem 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1rem" }}>
+        <section style={{ 
+          borderTop: `1px solid ${tokens.border}`, 
+          backgroundColor: tokens.secondary, 
+          padding: isDesktop ? "4rem 0" : "2.5rem 0" 
+        }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.25rem" }}>
             <div style={{ maxWidth: "36rem", margin: "0 auto", textAlign: "center" }}>
-              <h2 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 500, margin: 0, color: tokens.foreground }}>
+              <h2 style={{ 
+                fontFamily: tokens.fontDisplay, 
+                fontSize: "clamp(1.25rem, 4vw, 1.875rem)", 
+                fontWeight: 500, 
+                margin: 0, 
+                color: tokens.foreground,
+                lineHeight: 1.2,
+              }}>
                 Be the First to Know
               </h2>
-              <p style={{ marginTop: "0.75rem", color: tokens.mutedForeground, fontSize: "1rem", lineHeight: 1.6 }}>
+              <p style={{ 
+                marginTop: isDesktop ? "0.75rem" : "0.5rem", 
+                color: tokens.mutedForeground, 
+                fontSize: "clamp(0.875rem, 2vw, 1rem)", 
+                lineHeight: 1.6,
+                padding: "0 0.5rem",
+              }}>
                 Subscribe to our newsletter and never miss a new arrival.
               </p>
               <form
                 onSubmit={handleSubscribe}
                 style={{
-                  marginTop: "1.5rem",
+                  marginTop: "1.25rem",
                   display: "flex",
                   flexDirection: "column",
                   gap: "0.75rem",
                   justifyContent: "center",
+                  maxWidth: isDesktop ? "none" : "400px",
+                  margin: "1.25rem auto 0",
                 }}
                 className="newarrivals-newsletter-form"
               >
@@ -259,6 +306,8 @@ const NewArrivalsPage = ({ products = [] }) => {
                     color: tokens.foreground,
                     outline: "none",
                     transition: "border-color 0.2s ease",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                   onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
                   onBlur={(e) => (e.target.style.borderColor = tokens.border)}
@@ -279,6 +328,8 @@ const NewArrivalsPage = ({ products = [] }) => {
                     cursor: submitting ? "not-allowed" : "pointer",
                     opacity: submitting ? 0.7 : subscribeBtnHovered ? 0.9 : 1,
                     transition: "opacity 0.2s ease",
+                    width: "100%",
+                    whiteSpace: "nowrap",
                   }}
                   onMouseEnter={() => setSubscribeBtnHovered(true)}
                   onMouseLeave={() => setSubscribeBtnHovered(false)}
@@ -292,6 +343,7 @@ const NewArrivalsPage = ({ products = [] }) => {
                     marginTop: "0.75rem",
                     fontSize: "0.8125rem",
                     color: feedback.type === "success" ? "#16a34a" : "#ef4444",
+                    padding: "0 0.5rem",
                   }}
                 >
                   {feedback.message}
@@ -309,6 +361,19 @@ const NewArrivalsPage = ({ products = [] }) => {
         @media (min-width: 640px) {
           .newarrivals-newsletter-form {
             flex-direction: row !important;
+            max-width: none !important;
+          }
+          .newarrivals-newsletter-form input {
+            width: auto !important;
+          }
+          .newarrivals-newsletter-form button {
+            width: auto !important;
+  flex-shrink: 0;
+          }
+        }
+        @media (max-width: 639px) {
+          .newarrivals-newsletter-form {
+            padding: 0 0.5rem;
           }
         }
       `}</style>

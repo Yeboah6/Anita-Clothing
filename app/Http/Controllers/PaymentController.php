@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Product;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,24 +84,24 @@ class PaymentController extends Controller
     public function callback(Request $request)
     {
         $reference = $request->query('reference') ?? $request->query('trxref');
-
+    
         if (! $reference) {
             return redirect()->route('cart')->withErrors([
                 'payment' => 'Missing payment reference.',
             ]);
         }
-
+    
         $payment = Payment::where('reference', $reference)->firstOrFail();
-
+    
         try {
             $result = $this->paystack->verifyTransaction($reference);
         } catch (\Throwable $e) {
             Log::error('Paystack verify error', ['error' => $e->getMessage()]);
             return redirect()->route('checkout.failed', $payment->order_id);
         }
-
+    
         $status = $result['data']['status'] ?? 'failed';
-
+    
         DB::transaction(function () use ($payment, $result, $status) {
             $payment->update([
                 'status' => $status === 'success' ? 'success' : 'failed',
@@ -108,17 +109,19 @@ class PaymentController extends Controller
                 'gateway_response' => $result['data'],
                 'paid_at' => $status === 'success' ? now() : null,
             ]);
-
+    
             if ($status === 'success') {
                 $payment->order->update(['payment_status' => 'paid']);
                 $payment->order->update(['order_status' => 'processing']);
+    
+                $this->deductStock($payment->order);
             }
         });
-
+    
         if ($status === 'success') {
             return redirect()->route('checkout.success', $payment->order->order_number);
         }
-
+    
         return redirect()->route('checkout.failed', $payment->order->order_number);
     }
 
@@ -197,5 +200,39 @@ class PaymentController extends Controller
                 'status' => $payment->status,
             ] : null,
         ]);
+    }
+
+    private function deductStock(Order $order): void
+    {
+        if ($order->stock_deducted_at !== null) {
+            return;
+        }
+    
+        // Lock the order row so a second concurrent call (redirect + webhook
+        // racing each other) blocks here until the first one finishes and
+        // commits, then sees stock_deducted_at already set and returns.
+        $locked = Order::where('id', $order->id)->lockForUpdate()->first();
+    
+        if (!$locked || $locked->stock_deducted_at !== null) {
+            return;
+        }
+    
+        foreach ($order->items()->with('product')->get() as $item) {
+            $product = Product::where('id', $item->product_id)->lockForUpdate()->first();
+    
+            if (!$product) {
+                Log::warning('Stock deduction skipped: product missing', [
+                    'order_id' => $order->id,
+                    'product_id' => $item->product_id,
+                ]);
+                continue;
+            }
+    
+            $product->update([
+                'stock_quantity' => max(0, $product->stock_quantity - $item->quantity),
+            ]);
+        }
+    
+        $locked->update(['stock_deducted_at' => now()]);
     }
 }

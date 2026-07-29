@@ -82,6 +82,7 @@ const successBannerStyle = {
 // ─── AccountProfile Page ─────────────────────────────────────────────────────
 const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats }) => {
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   const [activePath, setActivePath] = useState("/account");
   const [saveBtnHovered, setSaveBtnHovered] = useState(false);
   const [cancelBtnHovered, setCancelBtnHovered] = useState(false);
@@ -108,7 +109,11 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
     injectFonts();
     setActivePath(getActivePath());
 
-    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsDesktop(width >= 1024);
+      setIsTablet(width >= 640 && width < 1024);
+    };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -170,7 +175,11 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
       <Header />
 
       <main style={{ flex: 1, backgroundColor: "rgba(245,245,245,0.6)" }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "2rem 1rem" }}>
+        <div style={{ 
+          maxWidth: "1280px", 
+          margin: "0 auto", 
+          padding: isDesktop ? "2rem 1rem" : isTablet ? "1.75rem 1.25rem" : "1.5rem 1rem" 
+        }}>
           {/* Page header */}
           <div
             style={{
@@ -178,18 +187,18 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
               flexDirection: isDesktop ? "row" : "column",
               alignItems: isDesktop ? "center" : "flex-start",
               justifyContent: "space-between",
-              gap: "1rem",
-              marginBottom: "2rem",
-              paddingBottom: "2rem",
+              gap: isDesktop ? "1rem" : "0.75rem",
+              marginBottom: isDesktop ? "2rem" : "1.5rem",
+              paddingBottom: isDesktop ? "2rem" : "1.5rem",
               borderBottom: `1px solid ${tokens.border}`,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isDesktop ? "1rem" : "0.75rem" }}>
               {/* Avatar */}
               <div
                 style={{
-                  width: "56px",
-                  height: "56px",
+                  width: isDesktop ? "56px" : "48px",
+                  height: isDesktop ? "56px" : "48px",
                   borderRadius: "50%",
                   backgroundColor: tokens.foreground,
                   color: tokens.background,
@@ -197,7 +206,7 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                   alignItems: "center",
                   justifyContent: "center",
                   fontFamily: tokens.fontDisplay,
-                  fontSize: "1.125rem",
+                  fontSize: isDesktop ? "1.125rem" : "1rem",
                   fontWeight: 600,
                   flexShrink: 0,
                 }}
@@ -205,10 +214,21 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                 {currentCustomer.avatar}
               </div>
               <div>
-                <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0 }}>
+                <p style={{ 
+                  fontSize: "clamp(0.75rem, 2.5vw, 0.875rem)", 
+                  color: tokens.mutedForeground, 
+                  margin: 0 
+                }}>
                   Welcome back,
                 </p>
-                <h1 style={{ fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 500, margin: "0.25rem 0 0", color: tokens.foreground }}>
+                <h1 style={{ 
+                  fontFamily: tokens.fontDisplay, 
+                  fontSize: "clamp(1.25rem, 4vw, 1.875rem)", 
+                  fontWeight: 500, 
+                  margin: "0.25rem 0 0", 
+                  color: tokens.foreground,
+                  lineHeight: 1.2,
+                }}>
                   {currentCustomer.name}
                 </h1>
               </div>
@@ -219,7 +239,7 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
             style={{
               display: "grid",
               gridTemplateColumns: isDesktop ? "220px 1fr" : "1fr",
-              gap: isDesktop ? "3rem" : "2rem",
+              gap: isDesktop ? "3rem" : isTablet ? "2rem" : "1.5rem",
             }}
           >
             {/* Sidebar */}
@@ -227,78 +247,176 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
 
             {/* Content */}
             <section>
-              <div style={{ marginBottom: "1.5rem" }}>
-                <h2 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.5rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>
+              <div style={{ marginBottom: isDesktop ? "1.5rem" : "1.25rem" }}>
+                <h2 style={{ 
+                  fontFamily: tokens.fontDisplay, 
+                  fontSize: "clamp(1.25rem, 3.5vw, 1.5rem)", 
+                  fontWeight: 500, 
+                  margin: 0, 
+                  color: tokens.foreground 
+                }}>
                   Profile
                 </h2>
-                <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
+                <p style={{ 
+                  marginTop: "0.25rem", 
+                  fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)", 
+                  color: tokens.mutedForeground 
+                }}>
                   Manage your personal information and preferences
                 </p>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: isDesktop ? "1.5rem" : "1.25rem" }}>
                 {/* Quick stats */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
-                  <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, padding: "1rem" }}>
-                    <p style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", color: tokens.mutedForeground, margin: 0 }}>
+                <div style={{ 
+                  display: "grid", 
+                  gridTemplateColumns: isDesktop ? "repeat(3, 1fr)" : "repeat(3, 1fr)", 
+                  gap: isDesktop ? "1rem" : "0.75rem" 
+                }}>
+                  <div style={{ 
+                    backgroundColor: tokens.background, 
+                    border: `1px solid ${tokens.border}`, 
+                    borderRadius: tokens.radius, 
+                    padding: isDesktop ? "1rem" : "0.875rem",
+                    textAlign: isDesktop ? "left" : "center",
+                  }}>
+                    <p style={{ 
+                      fontSize: "clamp(0.625rem, 2vw, 0.75rem)", 
+                      textTransform: "uppercase", 
+                      letterSpacing: "0.05em", 
+                      color: tokens.mutedForeground, 
+                      margin: 0 
+                    }}>
                       Orders
                     </p>
-                    <p style={{ marginTop: "0.5rem", fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 500, color: tokens.foreground }}>
+                    <p style={{ 
+                      marginTop: "0.5rem", 
+                      fontFamily: tokens.fontDisplay, 
+                      fontSize: "clamp(1.25rem, 3vw, 1.875rem)", 
+                      fontWeight: 500, 
+                      color: tokens.foreground 
+                    }}>
                       {stats.totalOrders}
                     </p>
                   </div>
-                  <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, padding: "1rem" }}>
-                    <p style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", color: tokens.mutedForeground, margin: 0 }}>
+                  <div style={{ 
+                    backgroundColor: tokens.background, 
+                    border: `1px solid ${tokens.border}`, 
+                    borderRadius: tokens.radius, 
+                    padding: isDesktop ? "1rem" : "0.875rem",
+                    textAlign: isDesktop ? "left" : "center",
+                  }}>
+                    <p style={{ 
+                      fontSize: "clamp(0.625rem, 2vw, 0.75rem)", 
+                      textTransform: "uppercase", 
+                      letterSpacing: "0.05em", 
+                      color: tokens.mutedForeground, 
+                      margin: 0 
+                    }}>
                       Spent
                     </p>
-                    <p style={{ marginTop: "0.5rem", fontFamily: tokens.fontDisplay, fontSize: "clamp(1.5rem, 3vw, 1.875rem)", fontWeight: 500, color: tokens.foreground }}>
+                    <p style={{ 
+                      marginTop: "0.5rem", 
+                      fontFamily: tokens.fontDisplay, 
+                      fontSize: "clamp(1.25rem, 3vw, 1.875rem)", 
+                      fontWeight: 500, 
+                      color: tokens.foreground 
+                    }}>
                       ₵{stats.totalSpent.toLocaleString()}
                     </p>
                   </div>
-                  <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, padding: "1rem" }}>
-                    <p style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", color: tokens.mutedForeground, margin: 0 }}>
+                  <div style={{ 
+                    backgroundColor: tokens.background, 
+                    border: `1px solid ${tokens.border}`, 
+                    borderRadius: tokens.radius, 
+                    padding: isDesktop ? "1rem" : "0.875rem",
+                    textAlign: isDesktop ? "left" : "center",
+                  }}>
+                    <p style={{ 
+                      fontSize: "clamp(0.625rem, 2vw, 0.75rem)", 
+                      textTransform: "uppercase", 
+                      letterSpacing: "0.05em", 
+                      color: tokens.mutedForeground, 
+                      margin: 0 
+                    }}>
                       Member since
                     </p>
-                    <p style={{ marginTop: "0.5rem", fontFamily: tokens.fontDisplay, fontSize: "clamp(1.125rem, 2vw, 1.25rem)", fontWeight: 500, color: tokens.foreground }}>
+                    <p style={{ 
+                      marginTop: "0.5rem", 
+                      fontFamily: tokens.fontDisplay, 
+                      fontSize: "clamp(0.938rem, 2.5vw, 1.25rem)", 
+                      fontWeight: 500, 
+                      color: tokens.foreground 
+                    }}>
                       {currentCustomer.joined}
                     </p>
                   </div>
                 </div>
 
                 {/* Personal Information */}
-                <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, overflow: "hidden" }}>
-                  <div style={{ padding: "1.5rem", borderBottom: `1px solid ${tokens.border}` }}>
-                    <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>
+                <div style={{ 
+                  backgroundColor: tokens.background, 
+                  border: `1px solid ${tokens.border}`, 
+                  borderRadius: tokens.radius, 
+                  overflow: "hidden" 
+                }}>
+                  <div style={{ 
+                    padding: isDesktop ? "1.5rem" : "1.25rem", 
+                    borderBottom: `1px solid ${tokens.border}` 
+                  }}>
+                    <h3 style={{ 
+                      fontFamily: tokens.fontDisplay, 
+                      fontSize: "clamp(1.125rem, 3vw, 1.25rem)", 
+                      fontWeight: 500, 
+                      margin: 0, 
+                      color: tokens.foreground 
+                    }}>
                       Personal Information
                     </h3>
                   </div>
-                  <div style={{ padding: "1.5rem" }}>
+                  <div style={{ padding: isDesktop ? "1.5rem" : "1.25rem" }}>
                     {profileSuccess && (
-                      <div style={{ ...successBannerStyle, marginBottom: "1rem" }}>
+                      <div style={{ ...successBannerStyle, marginBottom: "1rem", fontSize: "clamp(0.75rem, 2vw, 0.8125rem)" }}>
                         Profile updated successfully.
                       </div>
                     )}
                     <form onSubmit={handleProfileSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "1fr 1fr" : "1fr", gap: "1rem" }}>
+                      <div style={{ 
+                        display: "grid", 
+                        gridTemplateColumns: isDesktop ? "1fr 1fr" : "1fr", 
+                        gap: "1rem" 
+                      }}>
                         <div>
-                          <label htmlFor="firstName" style={labelStyle}>First Name</label>
+                          <label htmlFor="firstName" style={{ ...labelStyle, fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)" }}>
+                            First Name
+                          </label>
                           <input
                             id="firstName"
                             value={profile.data.firstName}
                             onChange={handleProfileChange("firstName")}
-                            style={{ ...inputStyle, borderColor: profile.errors.firstName ? tokens.destructive : tokens.border }}
+                            style={{ 
+                              ...inputStyle, 
+                              borderColor: profile.errors.firstName ? tokens.destructive : tokens.border,
+                              fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
+                            }}
                             onFocus={(e) => { if (!profile.errors.firstName) e.target.style.borderColor = tokens.foreground; }}
                             onBlur={(e) => (e.target.style.borderColor = profile.errors.firstName ? tokens.destructive : tokens.border)}
                           />
                           {profile.errors.firstName && <p style={errorTextStyle}>{profile.errors.firstName}</p>}
                         </div>
                         <div>
-                          <label htmlFor="lastName" style={labelStyle}>Last Name</label>
+                          <label htmlFor="lastName" style={{ ...labelStyle, fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)" }}>
+                            Last Name
+                          </label>
                           <input
                             id="lastName"
                             value={profile.data.lastName}
                             onChange={handleProfileChange("lastName")}
-                            style={{ ...inputStyle, borderColor: profile.errors.lastName ? tokens.destructive : tokens.border }}
+                            style={{ 
+                              ...inputStyle, 
+                              borderColor: profile.errors.lastName ? tokens.destructive : tokens.border,
+                              fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
+                            }}
                             onFocus={(e) => { if (!profile.errors.lastName) e.target.style.borderColor = tokens.foreground; }}
                             onBlur={(e) => (e.target.style.borderColor = profile.errors.lastName ? tokens.destructive : tokens.border)}
                           />
@@ -306,39 +424,55 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="email" style={labelStyle}>Email</label>
+                        <label htmlFor="email" style={{ ...labelStyle, fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)" }}>
+                          Email
+                        </label>
                         <input
                           id="email"
                           type="email"
                           value={profile.data.email}
                           onChange={handleProfileChange("email")}
-                          style={{ ...inputStyle, borderColor: profile.errors.email ? tokens.destructive : tokens.border }}
+                          style={{ 
+                            ...inputStyle, 
+                            borderColor: profile.errors.email ? tokens.destructive : tokens.border,
+                            fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
+                          }}
                           onFocus={(e) => { if (!profile.errors.email) e.target.style.borderColor = tokens.foreground; }}
                           onBlur={(e) => (e.target.style.borderColor = profile.errors.email ? tokens.destructive : tokens.border)}
                         />
                         {profile.errors.email && <p style={errorTextStyle}>{profile.errors.email}</p>}
                       </div>
                       <div>
-                        <label htmlFor="phone" style={labelStyle}>Phone</label>
+                        <label htmlFor="phone" style={{ ...labelStyle, fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)" }}>
+                          Phone
+                        </label>
                         <input
                           id="phone"
                           type="tel"
                           value={profile.data.phone}
                           onChange={handleProfileChange("phone")}
-                          style={{ ...inputStyle, borderColor: profile.errors.phone ? tokens.destructive : tokens.border }}
+                          style={{ 
+                            ...inputStyle, 
+                            borderColor: profile.errors.phone ? tokens.destructive : tokens.border,
+                            fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
+                          }}
                           onFocus={(e) => { if (!profile.errors.phone) e.target.style.borderColor = tokens.foreground; }}
                           onBlur={(e) => (e.target.style.borderColor = profile.errors.phone ? tokens.destructive : tokens.border)}
                         />
                         {profile.errors.phone && <p style={errorTextStyle}>{profile.errors.phone}</p>}
                       </div>
                       <hr style={{ margin: "0.5rem 0", border: "none", borderTop: `1px solid ${tokens.border}` }} />
-                      <div style={{ display: "flex", gap: "0.75rem" }}>
+                      <div style={{ 
+                        display: "flex", 
+                        gap: "0.75rem",
+                        flexDirection: isDesktop ? "row" : "column",
+                      }}>
                         <button
                           type="submit"
                           disabled={profile.processing}
                           style={{
                             padding: "0.5rem 1.5rem",
-                            fontSize: "0.875rem",
+                            fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
                             fontWeight: 500,
                             fontFamily: tokens.fontBody,
                             borderRadius: tokens.radius,
@@ -348,6 +482,8 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                             cursor: profile.processing ? "not-allowed" : "pointer",
                             opacity: profile.processing ? 0.7 : saveBtnHovered ? 0.9 : 1,
                             transition: "opacity 0.2s ease",
+                            width: isDesktop ? "auto" : "100%",
+                            height: isDesktop ? "auto" : "44px",
                           }}
                           onMouseEnter={() => setSaveBtnHovered(true)}
                           onMouseLeave={() => setSaveBtnHovered(false)}
@@ -359,7 +495,7 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                           onClick={handleProfileCancel}
                           style={{
                             padding: "0.5rem 1.5rem",
-                            fontSize: "0.875rem",
+                            fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
                             fontWeight: 500,
                             fontFamily: tokens.fontBody,
                             borderRadius: tokens.radius,
@@ -368,6 +504,8 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                             color: tokens.foreground,
                             cursor: "pointer",
                             transition: "background-color 0.2s ease",
+                            width: isDesktop ? "auto" : "100%",
+                            height: isDesktop ? "auto" : "44px",
                           }}
                           onMouseEnter={() => setCancelBtnHovered(true)}
                           onMouseLeave={() => setCancelBtnHovered(false)}
@@ -380,54 +518,90 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                 </div>
 
                 {/* Password */}
-                <div style={{ backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, overflow: "hidden" }}>
-                  <div style={{ padding: "1.5rem", borderBottom: `1px solid ${tokens.border}` }}>
-                    <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>
+                <div style={{ 
+                  backgroundColor: tokens.background, 
+                  border: `1px solid ${tokens.border}`, 
+                  borderRadius: tokens.radius, 
+                  overflow: "hidden" 
+                }}>
+                  <div style={{ 
+                    padding: isDesktop ? "1.5rem" : "1.25rem", 
+                    borderBottom: `1px solid ${tokens.border}` 
+                  }}>
+                    <h3 style={{ 
+                      fontFamily: tokens.fontDisplay, 
+                      fontSize: "clamp(1.125rem, 3vw, 1.25rem)", 
+                      fontWeight: 500, 
+                      margin: 0, 
+                      color: tokens.foreground 
+                    }}>
                       Password
                     </h3>
                   </div>
-                  <div style={{ padding: "1.5rem" }}>
+                  <div style={{ padding: isDesktop ? "1.5rem" : "1.25rem" }}>
                     {passwordSuccess && (
-                      <div style={{ ...successBannerStyle, marginBottom: "1rem" }}>
+                      <div style={{ ...successBannerStyle, marginBottom: "1rem", fontSize: "clamp(0.75rem, 2vw, 0.8125rem)" }}>
                         Password updated successfully.
                       </div>
                     )}
                     <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                       <div>
-                        <label htmlFor="current" style={labelStyle}>Current Password</label>
+                        <label htmlFor="current" style={{ ...labelStyle, fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)" }}>
+                          Current Password
+                        </label>
                         <input
                           id="current"
                           type="password"
                           value={password.data.current}
                           onChange={handlePasswordChange("current")}
-                          style={{ ...inputStyle, borderColor: password.errors.current ? tokens.destructive : tokens.border }}
+                          style={{ 
+                            ...inputStyle, 
+                            borderColor: password.errors.current ? tokens.destructive : tokens.border,
+                            fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
+                          }}
                           onFocus={(e) => { if (!password.errors.current) e.target.style.borderColor = tokens.foreground; }}
                           onBlur={(e) => (e.target.style.borderColor = password.errors.current ? tokens.destructive : tokens.border)}
                         />
                         {password.errors.current && <p style={errorTextStyle}>{password.errors.current}</p>}
                       </div>
-                      <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "1fr 1fr" : "1fr", gap: "1rem" }}>
+                      <div style={{ 
+                        display: "grid", 
+                        gridTemplateColumns: isDesktop ? "1fr 1fr" : "1fr", 
+                        gap: "1rem" 
+                      }}>
                         <div>
-                          <label htmlFor="new" style={labelStyle}>New Password</label>
+                          <label htmlFor="new" style={{ ...labelStyle, fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)" }}>
+                            New Password
+                          </label>
                           <input
                             id="new"
                             type="password"
                             value={password.data.new}
                             onChange={handlePasswordChange("new")}
-                            style={{ ...inputStyle, borderColor: password.errors.new ? tokens.destructive : tokens.border }}
+                            style={{ 
+                              ...inputStyle, 
+                              borderColor: password.errors.new ? tokens.destructive : tokens.border,
+                              fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
+                            }}
                             onFocus={(e) => { if (!password.errors.new) e.target.style.borderColor = tokens.foreground; }}
                             onBlur={(e) => (e.target.style.borderColor = password.errors.new ? tokens.destructive : tokens.border)}
                           />
                           {password.errors.new && <p style={errorTextStyle}>{password.errors.new}</p>}
                         </div>
                         <div>
-                          <label htmlFor="confirm" style={labelStyle}>Confirm Password</label>
+                          <label htmlFor="confirm" style={{ ...labelStyle, fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)" }}>
+                            Confirm Password
+                          </label>
                           <input
                             id="confirm"
                             type="password"
                             value={password.data.confirm}
                             onChange={handlePasswordChange("confirm")}
-                            style={{ ...inputStyle, borderColor: password.errors.confirm ? tokens.destructive : tokens.border }}
+                            style={{ 
+                              ...inputStyle, 
+                              borderColor: password.errors.confirm ? tokens.destructive : tokens.border,
+                              fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
+                            }}
                             onFocus={(e) => { if (!password.errors.confirm) e.target.style.borderColor = tokens.foreground; }}
                             onBlur={(e) => (e.target.style.borderColor = password.errors.confirm ? tokens.destructive : tokens.border)}
                           />
@@ -439,7 +613,7 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                         disabled={password.processing}
                         style={{
                           padding: "0.5rem 1.5rem",
-                          fontSize: "0.875rem",
+                          fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
                           fontWeight: 500,
                           fontFamily: tokens.fontBody,
                           borderRadius: tokens.radius,
@@ -449,7 +623,9 @@ const AccountProfile = ({ currentCustomer, profileForm: initialProfile, stats })
                           cursor: password.processing ? "not-allowed" : "pointer",
                           opacity: password.processing ? 0.7 : 1,
                           transition: "background-color 0.2s ease",
-                          alignSelf: "flex-start",
+                          alignSelf: isDesktop ? "flex-start" : "stretch",
+                          width: isDesktop ? "auto" : "100%",
+                          height: isDesktop ? "auto" : "44px",
                         }}
                         onMouseEnter={() => setUpdatePwdBtnHovered(true)}
                         onMouseLeave={() => setUpdatePwdBtnHovered(false)}

@@ -1,5 +1,5 @@
 // ─── AccountSidebar.jsx ──────────────────────────────────────────────────────
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useForm } from "@inertiajs/react";
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
@@ -52,6 +52,20 @@ const IconLogOut = () => (
   </svg>
 );
 
+const IconMenu = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+);
+
+const IconChevronDown = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
 // ─── Navigation items ────────────────────────────────────────────────────────
 const accountNavItems = [
   { to: "/account/profile", label: "Profile", icon: IconUser, end: true },
@@ -61,9 +75,7 @@ const accountNavItems = [
 ];
 
 // ─── NavLink Component ───────────────────────────────────────────────────────
-// Uses Inertia's <Link> so clicking actually triggers a real Inertia visit
-// (fetches new page props and re-renders) instead of just updating the URL bar.
-const AccountNavLink = ({ href, isActive, icon: Icon, label }) => {
+const AccountNavLink = ({ href, isActive, icon: Icon, label, isMobile }) => {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -74,16 +86,17 @@ const AccountNavLink = ({ href, isActive, icon: Icon, label }) => {
         display: "flex",
         alignItems: "center",
         gap: "0.75rem",
-        padding: "0.75rem 1rem",
-        fontSize: "0.875rem",
+        padding: isMobile ? "0.625rem 0.875rem" : "0.75rem 1rem",
+        fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
         fontFamily: tokens.fontBody,
         fontWeight: isActive ? 500 : 400,
         textDecoration: "none",
         color: isActive ? tokens.foreground : tokens.mutedForeground,
         backgroundColor: isActive ? tokens.secondary : hovered ? tokens.secondary : "transparent",
-        borderBottom: "2px solid transparent",
-        borderLeft: "2px solid transparent",
-        borderBottomColor: isActive ? tokens.foreground : "transparent",
+        borderBottom: isMobile ? "2px solid transparent" : "none",
+        borderLeft: isMobile ? "none" : "2px solid transparent",
+        borderBottomColor: isMobile && isActive ? tokens.foreground : "transparent",
+        borderLeftColor: !isMobile && isActive ? tokens.foreground : "transparent",
         borderRadius: tokens.radius,
         transition: "background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease",
         whiteSpace: "nowrap",
@@ -97,13 +110,13 @@ const AccountNavLink = ({ href, isActive, icon: Icon, label }) => {
       <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
         <Icon />
       </span>
-      <span className="account-sidebar-label">{label}</span>
+      {!isMobile && <span className="account-sidebar-label">{label}</span>}
     </Link>
   );
 };
 
 // ─── LogoutButton Component ──────────────────────────────────────────────────
-const LogoutButton = () => {
+const LogoutButton = ({ isMobile }) => {
   const { post, processing } = useForm();
   const [hovered, setHovered] = useState(false);
 
@@ -120,23 +133,23 @@ const LogoutButton = () => {
         display: "flex",
         alignItems: "center",
         gap: "0.75rem",
-        width: "100%",
-        padding: "0.75rem 1rem",
-        fontSize: "0.875rem",
+        width: isMobile ? "auto" : "100%",
+        padding: isMobile ? "0.625rem 0.875rem" : "0.75rem 1rem",
+        fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
         fontFamily: tokens.fontBody,
         fontWeight: 400,
         textDecoration: "none",
         color: hovered ? tokens.destructive : tokens.mutedForeground,
         backgroundColor: hovered ? tokens.secondary : "transparent",
         border: "none",
-        borderLeft: "2px solid transparent",
+        borderLeft: isMobile ? "none" : "2px solid transparent",
         borderRadius: tokens.radius,
         cursor: processing ? "not-allowed" : "pointer",
         whiteSpace: "nowrap",
         flexShrink: 0,
         opacity: processing ? 0.5 : 1,
         transition: "background-color 0.15s ease, color 0.15s ease",
-        marginTop: "1rem",
+        marginTop: isMobile ? "0" : "1rem",
       }}
       className="account-sidebar-link account-sidebar-signout"
       onMouseEnter={() => setHovered(true)}
@@ -145,23 +158,158 @@ const LogoutButton = () => {
       <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
         <IconLogOut />
       </span>
-      <span className="account-sidebar-label">
-        {processing ? "Signing out…" : "Sign out"}
-      </span>
+      {!isMobile && (
+        <span className="account-sidebar-label">
+          {processing ? "Signing out…" : "Sign out"}
+        </span>
+      )}
     </button>
   );
 };
 
+// ─── MobileDropdown Component ────────────────────────────────────────────────
+const MobileDropdown = ({ activePath, showSignOut }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const activeItem = accountNavItems.find(item => {
+    if (item.end) {
+      return activePath === item.to || activePath === item.to + "/";
+    }
+    return activePath.startsWith(item.to);
+  });
+
+  const currentLabel = activeItem ? activeItem.label : "Account";
+
+  return (
+    <div style={{ position: "relative", width: "100%" }}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          padding: "0.75rem 1rem",
+          backgroundColor: tokens.background,
+          border: `1px solid ${tokens.border}`,
+          borderRadius: tokens.radius,
+          fontSize: "0.875rem",
+          fontFamily: tokens.fontBody,
+          color: tokens.foreground,
+          cursor: "pointer",
+          transition: "border-color 0.15s ease",
+        }}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+      >
+        <span style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+          {activeItem && <activeItem.icon />}
+          <span style={{ fontWeight: 500 }}>{currentLabel}</span>
+        </span>
+        <span style={{ 
+          display: "flex", 
+          alignItems: "center",
+          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 0.2s ease",
+        }}>
+          <IconChevronDown />
+        </span>
+      </button>
+
+      {isOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            marginTop: "0.25rem",
+            backgroundColor: tokens.background,
+            border: `1px solid ${tokens.border}`,
+            borderRadius: tokens.radius,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            zIndex: 50,
+            overflow: "hidden",
+          }}
+        >
+          {accountNavItems.map((item) => {
+            const isActive = item.end 
+              ? activePath === item.to || activePath === item.to + "/"
+              : activePath.startsWith(item.to);
+            
+            return (
+              <Link
+                key={item.to}
+                href={item.to}
+                preserveScroll
+                onClick={() => setIsOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  padding: "0.75rem 1rem",
+                  fontSize: "0.875rem",
+                  fontFamily: tokens.fontBody,
+                  fontWeight: isActive ? 500 : 400,
+                  textDecoration: "none",
+                  color: isActive ? tokens.foreground : tokens.mutedForeground,
+                  backgroundColor: isActive ? tokens.secondary : "transparent",
+                  borderLeft: isActive ? `3px solid ${tokens.foreground}` : "3px solid transparent",
+                  transition: "background-color 0.15s ease",
+                }}
+              >
+                <span style={{ display: "flex", alignItems: "center" }}>
+                  <item.icon />
+                </span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+          
+          {showSignOut && (
+            <>
+              <div style={{ height: "1px", backgroundColor: tokens.border, margin: "0.25rem 0" }} />
+              <LogoutButton isMobile={false} />
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Overlay to close dropdown when clicking outside */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 40,
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
 // ─── AccountSidebar Component ────────────────────────────────────────────────
-// `activePath` is still accepted for highlighting the current nav item.
-// `onNavigate` is no longer needed for navigation itself (Link handles that),
-// but is accepted for backwards compatibility in case a parent page still
-// wants to know when navigation happens (e.g. to close a mobile menu).
 const AccountSidebar = ({
   activePath = "/account",
   showSignOut = true,
   className = "",
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 640);
+      setIsTablet(width >= 640 && width < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const checkIsActive = (item) => {
     if (item.end) {
       return activePath === item.to || activePath === item.to + "/";
@@ -169,16 +317,62 @@ const AccountSidebar = ({
     return activePath.startsWith(item.to);
   };
 
+  // Render dropdown on mobile
+  if (isMobile) {
+    return (
+      <aside className={className}>
+        <MobileDropdown activePath={activePath} showSignOut={showSignOut} />
+      </aside>
+    );
+  }
+
+  // Render tablet view (compact horizontal with labels)
+  if (isTablet) {
+    return (
+      <aside className={className}>
+        <nav
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: "0.25rem",
+            overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
+            padding: "0.25rem 0",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+          className="account-sidebar-nav"
+        >
+          {accountNavItems.map((item) => (
+            <AccountNavLink
+              key={item.to}
+              href={item.to}
+              isActive={checkIsActive(item)}
+              icon={item.icon}
+              label={item.label}
+              isMobile={false}
+            />
+          ))}
+          {showSignOut && <LogoutButton isMobile={false} />}
+        </nav>
+        <style>{`
+          .account-sidebar-nav::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+      </aside>
+    );
+  }
+
+  // Render desktop view (vertical sidebar)
   return (
     <aside className={className}>
       <nav
         style={{
           display: "flex",
-          flexDirection: "row",
+          flexDirection: "column",
           gap: "0.25rem",
-          overflowX: "auto",
-          WebkitOverflowScrolling: "touch",
-          padding: "0.5rem 0",
+          padding: "0",
         }}
         className="account-sidebar-nav"
       >
@@ -189,55 +383,21 @@ const AccountSidebar = ({
             isActive={checkIsActive(item)}
             icon={item.icon}
             label={item.label}
+            isMobile={false}
           />
         ))}
-
-        {showSignOut && <LogoutButton />}
+        {showSignOut && <LogoutButton isMobile={false} />}
       </nav>
-
-      {/* Responsive styles */}
       <style>{`
-        /* Mobile: horizontal scroll */
-        .account-sidebar-nav {
-          display: flex;
-          flex-direction: row;
-          gap: 0.25rem;
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .account-sidebar-nav::-webkit-scrollbar {
-          display: none;
-        }
         .account-sidebar-link {
-          border-bottom: 2px solid transparent;
           border-left: 2px solid transparent;
+          border-bottom: none;
         }
-        .account-sidebar-label {
-          display: inline;
+        .account-sidebar-link[aria-current="page"] {
+          border-left-color: ${tokens.foreground};
         }
-        
-        /* Desktop: vertical sidebar */
-        @media (min-width: 768px) {
-          .account-sidebar-nav {
-            flex-direction: column !important;
-            overflow-x: visible;
-            padding: 0;
-          }
-          .account-sidebar-link {
-            border-bottom: none !important;
-            border-left: 2px solid transparent !important;
-            border-bottom-color: transparent !important;
-          }
-          /* Active state on desktop - left border instead of bottom */
-          .account-sidebar-link[aria-current="page"] {
-            border-left-color: ${tokens.foreground} !important;
-            border-bottom-color: transparent !important;
-          }
-          .account-sidebar-signout {
-            margin-top: 1.5rem !important;
-          }
+        .account-sidebar-signout {
+          margin-top: 1.5rem;
         }
       `}</style>
     </aside>

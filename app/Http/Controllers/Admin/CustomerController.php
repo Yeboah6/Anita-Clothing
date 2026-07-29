@@ -26,7 +26,7 @@ class CustomerController extends Controller
                     'joined' => $user->created_at->format('Y-m-d'),
                     'orders_count' => $user->orders_count ?? 0,
                     'total_spent' => $user->orders_sum_total_amount ?? 0,
-                    'status' => $user->email_verified_at ? 'active' : 'inactive',
+                    'status' => $user->status,
                     'avatar' => null, // You can add avatar later
                     'last_order_at' => optional($user->orders()->latest()->first())->created_at?->format('Y-m-d'),
                 ];
@@ -75,9 +75,10 @@ class CustomerController extends Controller
             'addresses' => $customer->addresses()->get()->map(fn ($a) => [
                 'id' => $a->id,
                 'label' => $a->label,
-                'street' => $a->street,
+                'address' => $a->address,
+                'state' => $a->state,
                 'city' => $a->city,
-                'region' => $a->region,
+                'apartment' => $a->apartment,
                 'country' => $a->country,
                 'is_default' => $a->is_default,
             ]),
@@ -88,5 +89,56 @@ class CustomerController extends Controller
                 'image_url' => $w->product->url ?? null,
             ]),
         ]);
+    }
+
+    public function edit(User $customer)
+    {
+        return Inertia::render('Admin/Customer/EditCustomer', [
+            'customer' => [
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'email' => $customer->email,
+                'phone' => $customer->phone,
+                'status' => $customer->status,
+                'role' => $customer->role,
+                'joined' => $customer->created_at->format('M d, Y'),
+                'orders_count' => $customer->orders()->count(),
+                'total_spent' => $customer->total_spent,
+                'last_order_at' => optional($customer->orders()->latest()->first())->created_at?->format('M d, Y'),
+            ],
+        ]);
+    }
+
+    public function update(Request $request, User $customer)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $customer->id,
+            'phone' => 'nullable|string|max:20',
+            'status' => 'required|in:active,inactive',
+            'role' => 'required|in:customer',
+        ]);
+
+        $customer->update($validated);
+
+        return back();
+    }
+
+    public function destroy(User $customer)
+    {
+        $customer->update(['status' => 'suspended']); // Mark the customer as suspended instead of deleting
+
+        return redirect()
+            ->route('admin.customers.index')
+            ->with('success', 'Customer account deactivated. Their data has been preserved.');
+    }
+
+    public function reactivate(User $customer)
+    {
+        $customer->update(['status' => 'active']); // Restore the customer account
+
+        return redirect()
+            ->route('admin.customers.index')
+            ->with('success', 'Customer account restored.');
     }
 }

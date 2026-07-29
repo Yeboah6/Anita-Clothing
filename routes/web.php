@@ -86,6 +86,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/account/password', [ProfileController::class, 'updatePassword'])->name('account.password.update');
 
         Route::get('/account/orders', [CustomerOrderController::class, 'Index']);
+        Route::post('/account/reviews', [MainController::class, 'storeReview']);
         Route::get('/account/wishlist', [WishlistController::class, 'Index']);
 
         Route::get('/account/addresses', [AddressController::class, 'Index']);
@@ -116,10 +117,14 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/orders/{orderNumber}', [OrderController::class, 'update'])->name('admin.orders.update');
         Route::patch('/admin/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.update-status');
 
-        Route::get('/admin/customers', [CustomerController::class, 'Index']);
-        Route::get('/admin/customers/{id}', [CustomerController::class, 'show'])->name('admin.customers.show');
-        Route::get('/admin/customers/{id}/edit', [CustomerController::class, 'edit'])->name('admin.customers.edit');
-        Route::get('/admin/categories', [CategoryController::class, 'Index']);
+        Route::get('/admin/customers', [CustomerController::class, 'Index'])->name('admin.customers.index');
+        Route::get('/admin/customers/{customer}', [CustomerController::class, 'show'])->name('admin.customers.show');
+        Route::get('/admin/customers/{customer}/edit', [CustomerController::class, 'edit'])->name('admin.customers.edit');
+        Route::put('/admin/customers/{customer}', [CustomerController::class, 'update'])->name('admin.customers.update');
+        Route::delete('/admin/customers/{customer}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy');
+        Route::put('/admin/customers/{customer}', [CustomerController::class, 'reactivate'])->name('admin.customers.reactivate');
+
+        // Route::get('/admin/categories', [CategoryController::class, 'Index']);
 
         Route::get('/admin/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
         Route::get('/admin/payments/export', [AdminPaymentController::class, 'export'])->name('admin.payments.export');

@@ -63,20 +63,28 @@ const IconShoppingBag = () => (
 // ─── CartLineItem ─────────────────────────────────────────────────────────────
 const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
   const [removeHovered, setRemoveHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const lineTotal = (item.price * item.quantity).toFixed(2);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div
       style={{
         display: "flex",
-        gap: "1rem",
-        padding: "1.5rem 0",
+        gap: isDesktop ? "1rem" : "0.75rem",
+        padding: isDesktop ? "1.5rem 0" : "1.25rem 0",
         borderBottom: `1px solid ${tokens.border}`,
       }}
     >
       {/* Image */}
       <div style={{
-        width: isDesktop ? "120px" : "88px",
+        width: isDesktop ? "120px" : isMobile ? "80px" : "100px",
         flexShrink: 0,
         backgroundColor: tokens.secondary,
         borderRadius: tokens.radius,
@@ -119,7 +127,7 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
         justifyContent: "space-between",
         minWidth: 0
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem" }}>
           <div style={{ minWidth: 0 }}>
             <a
               href={`/product/${item.slug || item.product_id}`}
@@ -127,7 +135,7 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
             >
               <h3 style={{
                 fontFamily: tokens.fontDisplay,
-                fontSize: "1.0625rem",
+                fontSize: isDesktop ? "1.0625rem" : "clamp(0.875rem, 3vw, 1rem)",
                 fontWeight: 500,
                 margin: 0,
                 color: tokens.foreground,
@@ -138,10 +146,10 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
                 {item.name}
               </h3>
             </a>
-            <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, margin: "0.25rem 0 0" }}>
+            <p style={{ fontSize: "clamp(0.75rem, 2.5vw, 0.8125rem)", color: tokens.mutedForeground, margin: "0.25rem 0 0" }}>
               {[item.size, item.color].filter(Boolean).join(" / ") || "—"}
             </p>
-            <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, margin: "0.25rem 0 0" }}>
+            <p style={{ fontSize: "clamp(0.75rem, 2.5vw, 0.8125rem)", color: tokens.mutedForeground, margin: "0.25rem 0 0" }}>
               ₵{Number(item.price).toFixed(2)} each
             </p>
           </div>
@@ -169,7 +177,9 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginTop: "0.75rem"
+          marginTop: isDesktop ? "0.75rem" : "0.5rem",
+          flexWrap: isMobile ? "wrap" : "nowrap",
+          gap: isMobile ? "0.5rem" : "0"
         }}>
           {/* Quantity stepper */}
           <div style={{
@@ -183,8 +193,8 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
               disabled={item.quantity <= 1}
               aria-label="Decrease quantity"
               style={{
-                width: "32px",
-                height: "32px",
+                width: isMobile ? "28px" : "32px",
+                height: isMobile ? "28px" : "32px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -198,9 +208,9 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
               <IconMinus />
             </button>
             <span style={{
-              minWidth: "32px",
+              minWidth: isMobile ? "28px" : "32px",
               textAlign: "center",
-              fontSize: "0.875rem",
+              fontSize: "clamp(0.75rem, 2.5vw, 0.875rem)",
               fontWeight: 500,
               color: tokens.foreground
             }}>
@@ -210,8 +220,8 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
               aria-label="Increase quantity"
               style={{
-                width: "32px",
-                height: "32px",
+                width: isMobile ? "28px" : "32px",
+                height: isMobile ? "28px" : "32px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -226,7 +236,7 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
           </div>
 
           <p style={{
-            fontSize: "0.9375rem",
+            fontSize: "clamp(0.875rem, 2.5vw, 0.9375rem)",
             fontWeight: 500,
             color: tokens.foreground,
             margin: 0
@@ -243,12 +253,12 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
 const Cart = () => {
   const { serverCart } = usePage().props;
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   const [error, setError] = useState(null);
   const [items, setItems] = useState([]);
 
   // Initialize cart from server data
   useEffect(() => {
-    console.log('ServerCart received:', serverCart); // Debug log
     
     if (serverCart?.items && serverCart.items.length > 0) {
       setItems(serverCart.items.map(item => ({
@@ -267,7 +277,11 @@ const Cart = () => {
 
   useEffect(() => {
     injectFonts();
-    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsDesktop(width >= 1024);
+      setIsTablet(width >= 640 && width < 1024);
+    };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -355,27 +369,34 @@ const Cart = () => {
       <Header />
 
       <main style={{ flex: 1, backgroundColor: "rgba(245,245,245,0.4)" }}>
-        <div style={{ maxWidth: "1024px", margin: "0 auto", padding: isDesktop ? "3rem 1rem" : "2rem 1rem" }}>
+        <div style={{ 
+          maxWidth: "1024px", 
+          margin: "0 auto", 
+          padding: isDesktop ? "3rem 1rem" : isTablet ? "2rem 1.25rem" : "1.5rem 1rem" 
+        }}>
           {/* Header */}
           <div style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "baseline",
-            marginBottom: "2rem"
+            alignItems: isDesktop ? "baseline" : "center",
+            marginBottom: isDesktop ? "2rem" : "1.5rem",
+            flexWrap: "wrap",
+            gap: "0.5rem"
           }}>
             <div>
               <h1 style={{
                 fontFamily: tokens.fontDisplay,
-                fontSize: "clamp(1.875rem, 4vw, 2.5rem)",
+                fontSize: "clamp(1.5rem, 5vw, 2.5rem)",
                 fontWeight: 500,
                 margin: 0,
-                color: tokens.foreground
+                color: tokens.foreground,
+                lineHeight: 1.2,
               }}>
                 Shopping Bag
               </h1>
               {!isEmpty && (
                 <p style={{
-                  fontSize: "0.875rem",
+                  fontSize: "clamp(0.75rem, 2.5vw, 0.875rem)",
                   color: tokens.mutedForeground,
                   margin: "0.5rem 0 0"
                 }}>
@@ -391,9 +412,10 @@ const Cart = () => {
                   border: "none",
                   color: tokens.mutedForeground,
                   cursor: "pointer",
-                  fontSize: "0.8125rem",
+                  fontSize: "clamp(0.75rem, 2.5vw, 0.8125rem)",
                   fontFamily: tokens.fontBody,
                   textDecoration: "underline",
+                  padding: "0.25rem",
                 }}
               >
                 Clear Cart
@@ -404,18 +426,19 @@ const Cart = () => {
           {/* Error message */}
           {error && (
             <div style={{
-              padding: "1rem",
+              padding: "0.75rem 1rem",
               backgroundColor: "#fef2f2",
               border: "1px solid #fecaca",
               borderRadius: tokens.radius,
               color: tokens.destructive,
-              fontSize: "0.875rem",
+              fontSize: "clamp(0.75rem, 2.5vw, 0.875rem)",
               marginBottom: "1rem",
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center"
+              alignItems: "center",
+              gap: "0.5rem",
             }}>
-              <span>{error}</span>
+              <span style={{ flex: 1 }}>{error}</span>
               <button
                 onClick={() => setError(null)}
                 style={{
@@ -424,7 +447,8 @@ const Cart = () => {
                   color: tokens.destructive,
                   cursor: "pointer",
                   textDecoration: "underline",
-                  fontSize: "0.8125rem"
+                  fontSize: "clamp(0.75rem, 2.5vw, 0.8125rem)",
+                  whiteSpace: "nowrap",
                 }}
               >
                 Dismiss
@@ -436,7 +460,7 @@ const Cart = () => {
           {isEmpty ? (
             <div style={{
               textAlign: "center",
-              padding: "4rem 1rem",
+              padding: isDesktop ? "4rem 1rem" : "3rem 1rem",
               backgroundColor: tokens.background,
               border: `1px solid ${tokens.border}`,
               borderRadius: tokens.radius
@@ -451,7 +475,7 @@ const Cart = () => {
               </div>
               <h2 style={{
                 fontFamily: tokens.fontDisplay,
-                fontSize: "1.375rem",
+                fontSize: "clamp(1.125rem, 4vw, 1.375rem)",
                 fontWeight: 500,
                 margin: "0 0 0.5rem",
                 color: tokens.foreground
@@ -459,9 +483,10 @@ const Cart = () => {
                 Your bag is empty
               </h2>
               <p style={{
-                fontSize: "0.875rem",
+                fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
                 color: tokens.mutedForeground,
-                margin: "0 0 1.5rem"
+                margin: "0 0 1.5rem",
+                padding: "0 0.5rem",
               }}>
                 Looks like you haven't added anything yet.
               </p>
@@ -472,7 +497,7 @@ const Cart = () => {
                   alignItems: "center",
                   justifyContent: "center",
                   padding: "0.625rem 1.75rem",
-                  fontSize: "0.875rem",
+                  fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
                   fontWeight: 500,
                   fontFamily: tokens.fontBody,
                   textDecoration: "none",
@@ -489,7 +514,7 @@ const Cart = () => {
             <div style={{
               display: "grid",
               gridTemplateColumns: isDesktop ? "1fr 380px" : "1fr",
-              gap: "2rem",
+              gap: isDesktop ? "2rem" : "1.5rem",
               alignItems: "start"
             }}>
               {/* Items list */}
@@ -497,7 +522,7 @@ const Cart = () => {
                 backgroundColor: tokens.background,
                 border: `1px solid ${tokens.border}`,
                 borderRadius: tokens.radius,
-                padding: "0 1.5rem"
+                padding: isDesktop ? "0 1.5rem" : "0 1rem",
               }}>
                 {items.map((item) => (
                   <CartLineItem
@@ -510,11 +535,14 @@ const Cart = () => {
                 ))}
 
                 {/* Continue shopping link */}
-                <div style={{ padding: "1.5rem 0", textAlign: "center" }}>
+                <div style={{ 
+                  padding: isDesktop ? "1.5rem 0" : "1.25rem 0", 
+                  textAlign: "center" 
+                }}>
                   <a
                     href="/collections"
                     style={{
-                      fontSize: "0.875rem",
+                      fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
                       color: tokens.mutedForeground,
                       textDecoration: "none",
                       fontFamily: tokens.fontBody,
@@ -530,15 +558,15 @@ const Cart = () => {
                 backgroundColor: tokens.background,
                 border: `1px solid ${tokens.border}`,
                 borderRadius: tokens.radius,
-                padding: "1.5rem",
+                padding: isDesktop ? "1.5rem" : "1.25rem",
                 position: isDesktop ? "sticky" : "static",
                 top: "88px"
               }}>
                 <h3 style={{
                   fontFamily: tokens.fontDisplay,
-                  fontSize: "1.25rem",
+                  fontSize: "clamp(1.125rem, 3vw, 1.25rem)",
                   fontWeight: 500,
-                  margin: "0 0 1.25rem",
+                  margin: "0 0 1rem",
                   color: tokens.foreground
                 }}>
                   Order Summary
@@ -548,7 +576,7 @@ const Cart = () => {
                   display: "flex",
                   flexDirection: "column",
                   gap: "0.75rem",
-                  fontSize: "0.875rem"
+                  fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)"
                 }}>
                   <div style={{
                     display: "flex",
@@ -565,7 +593,7 @@ const Cart = () => {
                     color: tokens.mutedForeground
                   }}>
                     <span>Delivery fee</span>
-                    <span>Calculated at checkout</span>
+                    <span style={{ fontSize: "clamp(0.75rem, 2vw, 0.875rem)" }}>Calculated at checkout</span>
                   </div>
 
                   <hr style={{
@@ -577,7 +605,7 @@ const Cart = () => {
                   <div style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    fontSize: "1.0625rem",
+                    fontSize: "clamp(0.938rem, 2.5vw, 1.0625rem)",
                     fontWeight: 600,
                     color: tokens.foreground
                   }}>
@@ -594,8 +622,8 @@ const Cart = () => {
                     justifyContent: "center",
                     width: "100%",
                     height: "48px",
-                    marginTop: "1.5rem",
-                    fontSize: "0.9375rem",
+                    marginTop: isDesktop ? "1.5rem" : "1.25rem",
+                    fontSize: "clamp(0.875rem, 2.5vw, 0.9375rem)",
                     fontWeight: 500,
                     fontFamily: tokens.fontBody,
                     textDecoration: "none",

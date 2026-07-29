@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('apartment')->nullable();
             $table->string('city');
             $table->string('state');
-            $table->string('zip');
+            $table->string('zip')->nullable();
             $table->string('country')->default('Ghana');
             $table->boolean('is_default')->default(false);
             $table->timestamps();

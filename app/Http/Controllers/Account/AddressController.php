@@ -39,7 +39,7 @@ class AddressController extends Controller
             'apartment'  => 'nullable|string|max:255',
             'city'       => 'required|string|max:255',
             'state'      => 'required|string|max:255',
-            'zip'        => 'required|string|max:255',
+            'zip'        => 'nullable|string|max:255',
             'country'    => 'required|string|max:255',
             'is_default' => 'boolean',
         ]);
@@ -78,7 +78,7 @@ class AddressController extends Controller
             'apartment'  => 'nullable|string|max:255',
             'city'       => 'required|string|max:255',
             'state'      => 'required|string|max:255',
-            'zip'        => 'required|string|max:255',
+            'zip'        => 'nullable|string|max:255',
             'country'    => 'required|string|max:255',
             'is_default' => 'boolean',
         ]);

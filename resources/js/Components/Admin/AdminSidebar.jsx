@@ -66,12 +66,24 @@ const IconLogOut = () => (
   </svg>
 );
 
+const IconCedi = () => (
+  <span
+    style={{
+      fontSize: "16px",
+      fontWeight: "bold",
+      lineHeight: 1,
+    }}
+  >
+    ₵
+  </span>
+);
+
 // ─── Navigation items ────────────────────────────────────────────────────────
 const navItems = [
   { title: "Overview", url: "/admin", icon: IconLayoutDashboard },
   { title: "Products", url: "/admin/products", icon: IconBox },
   { title: "Orders", url: "/admin/orders", icon: IconShoppingBag },
-  {title: "Payments", url: "/admin/payments", icon: IconBox},
+  {title: "Payments", url: "/admin/payments", icon: IconCedi},
   { title: "Customers", url: "/admin/customers", icon: IconUsers },
 ];
 
@@ -81,12 +93,9 @@ const NavLink = ({ item, isActive, collapsed, onClick }) => {
   const Icon = item.icon;
 
   const handleClick = (e) => {
-    // Only prevent default if there's an onClick handler (for SPA-like behavior)
     if (onClick) {
-      // e.preventDefault();
       onClick(item.url);
     }
-    // If no onClick is provided, the browser will navigate naturally via href
   };
 
   return (
@@ -182,8 +191,6 @@ const AdminSidebar = ({
 }) => {
   const sidebarWidth = collapsed ? 64 : 240;
 
-  // On mobile, the sidebar is positioned fixed and slides in/out
-  // On desktop, it's part of the layout flow
   const sidebarStyle = isMobile
     ? {
         position: "fixed",

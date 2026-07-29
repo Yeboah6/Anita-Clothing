@@ -443,7 +443,7 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
 
   const statusOptions = [
     { value: "all", label: "All statuses" },
-    { value: "completed", label: "Completed" },
+    { value: "success", label: "Success" },
     { value: "pending", label: "Pending" },
     { value: "failed", label: "Failed" },
     { value: "refunded", label: "Refunded" },
@@ -641,9 +641,9 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
               marginBottom: "1.5rem",
             }}
           >
-            <MetricCard icon={<IconDollarSign />} label="Total Revenue" value={currency(summary.total_revenue)} color={tokens.pink} />
+            <MetricCard label="Total Revenue" value={currency(summary.total_revenue)} color={tokens.pink} />
             <MetricCard icon={<IconReceipt />} label="Transactions" value={summary.total_transactions} color={tokens.foreground} />
-            <MetricCard icon={<IconDollarSign />} label="Avg. Transaction" value={currency(summary.avg_transaction)} color={tokens.foreground} />
+            <MetricCard label="Avg. Transaction" value={currency(summary.avg_transaction)} color={tokens.foreground} />
             <MetricCard icon={<IconRotateCcw />} label="Refunded" value={currency(summary.refunded_amount)} color={tokens.destructive} />
             <MetricCard
               icon={<IconAlertCircle />}

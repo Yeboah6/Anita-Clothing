@@ -235,9 +235,9 @@ const EditOrder = ({ order }) => {
   const { data, setData, put, processing, errors, isDirty } = useForm({
     order_status: order.order_status ?? "pending",
     payment_status: order.payment_status ?? "unpaid",
-    tracking_number: order.tracking_number ?? "",
-    courier: order.courier ?? "",
-    admin_note: order.admin_note ?? "",
+    // tracking_number: order.tracking_number ?? "",
+    // courier: order.courier ?? "",
+    // admin_note: order.admin_note ?? "",
   });
 
   useEffect(() => {
@@ -357,36 +357,6 @@ const EditOrder = ({ order }) => {
                       <CustomSelect value={data.payment_status} onChange={(val) => setData("payment_status", val)} options={paymentStatusOptions} placeholder="Select payment status" error={errors.payment_status} />
                       {errors.payment_status && <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.payment_status}</p>}
                     </div>
-                  </div>
-                </div>
-
-                <div style={cardStyle}>
-                  <div style={cardHeaderStyle}>
-                    <h3 style={cardTitleStyle}><IconTruck /> Fulfillment</h3>
-                  </div>
-                  <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                      <div>
-                        <label htmlFor="courier" style={labelStyle}>Courier</label>
-                        <input id="courier" type="text" value={data.courier} onChange={(e) => setData("courier", e.target.value)} placeholder="e.g. DHL"
-                          style={inputStyle} onFocus={(e) => (e.target.style.borderColor = tokens.foreground)} onBlur={(e) => (e.target.style.borderColor = tokens.border)} />
-                      </div>
-                      <div>
-                        <label htmlFor="tracking_number" style={labelStyle}>Tracking Number</label>
-                        <input id="tracking_number" type="text" value={data.tracking_number} onChange={(e) => setData("tracking_number", e.target.value)} placeholder="e.g. 1Z999AA10123456784"
-                          style={inputStyle} onFocus={(e) => (e.target.style.borderColor = tokens.foreground)} onBlur={(e) => (e.target.style.borderColor = tokens.border)} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={cardStyle}>
-                  <div style={cardHeaderStyle}>
-                    <h3 style={cardTitleStyle}>Internal Note</h3>
-                  </div>
-                  <div style={{ padding: "1.5rem" }}>
-                    <textarea value={data.admin_note} onChange={(e) => setData("admin_note", e.target.value)} placeholder="Notes visible to admin staff only"
-                      style={textareaStyle} onFocus={(e) => (e.target.style.borderColor = tokens.foreground)} onBlur={(e) => (e.target.style.borderColor = tokens.border)} />
                   </div>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "@/Components/Admin/AdminSidebar";
-import { usePage, Link } from "@inertiajs/react";
+import { usePage, Link, router } from "@inertiajs/react";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -83,6 +83,13 @@ const IconMail = () => (
   </svg>
 );
 
+const IconBan = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+  </svg>
+);
+
 const IconPhone = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -120,10 +127,31 @@ const IconHeart = () => (
   </svg>
 );
 
+const IconEye = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
 // ─── Status badge helpers ─────────────────────────────────────────────────
 const getStatusStyle = (status) => {
   if (status === "active") {
     return { backgroundColor: "#dcfce7", color: "#166534", border: "1px solid #bbf7d0" };
+  }
+  if (status === "suspended") {
+    return { backgroundColor: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" };
   }
   return { backgroundColor: "transparent", color: tokens.mutedForeground, border: `1px solid ${tokens.border}` };
 };
@@ -161,6 +189,8 @@ const AdminShowCustomer = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeUrl] = useState("/admin/customers");
   const [activeTab, setActiveTab] = useState("orders");
+  const [showSuspendConfirm, setShowSuspendConfirm] = useState(false);
+  const [suspending, setSuspending] = useState(false);
 
   useEffect(() => {
     injectFonts();
@@ -183,6 +213,26 @@ const AdminShowCustomer = () => {
 
   const handleEmailCustomer = () => {
     if (customer?.email) window.location.href = `mailto:${customer.email}`;
+  };
+
+  const handleSuspend = () => {
+    setSuspending(true);
+    router.delete(`/admin/customers/${customer.id}`, {
+      preserveScroll: true,
+      onFinish: () => {
+        setSuspending(false);
+        setShowSuspendConfirm(false);
+      },
+    });
+  };
+
+  const handleReactivate = () => {
+    setSuspending(true);
+    router.put(
+      `/admin/customers/${customer.id}`,
+      { name: customer.name, email: customer.email, phone: customer.phone, status: "active", role: customer.role },
+      { preserveScroll: true, onFinish: () => setSuspending(false) }
+    );
   };
 
   const avatarColor = { bg: "#fce4ec", text: "#c62828" };
@@ -410,6 +460,91 @@ const AdminShowCustomer = () => {
               >
                 <IconEdit /> Edit Customer
               </Link>
+
+              {customer.status === "suspended" ? (
+                <button
+                  onClick={handleReactivate}
+                  disabled={suspending}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    height: "38px",
+                    padding: "0 1.125rem",
+                    fontSize: "0.8125rem",
+                    fontWeight: 500,
+                    fontFamily: tokens.fontBody,
+                    color: tokens.green,
+                    backgroundColor: "transparent",
+                    border: `1px solid ${tokens.green}`,
+                    borderRadius: tokens.radius,
+                    cursor: suspending ? "default" : "pointer",
+                    opacity: suspending ? 0.7 : 1,
+                  }}
+                >
+                  {suspending ? "Reactivating..." : "Reactivate"}
+                </button>
+              ) : !showSuspendConfirm ? (
+                <button
+                  onClick={() => setShowSuspendConfirm(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    height: "38px",
+                    padding: "0 1.125rem",
+                    fontSize: "0.8125rem",
+                    fontWeight: 500,
+                    fontFamily: tokens.fontBody,
+                    color: tokens.red,
+                    backgroundColor: "transparent",
+                    border: `1px solid ${tokens.red}`,
+                    borderRadius: tokens.radius,
+                    cursor: "pointer",
+                  }}
+                >
+                  <IconBan /> Suspend
+                </button>
+              ) : (
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    onClick={handleSuspend}
+                    disabled={suspending}
+                    style={{
+                      height: "38px",
+                      padding: "0 1rem",
+                      fontSize: "0.8125rem",
+                      fontWeight: 500,
+                      fontFamily: tokens.fontBody,
+                      color: tokens.background,
+                      backgroundColor: tokens.red,
+                      border: "none",
+                      borderRadius: tokens.radius,
+                      cursor: suspending ? "default" : "pointer",
+                      opacity: suspending ? 0.7 : 1,
+                    }}
+                  >
+                    {suspending ? "Suspending..." : "Confirm"}
+                  </button>
+                  <button
+                    onClick={() => setShowSuspendConfirm(false)}
+                    style={{
+                      height: "38px",
+                      padding: "0 1rem",
+                      fontSize: "0.8125rem",
+                      fontWeight: 500,
+                      fontFamily: tokens.fontBody,
+                      color: tokens.foreground,
+                      backgroundColor: "transparent",
+                      border: `1px solid ${tokens.border}`,
+                      borderRadius: tokens.radius,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -479,7 +614,7 @@ const AdminShowCustomer = () => {
                     </thead>
                     <tbody>
                       {orders.map((order) => (
-                        <tr key={order.id} style={{ borderBottom: `1px solid ${tokens.border}` }}>
+                        <tr key={order.order_number} style={{ borderBottom: `1px solid ${tokens.border}` }}>
                           <td style={{ padding: "0.75rem 1.5rem", fontWeight: 500, color: tokens.foreground }}>
                             #{order.order_number || order.id}
                           </td>
@@ -497,18 +632,18 @@ const AdminShowCustomer = () => {
                                 fontSize: "0.75rem",
                                 fontWeight: 500,
                                 textTransform: "capitalize",
-                                ...getOrderStatusStyle(order.status),
+                                ...getOrderStatusStyle(order.order_status),
                               }}
                             >
-                              {order.status}
+                              {order.order_status}
                             </span>
                           </td>
                           <td style={{ padding: "0.75rem 1.5rem", textAlign: "right" }}>
                             <Link
-                              href={`/admin/orders/${order.id}`}
+                              href={`/admin/orders/${order.order_number}`}
                               style={{ fontSize: "0.8125rem", fontWeight: 500, color: tokens.blue, textDecoration: "none" }}
                             >
-                              View
+                              <IconEye />
                             </Link>
                           </td>
                         </tr>
@@ -554,7 +689,7 @@ const AdminShowCustomer = () => {
                           )}
                         </div>
                         <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0, lineHeight: 1.5 }}>
-                          {[address.street, address.city, address.region, address.country].filter(Boolean).join(", ")}
+                          {[address.address, address.city, address.state, address.country,address.apartment].filter(Boolean).join(", ")}
                         </p>
                       </div>
                     ))}

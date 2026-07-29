@@ -37,13 +37,6 @@ const stats = [
 ];
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
-const IconDollarSign = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="12" y1="1" x2="12" y2="23" />
-    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-  </svg>
-);
-
 const IconCedi = () => (
   <span
     style={{
@@ -376,26 +369,6 @@ const AdminOverview = ({ stats, salesData, topProducts, recentOrders }) => {
 
           {/* Right controls */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
-            <button
-              aria-label="Notifications"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "36px",
-                height: "36px",
-                borderRadius: tokens.radius,
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                color: tokens.mutedForeground,
-                transition: "background-color 0.15s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = tokens.secondary)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-            >
-              <IconBell />
-            </button>
             <div
               style={{
                 width: "32px",
@@ -411,7 +384,7 @@ const AdminOverview = ({ stats, salesData, topProducts, recentOrders }) => {
                 fontFamily: tokens.fontBody,
               }}
             >
-              AN
+              CB
             </div>
           </div>
         </header>

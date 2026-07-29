@@ -101,17 +101,12 @@ const IconEye = () => (
 // ─── Status badge style helper ───────────────────────────────────────────────
 const getStatusStyle = (status) => {
   if (status === "active") {
-    return {
-      backgroundColor: "#dcfce7",
-      color: "#166534",
-      border: "1px solid #bbf7d0",
-    };
+    return { backgroundColor: "#dcfce7", color: "#166534", border: "1px solid #bbf7d0" };
   }
-  return {
-    backgroundColor: "transparent",
-    color: tokens.mutedForeground,
-    border: `1px solid ${tokens.border}`,
-  };
+  if (status === "suspended") {
+    return { backgroundColor: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" };
+  }
+  return { backgroundColor: "transparent", color: tokens.mutedForeground, border: `1px solid ${tokens.border}` };
 };
 
 // ─── AdminCustomers Page ─────────────────────────────────────────────────────
@@ -122,7 +117,7 @@ const AdminCustomers = () => {
   const [editHovered, setEditHovered] = useState(false);
 
   const Customers = rawCustomers.map(customer => ({
-    id: `CUS-${customer.id}`,
+    id: customer.id,
     name: customer.name,
     email: customer.email,
     joined: customer.joined,
