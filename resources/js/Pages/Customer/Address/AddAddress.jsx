@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm, usePage } from "@inertiajs/react";
+import { useForm, usePage, Link } from "@inertiajs/react";
 import AccountSidebar from '@/Components/Customer/AccountSidebar';
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
@@ -17,7 +17,7 @@ const injectFonts = () => {
   }
 };
 
-// ─── Design tokens (matches AccountAddresses.jsx) ────────────────────────────
+// ─── Design tokens ────────────────────────────────────────────────────────────
 const tokens = {
   fontDisplay: "'Cormorant Garamond', serif",
   fontBody: "'Inter', sans-serif",
@@ -53,7 +53,7 @@ const FieldLabel = ({ children, htmlFor }) => (
     htmlFor={htmlFor}
     style={{
       display: "block",
-      fontSize: "0.8125rem",
+      fontSize: "clamp(0.75rem, 2.5vw, 0.8125rem)",
       fontWeight: 500,
       color: tokens.foreground,
       marginBottom: "0.375rem",
@@ -85,7 +85,7 @@ const TextInput = ({ id, error, ...props }) => {
         width: "100%",
         boxSizing: "border-box",
         padding: "0.625rem 0.75rem",
-        fontSize: "0.875rem",
+        fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
         fontFamily: tokens.fontBody,
         color: tokens.foreground,
         backgroundColor: tokens.background,
@@ -93,6 +93,7 @@ const TextInput = ({ id, error, ...props }) => {
         borderRadius: tokens.radius,
         outline: "none",
         transition: "border-color 0.15s ease",
+        height: "44px",
       }}
     />
   );
@@ -110,7 +111,7 @@ const SelectInput = ({ id, error, children, ...props }) => {
         width: "100%",
         boxSizing: "border-box",
         padding: "0.625rem 0.75rem",
-        fontSize: "0.875rem",
+        fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)",
         fontFamily: tokens.fontBody,
         color: tokens.foreground,
         backgroundColor: tokens.background,
@@ -124,6 +125,7 @@ const SelectInput = ({ id, error, children, ...props }) => {
         backgroundRepeat: "no-repeat",
         backgroundPosition: "right 0.75rem center",
         paddingRight: "2.25rem",
+        height: "44px",
       }}
     >
       {children}
@@ -131,18 +133,11 @@ const SelectInput = ({ id, error, children, ...props }) => {
   );
 };
 
-// US states — adjust/remove if your storefront ships outside the US
-const US_STATES = [
-  "Accra",
-];
-
 // ─── AddAddress Page ───────────────────────────────────────────────────────
 const AddAddress = ({ user }) => {
   const { auth } = usePage().props;
   const currentUser = user ?? auth?.user ?? null;
 
-  // currentUser only exposes a combined `name` field (e.g. "Solomon Yeboah"),
-  // not first_name/last_name separately — split it here for the form.
   const [derivedFirstName, derivedLastName] = React.useMemo(() => {
     const full = (currentUser?.name || "").trim();
     if (!full) return ["", ""];
@@ -153,6 +148,7 @@ const AddAddress = ({ user }) => {
   }, [currentUser?.name]);
 
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   const [activePath, setActivePath] = useState("/account/addresses/create");
   const [saveBtnHovered, setSaveBtnHovered] = useState(false);
   const [cancelBtnHovered, setCancelBtnHovered] = useState(false);
@@ -175,7 +171,11 @@ const AddAddress = ({ user }) => {
     injectFonts();
     setActivePath(getActivePath());
 
-    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsDesktop(width >= 1024);
+      setIsTablet(width >= 640 && width < 1024);
+    };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -204,34 +204,41 @@ const AddAddress = ({ user }) => {
       <Header />
 
       <main style={{ flex: 1, backgroundColor: "rgba(245,245,245,0.6)" }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "2rem 1rem" }}>
+        <div style={{ 
+          maxWidth: "1280px", 
+          margin: "0 auto", 
+          padding: isDesktop ? "2rem 1rem" : isTablet ? "1.75rem 1.25rem" : "1.5rem 1rem" 
+        }}>
           {/* Breadcrumb / back link */}
-          <button
+          <Link
+            href={"/account/addresses"}
             type="button"
-            onClick={() => handleNavigate("/account/addresses")}
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "0.375rem",
               background: "none",
               border: "none",
-              padding: 0,
-              marginBottom: "1.5rem",
-              fontSize: "0.8125rem",
+              padding: "0.25rem",
+              marginBottom: isDesktop ? "1.5rem" : "1.25rem",
+              fontSize: "clamp(0.75rem, 2.5vw, 0.8125rem)",
               fontFamily: tokens.fontBody,
               color: tokens.mutedForeground,
               cursor: "pointer",
+              transition: "color 0.2s ease",
             }}
+            onMouseEnter={(e) => e.target.style.color = tokens.foreground}
+            onMouseLeave={(e) => e.target.style.color = tokens.mutedForeground}
           >
             <IconChevronLeft />
             Back to Addresses
-          </button>
+          </Link>
 
           <div
             style={{
               display: "grid",
               gridTemplateColumns: isDesktop ? "220px 1fr" : "1fr",
-              gap: isDesktop ? "3rem" : "2rem",
+              gap: isDesktop ? "3rem" : isTablet ? "2rem" : "1.5rem",
             }}
           >
             {/* Sidebar */}
@@ -239,11 +246,16 @@ const AddAddress = ({ user }) => {
 
             {/* Content */}
             <section>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+              <div style={{ 
+                display: "flex", 
+                alignItems: "flex-start", 
+                gap: isDesktop ? "0.75rem" : "0.625rem", 
+                marginBottom: isDesktop ? "0.5rem" : "0.25rem" 
+              }}>
                 <div
                   style={{
-                    width: "40px",
-                    height: "40px",
+                    width: isDesktop ? "40px" : "36px",
+                    height: isDesktop ? "40px" : "36px",
                     borderRadius: "50%",
                     backgroundColor: tokens.foreground,
                     color: tokens.background,
@@ -251,15 +263,28 @@ const AddAddress = ({ user }) => {
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
+                    marginTop: "2px",
                   }}
                 >
                   <IconMapPin />
                 </div>
-                <div>
-                  <h2 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.5rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>
+                <div style={{ flex: 1 }}>
+                  <h2 style={{ 
+                    fontFamily: tokens.fontDisplay, 
+                    fontSize: "clamp(1.25rem, 4vw, 1.5rem)", 
+                    fontWeight: 500, 
+                    margin: 0, 
+                    color: tokens.foreground,
+                    lineHeight: 1.2,
+                  }}>
                     Add a New Address
                   </h2>
-                  <p style={{ marginTop: "0.125rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
+                  <p style={{ 
+                    marginTop: "0.25rem", 
+                    fontSize: "clamp(0.813rem, 2.5vw, 0.875rem)", 
+                    color: tokens.mutedForeground,
+                    lineHeight: 1.5,
+                  }}>
                     {currentUser?.email
                       ? <>Save a delivery address for faster checkout &mdash; linked to <strong style={{ color: tokens.foreground, fontWeight: 500 }}>{currentUser.email}</strong></>
                       : "Save a delivery address for faster checkout"}
@@ -270,11 +295,11 @@ const AddAddress = ({ user }) => {
               <form
                 onSubmit={handleSubmit}
                 style={{
-                  marginTop: "1.5rem",
+                  marginTop: isDesktop ? "1.5rem" : "1.25rem",
                   backgroundColor: tokens.background,
                   border: `1px solid ${tokens.border}`,
                   borderRadius: tokens.radius,
-                  padding: isDesktop ? "2rem" : "1.25rem",
+                  padding: isDesktop ? "2rem" : isTablet ? "1.5rem" : "1.25rem",
                 }}
               >
                 {/* Label */}
@@ -339,7 +364,7 @@ const AddAddress = ({ user }) => {
                 </div>
 
                 {/* Divider */}
-                <div style={{ height: "1px", backgroundColor: tokens.border, margin: "1.5rem 0" }} />
+                <div style={{ height: "1px", backgroundColor: tokens.border, margin: isDesktop ? "1.5rem 0" : "1.25rem 0" }} />
 
                 {/* Street address */}
                 <div style={{ marginBottom: "1.25rem" }}>
@@ -390,16 +415,16 @@ const AddAddress = ({ user }) => {
                     <FieldError message={errors.city} />
                   </div>
 
-                    <div>
-                        <FieldLabel htmlFor="city">State</FieldLabel>
-                            <TextInput
-                              id="state"
-                              type="text"
-                              value={data.state}
-                              onChange={handleChange("state")}
-                              error={errors.state}
-                            />
-                        <FieldError message={errors.state} />
+                  <div>
+                    <FieldLabel htmlFor="state">State</FieldLabel>
+                    <TextInput
+                      id="state"
+                      type="text"
+                      value={data.state}
+                      onChange={handleChange("state")}
+                      error={errors.state}
+                    />
+                    <FieldError message={errors.state} />
                   </div>
                   <div>
                     <FieldLabel htmlFor="zip">ZIP code</FieldLabel>
@@ -436,8 +461,9 @@ const AddAddress = ({ user }) => {
                     alignItems: "center",
                     gap: "0.5rem",
                     cursor: "pointer",
-                    marginBottom: "2rem",
+                    marginBottom: isDesktop ? "2rem" : "1.5rem",
                     userSelect: "none",
+                    padding: "0.5rem 0",
                   }}
                 >
                   <input
@@ -446,19 +472,29 @@ const AddAddress = ({ user }) => {
                     checked={data.is_default}
                     onChange={handleChange("is_default")}
                     style={{
-                      width: "16px",
-                      height: "16px",
+                      width: "18px",
+                      height: "18px",
                       accentColor: tokens.foreground,
                       cursor: "pointer",
+                      flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: "0.8125rem", color: tokens.foreground, fontFamily: tokens.fontBody }}>
+                  <span style={{ 
+                    fontSize: "clamp(0.75rem, 2.5vw, 0.8125rem)", 
+                    color: tokens.foreground, 
+                    fontFamily: tokens.fontBody,
+                    lineHeight: 1.4,
+                  }}>
                     Set as default delivery address
                   </span>
                 </label>
 
                 {/* Actions */}
-                <div style={{ display: "flex", gap: "0.75rem" }}>
+                <div style={{ 
+                  display: "flex", 
+                  gap: "0.75rem",
+                  flexDirection: isDesktop ? "row" : "column",
+                }}>
                   <button
                     type="submit"
                     disabled={processing}
@@ -466,7 +502,7 @@ const AddAddress = ({ user }) => {
                     onMouseLeave={() => setSaveBtnHovered(false)}
                     style={{
                       padding: "0.625rem 1.25rem",
-                      fontSize: "0.8125rem",
+                      fontSize: "clamp(0.75rem, 2.5vw, 0.8125rem)",
                       fontWeight: 500,
                       fontFamily: tokens.fontBody,
                       borderRadius: tokens.radius,
@@ -476,6 +512,8 @@ const AddAddress = ({ user }) => {
                       cursor: processing ? "default" : "pointer",
                       opacity: processing ? 0.6 : saveBtnHovered ? 0.9 : 1,
                       transition: "opacity 0.2s ease",
+                      width: isDesktop ? "auto" : "100%",
+                      height: isDesktop ? "auto" : "44px",
                     }}
                   >
                     {processing ? "Saving..." : "Save Address"}
@@ -487,7 +525,7 @@ const AddAddress = ({ user }) => {
                     onMouseLeave={() => setCancelBtnHovered(false)}
                     style={{
                       padding: "0.625rem 1.25rem",
-                      fontSize: "0.8125rem",
+                      fontSize: "clamp(0.75rem, 2.5vw, 0.8125rem)",
                       fontWeight: 500,
                       fontFamily: tokens.fontBody,
                       borderRadius: tokens.radius,
@@ -496,6 +534,8 @@ const AddAddress = ({ user }) => {
                       color: tokens.foreground,
                       cursor: "pointer",
                       transition: "background-color 0.2s ease",
+                      width: isDesktop ? "auto" : "100%",
+                      height: isDesktop ? "auto" : "44px",
                     }}
                   >
                     Cancel
