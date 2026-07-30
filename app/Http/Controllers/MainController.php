@@ -10,7 +10,7 @@ use Inertia\Inertia;
 use App\Models\OrderItem;
 use App\Models\Review;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\{Auth, DB};
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -48,7 +48,9 @@ class MainController extends Controller
         return inertia('Home', [
             'newArrivals' => $newArrivals,
             'categories' => $categories,
-            'collections' => $collections
+            'collections' => $collections,
+            'reviews' => $this->getFeaturedReviews(),
+            'reviewStats' => $this->getReviewStats(),
         ]);
     }
 
@@ -84,37 +86,32 @@ class MainController extends Controller
     public function about()
     {
         $collections = Category::all()->count();
-        
-        // Get featured/approved reviews for the about page
+
         $reviews = Review::with('user')
-            ->where('is_approved', true)
+            ->where('status', 'approved')
             ->latest()
-            ->take(6) // Limit to 6 featured reviews
+            ->take(6)
             ->get()
             ->map(function ($review) {
                 return [
                     'id' => $review->id,
                     'rating' => $review->rating,
-                    'title' => $review->title,
                     'review' => $review->review,
-                    'is_verified_purchase' => $review->is_verified_purchase,
+                    'is_verified_purchase' => true, // every review requires a real order_item_id
                     'created_at' => $review->created_at,
                     'user' => [
-                        'name' => $review->user->first_name . ' ' . $review->user->last_name,
+                        'name' => trim(($review->user->first_name ?? '') . ' ' . ($review->user->last_name ?? ''))
+                            ?: ($review->user->name ?? 'Anonymous'),
                     ],
                 ];
             });
-        
-        // Calculate overall stats from all approved reviews
+
         $stats = [
-            'average_rating' => round(Review::where('is_approved', true)->avg('rating') ?? 0, 1),
-            'total_reviews' => Review::where('is_approved', true)->count(),
-            'rating_distribution' => Review::getRatingDistribution(), // You'll need to make this static or create a helper
+            'average_rating' => round(Review::where('status', 'approved')->avg('rating') ?? 0, 1),
+            'total_reviews' => Review::where('status', 'approved')->count(),
+            'rating_distribution' => $this->getOverallRatingDistribution(),
         ];
-        
-        // Alternative: Calculate rating distribution manually
-        $stats['rating_distribution'] = $this->getOverallRatingDistribution();
-        
+
         return inertia('About', [
             'collections' => $collections,
             'reviews' => $reviews,
@@ -258,54 +255,66 @@ class MainController extends Controller
         ];
     }
 
-    public function storeReview(Request $request): JsonResponse
+    public function storeReview(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'orderId' => ['required'],
-            'itemId'  => ['required'],
-            'rating'  => ['required', 'integer', 'between:1,5'],
+            'itemId'  => ['required', 'integer'],
+            'rating'  => ['required', 'integer', 'min:1', 'max:5'],
             'review'  => ['required', 'string', 'min:10', 'max:1000'],
         ]);
 
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
+        $user = Auth::user();
+
+        $orderItem = OrderItem::with('order')->find($validated['itemId']);
+
+        if (! $orderItem || ! $orderItem->order) {
+            throw ValidationException::withMessages([
+                'itemId' => 'This order item could not be found.',
+            ]);
         }
 
-        $userId = Auth::id();
+        $order = $orderItem->order;
 
-        $orderItem = Order::where('id', $request->itemId)
-            ->where('order_id', $request->orderId)
-            ->whereHas('order', function ($query) use ($userId) {
-                $query->where('user_id', $userId)
-                      ->where('order_status', 'delivered');
-            })
+        if ((string) $order->user_id !== (string) $user->id) {
+            throw ValidationException::withMessages([
+                'itemId' => 'This order does not belong to your account.',
+            ]);
+        }
+
+        if ($order->order_status !== 'delivered') {
+            throw ValidationException::withMessages([
+                'itemId' => 'You can only review items from delivered orders.',
+            ]);
+        }
+
+        if (! $orderItem->product_id) {
+            throw ValidationException::withMessages([
+                'itemId' => 'This item is no longer linked to a product.',
+            ]);
+        }
+
+        $existing = Review::where('order_item_id', $orderItem->id)
+            ->where('user_id', $user->id)
             ->first();
 
-        if (! $orderItem || ! $orderItem->product_id) {
-            return response()->json([
-                'message' => 'This item is not eligible for a review.',
-            ], 422);
+        if ($existing) {
+            throw ValidationException::withMessages([
+                'itemId' => 'You have already reviewed this item.',
+            ]);
         }
 
-        $alreadyReviewed = Review::where('user_id', $userId)
-            ->where('order_id', $orderItem->order_id)
-            ->where('product_id', $orderItem->product_id)
-            ->exists();
-
-        if ($alreadyReviewed) {
-            return response()->json([
-                'message' => 'You have already reviewed this product for this order.',
-            ], 422);
-        }
-
-        $review = Review::create([
-            'user_id'               => $userId,
-            'order_id'              => $orderItem->order_id,
-            'product_id'            => $orderItem->product_id,
-            'rating'                => $request->rating,
-            'review'                => $request->review,
-            'is_verified_purchase'  => true,
-        ]);
+        $review = DB::transaction(function () use ($validated, $user, $order, $orderItem) {
+            return Review::create([
+                'user_id'       => $user->id,
+                'order_id'      => $order->id,
+                'order_item_id' => $orderItem->id,
+                'product_id'    => $orderItem->product_id,
+                'rating'        => $validated['rating'],
+                'review'        => $validated['review'],
+                'status'        => 'pending',
+            ]);
+        });
 
         return response()->json([
             'message' => 'Review submitted successfully.',
@@ -319,12 +328,38 @@ class MainController extends Controller
      */
     private function getOverallRatingDistribution(): array
     {
-        $distribution = [];
-        for ($i = 5; $i >= 1; $i--) {
-            $distribution[$i] = Review::where('is_approved', true)
-                ->where('rating', $i)
-                ->count();
-        }
-        return $distribution;
+        $counts = Review::where('status', 'approved')
+            ->selectRaw('rating, count(*) as total')
+            ->groupBy('rating')
+            ->pluck('total', 'rating');
+    
+        return collect(range(1, 5))->mapWithKeys(fn ($r) => [$r => $counts[$r] ?? 0])->toArray();
+    }
+
+    private function getFeaturedReviews(int $limit = 6)
+    {
+        return Review::with('user')
+            ->where('status', 'approved')
+            ->latest()
+            ->take($limit)
+            ->get()
+            ->map(fn ($review) => [
+                'id' => $review->id,
+                'rating' => $review->rating,
+                'review' => $review->review,
+                'created_at' => $review->created_at,
+                'user' => [
+                    'name' => trim(($review->user->first_name ?? '') . ' ' . ($review->user->last_name ?? ''))
+                        ?: ($review->user->name ?? 'Anonymous'),
+                ],
+            ]);
+    }
+
+    private function getReviewStats(): array
+    {
+        return [
+            'average_rating' => round(Review::where('status', 'approved')->avg('rating') ?? 0, 1),
+            'total_reviews' => Review::where('status', 'approved')->count(),
+        ];
     }
 }

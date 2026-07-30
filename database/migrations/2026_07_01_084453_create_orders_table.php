@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('apartment')->nullable();
             $table->string('city');
             $table->string('state');
-            $table->string('zip');
+            $table->string('zip')->nullable();
             $table->text('notes')->nullable();
             $table->decimal('subtotal', 10, 2);
             $table->decimal('total_amount', 10, 2);

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\ReviewController;
 
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\WishlistController;
@@ -124,7 +125,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/admin/customers/{customer}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy');
         Route::put('/admin/customers/{customer}', [CustomerController::class, 'reactivate'])->name('admin.customers.reactivate');
 
-        // Route::get('/admin/categories', [CategoryController::class, 'Index']);
+        Route::get('/admin/reviews', [ReviewController::class, 'index'])->name('admin.reviews.index');
+        Route::patch('/admin/reviews/{review}/status', [ReviewController::class, 'updateStatus'])->name('admin.reviews.update-status');
+        Route::delete('/admin/reviews/{review}', [ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
 
         Route::get('/admin/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
         Route::get('/admin/payments/export', [AdminPaymentController::class, 'export'])->name('admin.payments.export');

@@ -1,3 +1,4 @@
+import SEO from '@/Components/SEO';
 import React, { useState, useEffect } from "react";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
@@ -190,6 +191,12 @@ const Collections = ({ categories = [] }) => {
         fontFamily: tokens.fontBody,
       }}
     >
+      <SEO
+        title="Shop Collections"
+        description="Cute fits for work, church, and every day. All affordable. All confidence.
+                      Pick your vibe"
+        url="/collections"
+      />
       <Header />
 
       <main style={{ flex: 1 }}>
@@ -229,8 +236,8 @@ const Collections = ({ categories = [] }) => {
                 lineHeight: 1.7,
               }}
             >
-              Explore our thoughtfully curated collections, designed to bring
-              timeless elegance to your everyday wardrobe.
+              Cute fits for work, church, and every day. All affordable. All confidence.
+              Pick your vibe
             </p>
           </div>
         </section>

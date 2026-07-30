@@ -839,7 +839,7 @@ const OrderCard = ({ order, isDesktop, isOpen, onToggle, onLeaveReview, reviewed
                 border: "1px solid #fecaca",
               }}
             >
-              Payment Due
+              Incomplete Payment
             </span>
           )}
           <IconChevronDown isOpen={isOpen} />

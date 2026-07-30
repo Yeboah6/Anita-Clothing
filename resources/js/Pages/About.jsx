@@ -1,3 +1,4 @@
+import SEO from '@/Components/SEO';
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Header from '@/Components/Layout/Header';
@@ -180,7 +181,7 @@ const ReviewCard = ({ review, isDesktop }) => {
       <StarRating rating={review.rating} />
       
       {/* Title */}
-      <h4
+      {/* <h4
         style={{
           fontFamily: tokens.fontDisplay,
           fontSize: "1.125rem",
@@ -191,7 +192,7 @@ const ReviewCard = ({ review, isDesktop }) => {
         }}
       >
         {review.title}
-      </h4>
+      </h4> */}
       
       {/* Review Text */}
       <p
@@ -310,7 +311,7 @@ const ReviewCard = ({ review, isDesktop }) => {
 const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initialStats = null }) => {
   const [reviews, setReviews] = useState(initialReviews);
   const [stats, setStats] = useState(initialStats);
-  const [loading, setLoading] = useState(!initialReviews.length);
+  const [loading, setLoading] = useState(!initialReviews.length && !!productId);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -400,7 +401,7 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
               color: tokens.foreground,
             }}
           >
-            Customer Reviews
+            What The Girlies Are Saying 🌸
           </h2>
           <p
             style={{
@@ -410,7 +411,7 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
               lineHeight: 1.6,
             }}
           >
-            Hear what our customers have to say about their CuteBloom pieces
+            Real reviews from real CuteBloom babes. Spoiler: they love how cute + affordable it is.
           </p>
         </div>
 
@@ -803,6 +804,12 @@ const About = ({ collections, productId = null, reviews = [], stats = null }) =>
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
+      <SEO
+        title="About Us"
+        description="Founded with a vision to redefine everyday elegance, CuteBloom creates timeless pieces that transcend seasons and trends."
+        image="/images/user.jpeg"
+        url="/about"
+      />
       <Header />
 
       <main style={{ flex: 1 }}>
@@ -833,8 +840,12 @@ const About = ({ collections, productId = null, reviews = [], stats = null }) =>
                   About CuteBloom
                 </h1>
                 <p style={{ fontSize: "1.125rem", color: tokens.mutedForeground, lineHeight: 1.7, margin: 0 }}>
-                  Founded with a vision to redefine everyday elegance, CuteBloom 
-                  creates timeless pieces that transcend seasons and trends.
+                  CuteBloom is made for the girlies 💕  
+                  We create ready-to-wear and official outfits that are cute, comfortable, and affordable — because looking good at work or on a normal day shouldn’t cost a fortune.
+                    
+                  Every piece is designed to help you walk into any room and feel confident. No stress, no overthinking. Just outfits that fit your life, your budget, and your vibe.
+                    
+                  Cute. Affordable. Confidence.
                 </p>
               </div>
               <div style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden", backgroundColor: tokens.secondary }}>
@@ -858,20 +869,18 @@ const About = ({ collections, productId = null, reviews = [], stats = null }) =>
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem", color: tokens.mutedForeground, fontSize: "1rem", lineHeight: 1.7 }}>
                 <p style={{ margin: 0 }}>
-                  CuteBloom was born from a simple belief: that every woman deserves 
-                  to feel effortlessly elegant in her everyday life. We started with a 
-                  small collection of essential pieces, each designed to be worn and loved 
-                  for years to come.
+                  CuteBloom was born from one simple belief: every girlie deserves to feel cute and confident — without spending too much 💕
                 </p>
                 <p style={{ margin: 0 }}>
-                  Today, our collections have grown, but our commitment remains unchanged. 
-                  We source only the finest fabrics—silk from trusted mills, cashmere from 
-                  ethical producers, and linen that softens beautifully with wear.
+                  We started small with ready-to-wear and office outfits that we actually wanted to wear ourselves. 
+                  Pieces that are easy to style, comfy all day, and affordable enough to buy more than one.
                 </p>
                 <p style={{ margin: 0 }}>
-                  Every garment is thoughtfully designed in our studio, where we obsess 
-                  over the details that matter: the perfect drape, the refined seam, the 
-                  versatile silhouette that moves from day to evening with ease.
+                  Today we’re growing, but our promise stays the same:  
+                  Cute outfits. Real prices. Confidence in every fit.
+
+                  Whether it’s for work, church, or just stepping out, we’ve got you.  
+                  Because when you look good, you feel good. And that’s the whole point of Cutebloom. 
                 </p>
               </div>
             </div>
@@ -891,11 +900,10 @@ const About = ({ collections, productId = null, reviews = [], stats = null }) =>
                   <span style={{ fontFamily: tokens.fontDisplay, fontSize: "1.5rem", color: tokens.foreground }}>✦</span>
                 </div>
                 <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: "0 0 0.5rem", color: tokens.foreground }}>
-                  Timeless Design
+                  Cute + Confidence 💕
                 </h3>
                 <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, lineHeight: 1.6, margin: 0 }}>
-                  We create pieces that transcend trends, designed to be worn and 
-                  cherished for years, not seasons.
+                  We design outfits that make you feel good the moment you wear them. Walk in, stand tall, own it.
                 </p>
               </div>
               {/* Value 2 */}
@@ -904,11 +912,10 @@ const About = ({ collections, productId = null, reviews = [], stats = null }) =>
                   <span style={{ fontFamily: tokens.fontDisplay, fontSize: "1.5rem", color: tokens.foreground }}>◈</span>
                 </div>
                 <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: "0 0 0.5rem", color: tokens.foreground }}>
-                  Quality Craftsmanship
+                  Affordable Always
                 </h3>
                 <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, lineHeight: 1.6, margin: 0 }}>
-                  Each garment is crafted with meticulous attention to detail, using 
-                  premium materials that feel as good as they look.
+                  Looking good shouldn’t cost all your salary. We keep prices friendly so you can get more than one fit.
                 </p>
               </div>
               {/* Value 3 */}
@@ -917,11 +924,10 @@ const About = ({ collections, productId = null, reviews = [], stats = null }) =>
                   <span style={{ fontFamily: tokens.fontDisplay, fontSize: "1.5rem", color: tokens.foreground }}>○</span>
                 </div>
                 <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.25rem", fontWeight: 500, margin: "0 0 0.5rem", color: tokens.foreground }}>
-                  Conscious Fashion
+                  For Real Life
                 </h3>
                 <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, lineHeight: 1.6, margin: 0 }}>
-                  We believe in responsible fashion—less, but better. Our pieces are 
-                  made to last, reducing the need for constant replacement.
+                  From office to church to brunch — our pieces are comfy, wearable, and easy to style. No stress, just bloom.
                 </p>
               </div>
             </div>
@@ -963,7 +969,8 @@ const About = ({ collections, productId = null, reviews = [], stats = null }) =>
                 Discover Our Collections
               </h2>
               <p style={{ marginTop: "1rem", color: tokens.mutedForeground, fontSize: "1rem", lineHeight: 1.6 }}>
-                Explore our carefully curated pieces and find your perfect wardrobe essentials.
+                Cute fits for work, church, and every day. All affordable. All confidence. <br />
+                Pick your vibe
               </p>
               <div style={{ marginTop: "2rem", display: "flex", flexDirection: "column", gap: "1rem", justifyContent: "center" }} className="about-cta-buttons">
                 <a

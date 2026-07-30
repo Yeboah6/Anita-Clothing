@@ -1,3 +1,4 @@
+import SEO from '@/Components/SEO';
 import React, { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
 import Header from '@/Components/Layout/Header';
@@ -169,6 +170,11 @@ const NewArrivalsPage = ({ products = [] }) => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
+      <SEO
+        title="New Arrivals"
+        description="Discover the latest additions to our collection — each piece crafted with care and designed to bring timeless elegance to your wardrobe."
+        url="/new-arrivals"
+      />
       <Header />
 
       <main style={{ flex: 1 }}>
@@ -216,8 +222,8 @@ const NewArrivalsPage = ({ products = [] }) => {
                 lineHeight: 1.7,
                 padding: isDesktop ? "0" : "0 0.5rem",
               }}>
-                Discover the latest additions to our collection. Each piece is crafted with care 
-                and designed to bring timeless elegance to your wardrobe.
+                New In For The Girlies ✨. <br /> Fresh drops just for you. Work fits, weekend looks, and everything in between — all cute, comfy, and wallet-friendly.  
+                <br />  Which one are you grabbing first?
               </p>
             </div>
           </div>

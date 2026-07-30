@@ -188,6 +188,8 @@ const Checkout = () => {
     initialDefaultAddress ? initialDefaultAddress.id : "new"
   );
 
+    const showManualFields = selectedAddressId === "new" || addresses.length === 0;
+
   const [formData, setFormData] = useState({
     email: userInfo?.email || "",
     phone: userInfo?.phone || "",
@@ -229,14 +231,11 @@ const Checkout = () => {
 
   const handleInputChange = (field) => (e) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-    // Clear error for this field when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }));
     }
   };
 
-  // Selecting a saved address fills the delivery fields; selecting "new"
-  // clears them for manual entry.
   const handleSelectAddress = (id) => {
     setSelectedAddressId(id);
     setErrors({});
@@ -246,6 +245,7 @@ const Checkout = () => {
         ...prev,
         firstName: userInfo?.first_name || "",
         lastName: userInfo?.last_name || "",
+        phone: userInfo?.phone || "",
         address: "",
         apartment: "",
         city: "",
@@ -262,43 +262,43 @@ const Checkout = () => {
     setFormData((prev) => ({
       ...prev,
       ...addressToFormFields(addr),
-      // Keep whatever email/phone the user already has unless the address
-      // has its own phone on file.
       phone: addr.phone || prev.phone,
     }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email";
     }
-    
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone is required";
+    }
+
     if (!formData.firstName.trim()) {
       newErrors.firstName = "First name is required";
     }
-    
+
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Last name is required";
     }
-    
-    if (!formData.address.trim()) {
-      newErrors.address = "Address is required";
-    }
-    
-    if (!formData.city.trim()) {
-      newErrors.city = "City is required";
-    }
-    
-    if (!formData.state.trim()) {
-      newErrors.state = "State is required";
-    }
-    
-    if (!formData.zip.trim()) {
-      newErrors.zip = "ZIP code is required";
+
+    // Only validate manual address fields when they're actually visible/editable.
+    // A selected saved address is trusted as-is.
+    if (showManualFields) {
+      if (!formData.address.trim()) {
+        newErrors.address = "Address is required";
+      }
+      if (!formData.city.trim()) {
+        newErrors.city = "City is required";
+      }
+      if (!formData.state.trim()) {
+        newErrors.state = "State is required";
+      }
     }
 
     setErrors(newErrors);
@@ -422,8 +422,6 @@ const Checkout = () => {
     );
   }
 
-  const showManualFields = selectedAddressId === "new" || addresses.length === 0;
-
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
       <Header />
@@ -497,10 +495,16 @@ const Checkout = () => {
                       <input
                         id="phone" type="tel" placeholder="+1 (555) 000-0000"
                         value={formData.phone} onChange={handleInputChange("phone")}
-                        style={inputStyle}
-                        onFocus={(e) => (e.target.style.borderColor = tokens.foreground)}
-                        onBlur={(e) => (e.target.style.borderColor = tokens.border)}
+                        style={{
+                          ...inputStyle,
+                          borderColor: errors.phone ? tokens.destructive : tokens.border,
+                        }}
+                        onFocus={(e) => (e.target.style.borderColor = errors.phone ? tokens.destructive : tokens.foreground)}
+                        onBlur={(e) => (e.target.style.borderColor = errors.phone ? tokens.destructive : tokens.border)}
                       />
+                      {errors.phone && (
+                        <p style={{ color: tokens.destructive, fontSize: "0.75rem", margin: "0.25rem 0 0" }}>{errors.phone}</p>
+                      )}
                     </div>
                   </div>
 

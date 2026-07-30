@@ -206,8 +206,7 @@ const Footer = () => {
                 maxWidth: "320px",
               }}
             >
-              Timeless elegance for the modern woman. Curated collections that
-              celebrate understated luxury.
+              Outfits that makes you feel cute and confident.
             </p>
             {/* Social icons for mobile */}
             {!isDesktop && (
@@ -221,7 +220,7 @@ const Footer = () => {
                   <InstagramIcon />
                 </HoverLink>
                 <HoverLink
-                  href="https://tiktok.com/@cutebloom"
+                  href="https://tiktok.com/@eshun_23"
                   target="_blank"
                   rel="noopener noreferrer"
                   ariaLabel="TikTok"
@@ -303,7 +302,7 @@ const Footer = () => {
                   <InstagramIcon />
                 </HoverLink>
                 <HoverLink
-                  href="https://tiktok.com/@cutebloom"
+                  href="https://tiktok.com/@eshun_23"
                   target="_blank"
                   rel="noopener noreferrer"
                   ariaLabel="TikTok"
@@ -432,7 +431,7 @@ const Footer = () => {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} CuteBloom. All rights reserved.
+            © {new Date().getFullYear()} CuteBloom. All rights reserved || Everyday With God is Everyday in Victory!
           </p>
         </div>
       </div>

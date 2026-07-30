@@ -101,7 +101,6 @@ const ProductCard = ({ product }) => {
 // ─── NewArrivals ─────────────────────────────────────────────────────────────
 const NewArrivals = ({ products = [] }) => {
   const [btnHovered, setBtnHovered] = useState(false);
-  // const newArrivals = getNewArrivals().slice(0, 4);
 
   useEffect(() => { injectFonts(); }, []);
 
@@ -152,8 +151,7 @@ const NewArrivals = ({ products = [] }) => {
               lineHeight: 1.6,
             }}
           >
-            The latest additions to our collection, crafted with care and
-            designed to inspire.
+            New In For The Girlies ✨
           </p>
         </div>
 

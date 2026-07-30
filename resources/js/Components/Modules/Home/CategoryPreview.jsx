@@ -167,7 +167,8 @@ const CategoryPreview = ({ categories = [] }) => {
               lineHeight: 1.6,
             }}
           >
-            Explore our thoughtfully curated categories to find pieces that speak to your style.
+            Cute fits for work, church, and every day. All affordable. All confidence.
+            Pick your vibe
           </p>
         </div>
 

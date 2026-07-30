@@ -100,18 +100,16 @@ const AboutSection = ({ collections }) => {
               }}
             >
               <p style={{ margin: 0 }}>
-                Founded with a vision to redefine everyday elegance, CuteBloom
-                creates timeless pieces that transcend seasons and trends.
+                CuteBloom is made for the girlies 💕  
+                We create ready-to-wear and official outfits that are cute, comfortable, and affordable — because looking good at 
+                work or on a normal day shouldn’t cost a fortune.
               </p>
               <p style={{ margin: 0 }}>
-                Each garment in our collection is thoughtfully designed and crafted
-                using premium materials, ensuring both lasting quality and effortless
-                sophistication.
+                Every piece is designed to help you walk into any room and feel confident. 
+                No stress, no overthinking. Just outfits that fit your life, your budget, and your vibe.
               </p>
               <p style={{ margin: 0 }}>
-                We believe that true style lies in simplicity—clean lines, refined
-                details, and versatile silhouettes that empower you to express your
-                unique identity.
+                Cute. Affordable. Confidence.
               </p>
             </div>
 

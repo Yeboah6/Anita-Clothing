@@ -6,7 +6,7 @@ const fonts = {
 };
 
 const colors = {
-  white: '#ffffff',
+  white: '#fff',
   whiteAlpha90: 'rgba(255,255,255,0.9)',
   whiteAlpha30: 'rgba(255,255,255,0.3)',
   black: '#000000',
@@ -133,7 +133,7 @@ const HeroSection = () => {
       {/* Background Image */}
       <div style={styles.bgWrapper}>
         <img
-          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1920&q=80"
+          src="/images/herosection.jpeg"
           alt="Elegant fashion model wearing minimalist clothing"
           style={styles.bgImage}
         />
@@ -145,13 +145,13 @@ const HeroSection = () => {
         <div style={styles.content}>
 
           <h1 style={styles.heading}>
-            Timeless
+            Affordable Fits
             <br />
-            Elegance
+            for The Girlies
           </h1>
 
           <p style={styles.paragraph}>
-            Discover our curated collection of refined essentials designed for the modern woman.
+            Hi bloomer🌸✨ <br /> Welcome to your new favorite world..
           </p>
 
           <div style={styles.buttonRow}>
