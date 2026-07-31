@@ -387,7 +387,7 @@ const Login = () => {
                 fontFamily: tokens.fontBody,
                 borderRadius: tokens.radius,
                 border: "none",
-                backgroundColor: tokens.foreground,
+                backgroundColor: "#f6aab2",
                 color: tokens.background,
                 cursor: processing ? "not-allowed" : "pointer",
                 opacity: processing ? 0.5 : signInBtnHovered ? 0.9 : 1,

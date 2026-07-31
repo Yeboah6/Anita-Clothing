@@ -693,7 +693,7 @@ const Checkout = () => {
                       width: "100%", height: "48px", padding: "0 1.5rem",
                       fontSize: "1rem", fontWeight: 500, fontFamily: tokens.fontBody,
                       borderRadius: tokens.radius, border: "none",
-                      backgroundColor: tokens.foreground, color: tokens.background,
+                      backgroundColor: "#f6aab2", color: tokens.background,
                       cursor: isSubmitting ? "not-allowed" : "pointer",
                       opacity: isSubmitting ? 0.7 : 1,
                       transition: "opacity 0.2s ease",

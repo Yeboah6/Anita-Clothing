@@ -182,9 +182,9 @@ const NewArrivals = ({ products = [] }) => {
               fontFamily: tokens.fontBody,
               textDecoration: "none",
               borderRadius: tokens.radius,
-              border: `1px solid ${tokens.border}`,
-              backgroundColor: btnHovered ? tokens.secondary : "transparent",
-              color: tokens.foreground,
+              border: `1px solid #f6aab2`,
+              backgroundColor: btnHovered ? "#f6aab2" : "transparent",
+              color: btnHovered ? "#fff" : tokens.foreground,
               transition: "background-color 0.2s ease",
               cursor: "pointer",
             }}

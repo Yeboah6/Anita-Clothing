@@ -79,7 +79,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '4px',
-    backgroundColor: colors.white,
+    backgroundColor: "colors.white",
     color: colors.black,
     padding: '0.75rem 2rem',
     fontSize: '1rem',
@@ -159,9 +159,8 @@ const HeroSection = () => {
               href="/collections"
               style={{
                 ...styles.btnPrimary,
-                backgroundColor: primaryHovered
-                  ? 'rgba(255,255,255,0.9)'
-                  : colors.white,
+                backgroundColor: "#f6aab2",
+                color: "#fff"
               }}
               onMouseEnter={() => setPrimaryHovered(true)}
               onMouseLeave={() => setPrimaryHovered(false)}
@@ -173,8 +172,9 @@ const HeroSection = () => {
               href="/collections?filter=new"
               style={{
                 ...styles.btnOutline,
-                backgroundColor: outlineHovered ? colors.white : 'transparent',
-                color: outlineHovered ? colors.black : colors.white,
+                backgroundColor: outlineHovered ? "#f6aab2" : 'transparent',
+                color: outlineHovered ? "#fff" : colors.white,
+                borderColor: outlineHovered ? "#f6aab2" : colors.white,
               }}
               onMouseEnter={() => setOutlineHovered(true)}
               onMouseLeave={() => setOutlineHovered(false)}

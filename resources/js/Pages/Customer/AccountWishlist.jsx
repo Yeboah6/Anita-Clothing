@@ -201,9 +201,9 @@ const WishlistCard = ({ item, onRemove, onAddToBag, removingId, addingId }) => {
           fontWeight: 500,
           fontFamily: tokens.fontBody,
           borderRadius: tokens.radius,
-          border: `1px solid ${tokens.border}`,
-          backgroundColor: addBtnHovered ? tokens.secondary : "transparent",
-          color: tokens.foreground,
+          border: `1px solid #f6aab2`,
+          backgroundColor: addBtnHovered ? "#f6aab2" : "transparent",
+          color: addBtnHovered ? "#fff" : tokens.foreground,
           cursor: isAdding ? "default" : "pointer",
           opacity: isAdding ? 0.6 : 1,
           transition: "background-color 0.2s ease, opacity 0.2s ease",
@@ -218,11 +218,6 @@ const WishlistCard = ({ item, onRemove, onAddToBag, removingId, addingId }) => {
 };
 
 // ─── AccountWishlist Page ────────────────────────────────────────────────────
-// Expects the controller to pass real data, e.g.:
-//   return inertia('Customer/AccountWishlist', [
-//       'wishlistItems' => Wishlist::with('product')->where('user_id', auth()->id())->get(),
-//       'user' => auth()->user()->only(['id', 'name', 'email', 'role']),
-//   ]);
 const AccountWishlist = ({ wishlistItems = [], user }) => {
   const { auth } = usePage().props;
   const currentUser = user ?? auth?.user ?? null;

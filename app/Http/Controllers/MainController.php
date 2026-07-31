@@ -13,6 +13,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\{Auth, DB};
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use App\Mail\ContactMessage;
+use App\Models\Setting;
+use Illuminate\Support\Facades\Mail;
 
 class MainController extends Controller
 {
@@ -320,6 +323,42 @@ class MainController extends Controller
             'message' => 'Review submitted successfully.',
             'review'  => $review,
         ], 201);
+    }
+
+    public function contact()
+    {
+        $settings = Setting::allCached();
+ 
+        return Inertia::render('Contact', [
+            'store' => [
+                'name'    => $settings->get('store_name', ''),
+                'email'   => $settings->get('support_email', ''),
+                'phone'   => $settings->get('support_phone', ''),
+                'address' => $settings->get('store_address', ''),
+            ],
+        ]);
+    }
+ 
+    /**
+     * Route: POST /contact
+     */
+    public function submit(Request $request)
+    {
+        $validated = $request->validate([
+            'name'    => ['required', 'string', 'max:255'],
+            'email'   => ['required', 'email', 'max:255'],
+            'subject' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+ 
+        $settings = Setting::allCached();
+        $supportEmail = $settings->get('support_email');
+ 
+        if ($supportEmail) {
+            Mail::to($supportEmail)->queue(new ContactMessage($validated));
+        }
+ 
+        return back()->with('success', "Thanks — we'll get back to you shortly.");
     }
 
         

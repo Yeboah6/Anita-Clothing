@@ -629,7 +629,7 @@ const Cart = () => {
                     textDecoration: "none",
                     borderRadius: tokens.radius,
                     border: "none",
-                    backgroundColor: tokens.foreground,
+                    backgroundColor: "#f6aab2",
                     color: tokens.background,
                     boxSizing: "border-box",
                   }}

@@ -545,7 +545,7 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
-            <button
+            {/* <button
               aria-label="Notifications"
               style={{
                 display: "flex",
@@ -564,13 +564,13 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
             >
               <IconBell />
-            </button>
+            </button> */}
             <div
               style={{
                 width: "32px",
                 height: "32px",
                 borderRadius: "50%",
-                backgroundColor: tokens.foreground,
+                backgroundColor: "#f6aab2",
                 color: tokens.background,
                 display: "flex",
                 alignItems: "center",
@@ -580,7 +580,7 @@ export default function PaymentReport({ transactions, summary, revenueOverTime, 
                 fontFamily: tokens.fontBody,
               }}
             >
-              AN
+              CB
             </div>
           </div>
         </header>

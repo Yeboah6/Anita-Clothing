@@ -19,8 +19,8 @@ const IconStar = ({ filled, size = 16 }) => (
     width={size}
     height={size}
     viewBox="0 0 24 24"
-    fill={filled ? tokens.foreground : "none"}
-    stroke="currentColor"
+    fill={filled ? "#f6aab2" : "none"}
+    stroke="#f6aab2"
     strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -31,7 +31,7 @@ const IconStar = ({ filled, size = 16 }) => (
 );
 
 const IconQuote = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: tokens.border }}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#000" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: tokens.border }}>
     <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
     <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
   </svg>
@@ -72,7 +72,7 @@ const ReviewCard = ({ review }) => {
         e.currentTarget.style.transform = "translateY(0)";
       }}
     >
-      <div style={{ opacity: 0.3 }}>
+      <div style={{ opacity: 1 }}>
         <IconQuote />
       </div>
 

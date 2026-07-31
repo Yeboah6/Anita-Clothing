@@ -28,9 +28,6 @@ const tokens = {
   destructive: "#ef4444",
 };
 
-// Palette used to render a color swatch next to each variant row.
-// The DB only stores the color name (e.g. "Black"), so we resolve the hex
-// value locally rather than persisting a redundant column.
 const availableColors = [
   { name: "Black", hex: "#1a1a1a" },
   { name: "White", hex: "#FFFFFF" },
@@ -48,14 +45,14 @@ const getColorHex = (colorName) =>
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const IconBell = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
   </svg>
 );
 
 const IconMenu = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="3" y1="6" x2="21" y2="6" />
     <line x1="3" y1="12" x2="21" y2="12" />
     <line x1="3" y1="18" x2="21" y2="18" />
@@ -63,33 +60,33 @@ const IconMenu = () => (
 );
 
 const IconChevronLeft = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <polyline points="15 18 9 12 15 6" />
   </svg>
 );
 
 const IconPencil = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
     <path d="m15 5 4 4" />
   </svg>
 );
 
 const IconArrowLeft = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="19" y1="12" x2="5" y2="12" />
     <polyline points="12 19 5 12 12 5" />
   </svg>
 );
 
 const IconStar = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#f6aab2" stroke="#f6aab2" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
   </svg>
 );
 
 const IconPackage = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="m16.5 9.4-9-5.19" />
     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
     <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
@@ -98,7 +95,7 @@ const IconPackage = () => (
 );
 
 const IconCalendar = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
     <line x1="16" y1="2" x2="16" y2="6" />
     <line x1="8" y1="2" x2="8" y2="6" />
@@ -107,25 +104,38 @@ const IconCalendar = () => (
 );
 
 const IconTag = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
     <line x1="7" y1="7" x2="7.01" y2="7" />
   </svg>
 );
 
-const IconDollarSign = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="12" y1="1" x2="12" y2="23" />
-    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-  </svg>
-);
+// const IconDollarSign = () => (
+//   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+//     <line x1="12" y1="1" x2="12" y2="23" />
+//     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+//   </svg>
+// );
 
 const IconImageOff = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
     <circle cx="8.5" cy="8.5" r="1.5" />
     <polyline points="21 15 16 10 5 21" />
   </svg>
+);
+
+const IconCedi = () => (
+  <span
+    style={{
+      fontSize: "16px",
+      fontWeight: "bold",
+      lineHeight: 1,
+      color: "#f6aab2",
+    }}
+  >
+    ₵
+  </span>
 );
 
 // ─── ShowProduct Page ──────────────────────────────────────────────────────
@@ -204,13 +214,13 @@ const ShowProduct = ({ product }) => {
             {isMobile ? <IconMenu /> : <IconChevronLeft style={{ transform: sidebarCollapsed ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s ease" }} />}
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
-            <button aria-label="Notifications" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: tokens.radius, border: "none", background: "transparent", cursor: "pointer", color: tokens.mutedForeground, transition: "background-color 0.15s ease" }}
+            {/* <button aria-label="Notifications" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: tokens.radius, border: "none", background: "transparent", cursor: "pointer", color: tokens.mutedForeground, transition: "background-color 0.15s ease" }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = tokens.secondary)}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
             >
               <IconBell />
-            </button>
-            <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: tokens.foreground, color: tokens.background, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: 600, fontFamily: tokens.fontBody }}>AN</div>
+            </button> */}
+            <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#f6aab2", color: tokens.background, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: 600, fontFamily: tokens.fontBody }}>CB</div>
           </div>
         </header>
 
@@ -241,9 +251,9 @@ const ShowProduct = ({ product }) => {
               style={{
                 display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1.25rem",
                 fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody,
-                borderRadius: tokens.radius, border: `1px solid ${tokens.border}`,
-                backgroundColor: editBtnHovered ? tokens.secondary : "transparent",
-                color: tokens.foreground, textDecoration: "none", cursor: "pointer",
+                borderRadius: tokens.radius, border: `1px solid #f6aab2`,
+                backgroundColor: editBtnHovered ? "#f6aab2" : "transparent",
+                color: editBtnHovered ? "#fff" : tokens.foreground, textDecoration: "none", cursor: "pointer",
                 transition: "background-color 0.2s ease", whiteSpace: "nowrap",
               }}
               onMouseEnter={() => setEditBtnHovered(true)}
@@ -313,11 +323,11 @@ const ShowProduct = ({ product }) => {
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
                     <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
                       <span style={{ fontFamily: tokens.fontDisplay, fontSize: "2rem", fontWeight: 500, color: tokens.foreground }}>
-                        ${finalPrice}
+                        ₵{finalPrice}
                       </span>
                       {discountAmount > 0 && (
                         <span style={{ fontSize: "1.125rem", color: tokens.mutedForeground, textDecoration: "line-through" }}>
-                          ${price.toFixed(2)}
+                          ₵{price.toFixed(2)}
                         </span>
                       )}
                     </div>
@@ -328,7 +338,7 @@ const ShowProduct = ({ product }) => {
 
                   {discountAmount > 0 && (
                     <div style={{ padding: "0.5rem 0.75rem", borderRadius: tokens.radius, backgroundColor: "#fef3c7", border: "1px solid #fcd34d", fontSize: "0.8125rem", color: "#92400e" }}>
-                      Discount: ${discountAmount.toFixed(2)} off
+                      Discount: ₵{discountAmount.toFixed(2)} off
                     </div>
                   )}
 
@@ -349,7 +359,7 @@ const ShowProduct = ({ product }) => {
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                      <span style={{ color: tokens.mutedForeground, marginTop: "2px" }}><IconDollarSign /></span>
+                      <span style={{ color: tokens.mutedForeground, marginTop: "2px" }}><IconCedi /></span>
                       <div>
                         <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: 0 }}>SKU</p>
                         <p style={{ fontSize: "0.875rem", fontWeight: 500, color: tokens.foreground, margin: "2px 0 0" }}>{product.sku}</p>

@@ -24,13 +24,13 @@ const injectFonts = () => {
 const tokens = {
   fontDisplay: "'Cormorant Garamond', serif",
   fontBody: "'Inter', sans-serif",
-  foreground: "#141414",
+  foreground: "#f6aab2",
   background: "#ffffff",
   mutedForeground: "#737373",
   border: "#e6e6e6",
   radius: "4px",
   destructive: "#ef4444",
-  adminColor: "#7c3aed",
+  adminColor: "#f6aab2",
 };
 
 // ─── Cart Context ─────────────────────────────────────────────────────────────
@@ -160,7 +160,7 @@ function useCart() {
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const IconShoppingBag = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
     <line x1="3" y1="6" x2="21" y2="6" />
     <path d="M16 10a4 4 0 0 1-8 0" />

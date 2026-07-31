@@ -253,6 +253,7 @@ const Footer = () => {
               <HoverLink href="/collections">All Collections</HoverLink>
               <HoverLink href="/new-arrivals">New Arrivals</HoverLink>
               <HoverLink href="/#about">About Us</HoverLink>
+              <HoverLink href="/contact">Contact Us</HoverLink>
             </nav>
           </div>
 
@@ -384,7 +385,7 @@ const Footer = () => {
                   fontSize: "0.875rem",
                   fontWeight: 500,
                   fontFamily: tokens.fontBody,
-                  backgroundColor: tokens.foreground,
+                  backgroundColor: "#f6aab2",
                   color: "#ffffff",
                   border: "none",
                   borderRadius: tokens.radius,

@@ -36,12 +36,7 @@ class CategoryController extends Controller
             'slug' => $request->slug,
         ]);
 
-        // return redirect()->route('admin.categories.add')->with('success', 'Category created successfully.');
+        return redirect()->route('admin.categories.add')->with('message', 'Category created successfully.');
 
-        return response()->json([
-            'success' => true,
-            'message'  => 'Category created successfully.',
-            'category' => $category,
-        ]);
     }
 }

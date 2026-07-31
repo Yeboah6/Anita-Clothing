@@ -44,55 +44,55 @@ const availableColors = [
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const IconBell = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
   </svg>
 );
 
 const IconMenu = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
   </svg>
 );
 
 const IconChevronLeft = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <polyline points="15 18 9 12 15 6" />
   </svg>
 );
 
 const IconChevronDown = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <polyline points="6 9 12 15 18 9" />
   </svg>
 );
 
 const IconPlus = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
 
 const IconX = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
 const IconUpload = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
   </svg>
 );
 
 const IconArrowLeft = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
   </svg>
 );
 
 const IconLoader = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ animation: "anita-spin 0.8s linear infinite" }}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ animation: "anita-spin 0.8s linear infinite" }}>
     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
   </svg>
 );
@@ -452,9 +452,9 @@ const EditProduct = ({ product, categories }) => {
             {isMobile ? <IconMenu /> : <IconChevronLeft style={{ transform: sidebarCollapsed ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s ease" }} />}
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
-            <button aria-label="Notifications" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: tokens.radius, border: "none", background: "transparent", cursor: "pointer", color: tokens.mutedForeground, transition: "background-color 0.15s ease" }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = tokens.secondary)} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}><IconBell /></button>
-            <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: tokens.foreground, color: tokens.background, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: 600, fontFamily: tokens.fontBody }}>AN</div>
+            {/* <button aria-label="Notifications" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: tokens.radius, border: "none", background: "transparent", cursor: "pointer", color: tokens.mutedForeground, transition: "background-color 0.15s ease" }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = tokens.secondary)} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}><IconBell /></button> */}
+            <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#f6aab2", color: tokens.background, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: 600, fontFamily: tokens.fontBody }}>CB</div>
           </div>
         </header>
 
@@ -477,12 +477,12 @@ const EditProduct = ({ product, categories }) => {
             </div>
             <div style={{ display: "flex", gap: "0.75rem" }}>
               <a href="/admin/products"
-                style={{ display: "inline-flex", alignItems: "center", padding: "0.5rem 1.25rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: `1px solid ${tokens.border}`, backgroundColor: cancelBtnHovered ? tokens.secondary : "transparent", color: tokens.foreground, textDecoration: "none", cursor: "pointer", transition: "background-color 0.2s ease", whiteSpace: "nowrap" }}
+                style={{ display: "inline-flex", alignItems: "center", padding: "0.5rem 1.25rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: `1px solid #f6aab2`, backgroundColor: cancelBtnHovered ? "#f6aab2" : "transparent", color: cancelBtnHovered ? "#fff" : tokens.foreground, textDecoration: "none", cursor: "pointer", transition: "background-color 0.2s ease", whiteSpace: "nowrap" }}
                 onMouseEnter={() => setCancelBtnHovered(true)} onMouseLeave={() => setCancelBtnHovered(false)}>
                 Cancel
               </a>
               <button onClick={handleSubmit}
-                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1.5rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none", backgroundColor: tokens.foreground, color: tokens.background, cursor: processing ? "not-allowed" : "pointer", opacity: processing ? 0.7 : saveBtnHovered ? 0.9 : 1, transition: "opacity 0.2s ease", whiteSpace: "nowrap" }}
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1.5rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none", backgroundColor: "#f6aab2", color: tokens.background, cursor: processing ? "not-allowed" : "pointer", opacity: processing ? 0.7 : saveBtnHovered ? 0.9 : 1, transition: "opacity 0.2s ease", whiteSpace: "nowrap" }}
                 onMouseEnter={() => setSaveBtnHovered(true)} onMouseLeave={() => setSaveBtnHovered(false)}
                 disabled={processing}>
                 {processing && <IconLoader />}
@@ -697,12 +697,12 @@ const EditProduct = ({ product, categories }) => {
             {/* Bottom action bar */}
             <div style={{ marginTop: "1.5rem", padding: "1rem 1.5rem", backgroundColor: tokens.background, border: `1px solid ${tokens.border}`, borderRadius: tokens.radius, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.75rem" }}>
               <a href="/admin/products"
-                style={{ padding: "0.5rem 1.25rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: `1px solid ${tokens.border}`, backgroundColor: cancelBtnHovered ? tokens.secondary : "transparent", color: tokens.foreground, textDecoration: "none", cursor: "pointer", transition: "background-color 0.2s ease" }}
+                style={{ padding: "0.5rem 1.25rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: `1px solid #f6aab2`, backgroundColor: cancelBtnHovered ? "#f6aab2" : "transparent", color: cancelBtnHovered ? "#fff" : tokens.foreground, textDecoration: "none", cursor: "pointer", transition: "background-color 0.2s ease" }}
                 onMouseEnter={() => setCancelBtnHovered(true)} onMouseLeave={() => setCancelBtnHovered(false)}>
                 Cancel
               </a>
               <button type="submit" disabled={processing}
-                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1.5rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none", backgroundColor: tokens.foreground, color: tokens.background, cursor: processing ? "not-allowed" : "pointer", opacity: processing ? 0.7 : saveBtnHovered ? 0.9 : 1, transition: "opacity 0.2s ease" }}
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1.5rem", fontSize: "0.875rem", fontWeight: 500, fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none", backgroundColor: "#f6aab2", color: tokens.background, cursor: processing ? "not-allowed" : "pointer", opacity: processing ? 0.7 : saveBtnHovered ? 0.9 : 1, transition: "opacity 0.2s ease" }}
                 onMouseEnter={() => setSaveBtnHovered(true)} onMouseLeave={() => setSaveBtnHovered(false)}>
                 {processing && <IconLoader />}
                 {processing ? "Saving…" : "Update Product"}

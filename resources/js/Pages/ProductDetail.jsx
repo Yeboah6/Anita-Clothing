@@ -75,7 +75,7 @@ const IconHeart = ({ filled }) => (
     height="18"
     viewBox="0 0 24 24"
     fill={filled ? "currentColor" : "none"}
-    stroke="currentColor"
+    stroke="#f6aab2"
     strokeWidth="1.75"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -585,7 +585,7 @@ const ProductDetail = ({ product }) => {
                   style={{
                     width: "100%", height: "48px", fontSize: "0.9375rem", fontWeight: 500,
                     fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none",
-                    backgroundColor: tokens.foreground, color: tokens.background,
+                    backgroundColor: "#f6aab2", color: tokens.background,
                     cursor: ((isAuthenticated && !canAdd && !isOutOfStock) || isAddingToCart) ? "not-allowed" : "pointer",
                     opacity: ((isAuthenticated && !canAdd && !isOutOfStock) || isAddingToCart) ? 0.5 : 1,
                     transition: "opacity 0.2s ease",
@@ -627,7 +627,7 @@ const ProductDetail = ({ product }) => {
                     fontWeight: 500,
                     fontFamily: tokens.fontBody,
                     borderRadius: tokens.radius,
-                    border: `1px solid ${tokens.foreground}`,
+                    border: `1px solid #f6aab2`,
                     backgroundColor: "transparent",
                     color: tokens.foreground,
                     cursor: isTogglingWishlist ? "default" : "pointer",

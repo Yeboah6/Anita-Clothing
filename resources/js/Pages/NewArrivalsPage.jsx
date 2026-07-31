@@ -325,7 +325,7 @@ const NewArrivalsPage = ({ products = [] }) => {
                     height: "44px",
                     borderRadius: tokens.radius,
                     border: "none",
-                    backgroundColor: tokens.foreground,
+                    backgroundColor: "#f6aab2",
                     padding: "0 1.5rem",
                     fontSize: "0.875rem",
                     fontWeight: 500,

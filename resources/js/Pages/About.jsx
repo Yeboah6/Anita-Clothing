@@ -71,8 +71,8 @@ const IconStar = ({ filled, size = 16 }) => (
     width={size}
     height={size}
     viewBox="0 0 24 24"
-    fill={filled ? tokens.foreground : "none"}
-    stroke="currentColor"
+    fill={filled? "#f6aab2" : "none"}
+    stroke="#f6aab2"
     strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -83,7 +83,7 @@ const IconStar = ({ filled, size = 16 }) => (
 );
 
 const IconQuote = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: tokens.border }}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#000" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: tokens.border }}>
     <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
     <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
   </svg>
@@ -173,26 +173,12 @@ const ReviewCard = ({ review, isDesktop }) => {
       }}
     >
       {/* Quote Icon */}
-      <div style={{ opacity: 0.3 }}>
+      <div style={{ opacity: 1 }}>
         <IconQuote />
       </div>
       
       {/* Rating */}
       <StarRating rating={review.rating} />
-      
-      {/* Title */}
-      {/* <h4
-        style={{
-          fontFamily: tokens.fontDisplay,
-          fontSize: "1.125rem",
-          fontWeight: 500,
-          margin: 0,
-          color: tokens.foreground,
-          lineHeight: 1.4,
-        }}
-      >
-        {review.title}
-      </h4> */}
       
       {/* Review Text */}
       <p
@@ -315,8 +301,8 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [activeFilter, setActiveFilter] = useState(null); // null = all, number = rating filter
-  const [sortBy, setSortBy] = useState("latest"); // "latest", "oldest", "highest", "lowest"
+  const [activeFilter, setActiveFilter] = useState(null);
+  const [sortBy, setSortBy] = useState("latest");
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
@@ -509,7 +495,7 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
                       <div
                         style={{
                           height: "100%",
-                          backgroundColor: tokens.foreground,
+                          backgroundColor: "#f6aab2",
                           borderRadius: "4px",
                           width: `${percentage}%`,
                           transition: "width 0.3s ease",
@@ -571,8 +557,8 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
                     fontWeight: 500,
                     fontFamily: tokens.fontBody,
                     borderRadius: tokens.radius,
-                    border: `1px solid ${sortBy === option.value ? tokens.foreground : tokens.border}`,
-                    backgroundColor: sortBy === option.value ? tokens.foreground : "transparent",
+                    border: `1px solid ${sortBy === option.value ? "#f6aab2" : tokens.border}`,
+                    backgroundColor: sortBy === option.value ? "#f6aab2" : "transparent",
                     color: sortBy === option.value ? tokens.background : tokens.foreground,
                     cursor: "pointer",
                     transition: "all 0.2s ease",
@@ -980,7 +966,7 @@ const About = ({ collections, productId = null, reviews = [], stats = null }) =>
                     padding: "0.75rem 2rem", fontSize: "1rem", fontWeight: 500,
                     fontFamily: tokens.fontBody, textDecoration: "none",
                     borderRadius: tokens.radius, border: "none",
-                    backgroundColor: tokens.foreground, color: tokens.background,
+                    backgroundColor: "#f6aab2", color: tokens.background,
                     cursor: "pointer", opacity: shopBtnHovered ? 0.9 : 1,
                     transition: "opacity 0.2s ease",
                   }}

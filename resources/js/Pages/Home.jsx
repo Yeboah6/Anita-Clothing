@@ -17,7 +17,6 @@ export default function Home({ newArrivals, categories, collections, reviews, re
             />
             <div>
 
-            
             <Header />
             <HeroSection />
             <NewArrivals products={newArrivals} />
