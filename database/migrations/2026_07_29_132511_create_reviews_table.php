@@ -10,23 +10,17 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('order_id')->constrained()->onDelete('cascade');
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->unsignedTinyInteger('rating')->comment('1-5 star rating');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('order_item_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->unsignedTinyInteger('rating'); // 1-5
             $table->text('review');
-            $table->boolean('is_approved')->default(true);
-            $table->boolean('is_verified_purchase')->default(true);
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
-            $table->softDeletes();
 
-            // Prevent duplicate reviews for same product in same order
-            $table->unique(['user_id', 'order_id', 'product_id']);
-            
-            // Indexes for better performance
-            $table->index(['product_id', 'is_approved']);
-            $table->index(['user_id', 'created_at']);
-            $table->index('rating');
+            // One review per item per user — matches the "Leave Review" UX (once per delivered item)
+            $table->unique(['order_item_id', 'user_id']);
         });
     }
 

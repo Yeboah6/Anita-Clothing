@@ -9,8 +9,9 @@ use App\Models\Wishlist;
 use Inertia\Inertia;
 use App\Models\OrderItem;
 use App\Models\Review;
+use App\Models\Order;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\{Auth, DB};
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -260,57 +261,70 @@ class MainController extends Controller
 
     public function storeReview(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'orderId' => ['required'],
-            'itemId'  => ['required'],
-            'rating'  => ['required', 'integer', 'between:1,5'],
+            'itemId'  => ['required', 'integer'],
+            'rating'  => ['required', 'integer', 'min:1', 'max:5'],
             'review'  => ['required', 'string', 'min:10', 'max:1000'],
         ]);
 
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
+        $user = Auth::user();
+
+        $orderItem = OrderItem::with('order')->find($validated['itemId']);
+
+        if (! $orderItem || ! $orderItem->order) {
+            throw ValidationException::withMessages([
+                'itemId' => 'This order item could not be found.',
+            ]);
         }
 
-        $userId = Auth::id();
+        $order = $orderItem->order;
 
-        $orderItem = Order::where('id', $request->itemId)
-            ->where('order_id', $request->orderId)
-            ->whereHas('order', function ($query) use ($userId) {
-                $query->where('user_id', $userId)
-                      ->where('order_status', 'delivered');
-            })
+        if ((string) $order->user_id !== (string) $user->id) {
+            throw ValidationException::withMessages([
+                'itemId' => 'This order does not belong to your account.',
+            ]);
+        }
+
+        if ($order->order_status !== 'delivered') {
+            throw ValidationException::withMessages([
+                'itemId' => 'You can only review items from delivered orders.',
+            ]);
+        }
+
+        if (! $orderItem->product_id) {
+            throw ValidationException::withMessages([
+                'itemId' => 'This item is no longer linked to a product.',
+            ]);
+        }
+
+        $existing = Review::where('order_item_id', $orderItem->id)
+            ->where('user_id', $user->id)
             ->first();
 
-        if (! $orderItem || ! $orderItem->product_id) {
-            return response()->json([
-                'message' => 'This item is not eligible for a review.',
-            ], 422);
+        if ($existing) {
+            throw ValidationException::withMessages([
+                'itemId' => 'You have already reviewed this item.',
+            ]);
         }
 
-        $alreadyReviewed = Review::where('user_id', $userId)
-            ->where('order_id', $orderItem->order_id)
-            ->where('product_id', $orderItem->product_id)
-            ->exists();
-
-        if ($alreadyReviewed) {
-            return response()->json([
-                'message' => 'You have already reviewed this product for this order.',
-            ], 422);
-        }
-
-        $review = Review::create([
-            'user_id'               => $userId,
-            'order_id'              => $orderItem->order_id,
-            'product_id'            => $orderItem->product_id,
-            'rating'                => $request->rating,
-            'review'                => $request->review,
-            'is_verified_purchase'  => true,
-        ]);
+        $review = DB::transaction(function () use ($validated, $user, $order, $orderItem) {
+            return Review::create([
+                'user_id'       => $user->id,
+                'order_id'      => $order->id,
+                'order_item_id' => $orderItem->id,
+                'product_id'    => $orderItem->product_id,
+                'rating'        => $validated['rating'],
+                'review'        => $validated['review'],
+                'status'        => 'pending',
+            ]);
+        });
 
         return response()->json([
             'message' => 'Review submitted successfully.',
             'review'  => $review,
         ], 201);
+
     }
 
         
