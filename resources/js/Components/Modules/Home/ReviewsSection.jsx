@@ -60,7 +60,7 @@ const ReviewCard = ({ review }) => {
         display: "flex",
         flexDirection: "column",
         gap: "1rem",
-        height: "100%",
+        // height: "100%",
         transition: "box-shadow 0.2s ease, transform 0.2s ease",
       }}
       onMouseEnter={(e) => {
@@ -166,7 +166,7 @@ const ReviewsSection = ({ reviews = [], stats = null }) => {
           )}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "repeat(3, 1fr)" : "1fr", gap: "1.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isDesktop ? "repeat(3, 1fr)" : "1fr", gap: "1.5rem", alignItems: "start", }}>
           {reviews.map((review) => (
             <ReviewCard key={review.id} review={review} />
           ))}

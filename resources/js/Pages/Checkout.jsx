@@ -3,6 +3,7 @@ import { usePage, router } from "@inertiajs/react";
 import axios from "axios";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
+import { useCart, CART_STORAGE_KEY } from "@/Context/CartContext";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -176,6 +177,7 @@ const SavedAddressOption = ({ addr, selected, onSelect }) => {
 // ─── Checkout Page ───────────────────────────────────────────────────────────
 const Checkout = () => {
   const { serverCart, userInfo, addresses = [] } = usePage().props;
+  const { clearCart } = useCart();
   const [items, setItems] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -188,7 +190,7 @@ const Checkout = () => {
     initialDefaultAddress ? initialDefaultAddress.id : "new"
   );
 
-    const showManualFields = selectedAddressId === "new" || addresses.length === 0;
+  const showManualFields = selectedAddressId === "new" || addresses.length === 0;
 
   const [formData, setFormData] = useState({
     email: userInfo?.email || "",
@@ -326,6 +328,9 @@ const Checkout = () => {
         price: item.price,
       })),
     });
+
+    clearCart();
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify([]));
 
     if (response.data?.redirect) {
       window.location.href = response.data.redirect;

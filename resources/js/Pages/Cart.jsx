@@ -3,6 +3,7 @@ import axios from "axios";
 import { usePage } from "@inertiajs/react";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
+import { useCart } from "@/Context/CartContext";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -252,6 +253,7 @@ const CartLineItem = ({ item, onUpdateQuantity, onRemove, isDesktop }) => {
 // ─── Main Cart Component ─────────────────────────────────────────────────────
 const Cart = () => {
   const { serverCart } = usePage().props;
+  const { removeItem, updateQuantity, clearCart } = useCart();
   const [isDesktop, setIsDesktop] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [error, setError] = useState(null);
@@ -293,31 +295,32 @@ const Cart = () => {
       return;
     }
 
-    // Optimistic update
-    setItems(prev => 
-      prev.map(item => 
-        item.id === cartItemId ? { ...item, quantity: newQuantity } : item
-      )
+    const item = items.find(i => i.id === cartItemId);
+
+    setItems(prev =>
+      prev.map(i => i.id === cartItemId ? { ...i, quantity: newQuantity } : i)
     );
 
+    // keep CartContext / localStorage in sync
+    if (item) {
+      updateQuantity(item.product_id, item.size, item.color, newQuantity);
+    }
+
     try {
-      const item = items.find(i => i.id === cartItemId);
-      await axios.put(`/cart/${item.product_id}`, { 
-        size: item.size, 
-        color: item.color, 
-        quantity: newQuantity 
+      await axios.put(`/cart/${item.product_id}`, {
+        size: item.size,
+        color: item.color,
+        quantity: newQuantity
       });
     } catch (err) {
       console.error('Failed to update quantity:', err);
       setError('Failed to update cart. Please try again.');
-      // Revert on error
-      const item = items.find(i => i.id === cartItemId);
+      setItems(prev =>
+        prev.map(i => i.id === cartItemId ? { ...i, quantity: item.quantity } : i)
+      );
+      // revert context too
       if (item) {
-        setItems(prev => 
-          prev.map(i => 
-            i.id === cartItemId ? { ...i, quantity: item.quantity } : i
-          )
-        );
+        updateQuantity(item.product_id, item.size, item.color, item.quantity);
       }
     }
   };
@@ -328,6 +331,7 @@ const Cart = () => {
 
     // Optimistic update
     setItems(prev => prev.filter(item => item.id !== cartItemId));
+    removeItem(itemToRemove.product_id, itemToRemove.size, itemToRemove.color);
 
     try {
       await axios.delete(`/cart/${itemToRemove.product_id}`, { 
@@ -349,6 +353,7 @@ const Cart = () => {
     
     const previousItems = [...items];
     setItems([]);
+    clearCart();
 
     try {
       await axios.delete('/cart/clear');

@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use \App\Models\Product;
 
 class Order extends Model
 {
     protected $fillable = [
         'user_id',
+        'address_id',
         'order_number',
         'total_amount',
         'email',
@@ -23,10 +25,8 @@ class Order extends Model
         'city',
         'state',
         'zip',
-        'note',
+        'notes',
         'subtotal',
-        'shipping',
-        'tax',
         'order_status',
         'payment_status',
     ];
@@ -59,5 +59,10 @@ class Order extends Model
     public function getFormattedTotalAttribute(): string
     {
         return '₵' . number_format($this->total_amount, 2);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

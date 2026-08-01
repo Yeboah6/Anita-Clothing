@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 import AdminSidebar from "@/Components/Admin/AdminSidebar";
+import { availableColors, getColorHexes } from "@/Constants/colors";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -29,26 +30,9 @@ const tokens = {
   destructive: "#ef4444",
 };
 
-const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
-const availableColors = [
-  { name: "Black", hex: "#1a1a1a" },
-  { name: "White", hex: "#FFFFFF" },
-  { name: "Navy", hex: "#000080" },
-  { name: "Camel", hex: "#C19A6B" },
-  { name: "Champagne", hex: "#F7E7CE" },
-  { name: "Olive", hex: "#808000" },
-  { name: "Burgundy", hex: "#800020" },
-  { name: "Sage", hex: "#9CAF88" },
-  { name: "Blush", hex: "#DE5D83" },
-];
+const availableSizes = ["10", "12", "14", "16", "18"];
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
-const IconBell = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
-  </svg>
-);
-
 const IconMenu = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
@@ -286,7 +270,8 @@ const EditProduct = ({ product, categories }) => {
       stockQuantity: String(v.stock_quantity ?? 0),
     }))
   );
-  const [newVariant, setNewVariant] = useState({ size: "", color: "", stockQuantity: "0" });
+
+  const [newVariant, setNewVariant] = useState({ size: "", color: "", color2: "", stockQuantity: "0" });
 
   const [touched, setTouched] = useState({});
   const [saveBtnHovered, setSaveBtnHovered] = useState(false);
@@ -377,13 +362,17 @@ const EditProduct = ({ product, categories }) => {
 
   const handleAddVariant = () => {
     if (newVariant.size || newVariant.color) {
+      const combinedColor = newVariant.color2
+        ? `${newVariant.color}/${newVariant.color2}`
+        : newVariant.color;
+
       const rows = [
         ...variantRows,
-        { key: `new-${Date.now()}`, size: newVariant.size, color: newVariant.color, stockQuantity: newVariant.stockQuantity },
+        { key: `new-${Date.now()}`, size: newVariant.size, color: combinedColor, stockQuantity: newVariant.stockQuantity },
       ];
       setVariantRows(rows);
       syncVariantsToForm(rows);
-      setNewVariant({ size: "", color: "", stockQuantity: "0" });
+      setNewVariant({ size: "", color: "", color2: "", stockQuantity: "0" });
     }
   };
 
@@ -640,7 +629,7 @@ const EditProduct = ({ product, categories }) => {
                     <h3 style={{ fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 500, margin: 0, color: tokens.foreground }}>Product Variants ({variantRows.length})</h3>
                   </div>
                   <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: "0.5rem", alignItems: "end" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr auto", gap: "0.5rem", alignItems: "end" }}>
                       <div>
                         <label style={{ ...labelStyle, fontSize: "0.75rem", marginBottom: "0.25rem" }}>Size</label>
                         <CustomSelect value={newVariant.size} onChange={(val) => setNewVariant((prev) => ({ ...prev, size: val }))} options={sizeOptions} placeholder="Size" />
@@ -648,6 +637,15 @@ const EditProduct = ({ product, categories }) => {
                       <div>
                         <label style={{ ...labelStyle, fontSize: "0.75rem", marginBottom: "0.25rem" }}>Color</label>
                         <CustomSelect value={newVariant.color} onChange={(val) => setNewVariant((prev) => ({ ...prev, color: val }))} options={colorOptions} placeholder="Color" />
+                      </div>
+                      <div>
+                        <label style={{ ...labelStyle, fontSize: "0.75rem", marginBottom: "0.25rem" }}>Color 2 (optional)</label>
+                        <CustomSelect
+                          value={newVariant.color2}
+                          onChange={(val) => setNewVariant((prev) => ({ ...prev, color2: val }))}
+                          options={colorOptions.filter((c) => c.value !== newVariant.color)}
+                          placeholder="None"
+                        />
                       </div>
                       <div>
                         <label style={{ ...labelStyle, fontSize: "0.75rem", marginBottom: "0.25rem" }}>Qty</label>
@@ -669,7 +667,21 @@ const EditProduct = ({ product, categories }) => {
                               <span style={{ fontWeight: 500, color: tokens.foreground }}>{variant.size || "Any size"}</span>
                               <span style={{ color: tokens.mutedForeground }}>/</span>
                               <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                                {variant.color && <span style={{ width: "14px", height: "14px", borderRadius: "50%", backgroundColor: availableColors.find((c) => c.name === variant.color)?.hex || tokens.border, border: "1px solid rgba(0,0,0,0.2)", flexShrink: 0 }} />}
+                                {variant.color && (() => {
+                                  const hexes = getColorHexes(variant.color);
+                                  const isTwoTone = hexes.length > 1;
+                                  return (
+                                    <span
+                                      style={{
+                                        width: "14px", height: "14px", borderRadius: "50%",
+                                        background: isTwoTone
+                                          ? `linear-gradient(90deg, ${hexes[0]} 50%, ${hexes[1]} 50%)`
+                                          : hexes[0],
+                                        border: "1px solid rgba(0,0,0,0.2)", flexShrink: 0,
+                                      }}
+                                    />
+                                  );
+                                })()}
                                 <span style={{ color: tokens.foreground }}>{variant.color || "Any color"}</span>
                               </div>
                               <span style={{ color: tokens.mutedForeground, marginLeft: "0.5rem" }}>Qty: {variant.stockQuantity}</span>

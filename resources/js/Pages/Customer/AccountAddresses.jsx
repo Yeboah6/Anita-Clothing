@@ -266,7 +266,7 @@ const AccountAddresses = ({ addresses = [], user }) => {
               <div
                 style={{
                   width: "56px", height: "56px", borderRadius: "50%",
-                  backgroundColor: tokens.foreground, color: tokens.background,
+                  backgroundColor: "#f6aab2", color: tokens.background,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontFamily: tokens.fontDisplay, fontSize: "1.125rem", fontWeight: 600, flexShrink: 0,
                 }}

@@ -7,7 +7,7 @@ import React, {
 } from "react";
 
 // ─── Cart Context ─────────────────────────────────────────────────────────────
-const CART_STORAGE_KEY = "anita-clothing-cart";
+export const CART_STORAGE_KEY = "anita-clothing-cart";
 
 function cartReducer(state, action) {
   switch (action.type) {

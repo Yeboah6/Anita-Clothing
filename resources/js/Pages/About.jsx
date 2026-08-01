@@ -149,45 +149,58 @@ const ReviewCard = ({ review, isDesktop }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const maxLength = 150;
   const shouldTruncate = review.review.length > maxLength;
-  
+
   return (
     <div
       style={{
+        position: "relative",
         backgroundColor: tokens.background,
-        border: `1px solid ${tokens.border}`,
         borderRadius: tokens.radius,
-        padding: "2rem",
+        padding: "2rem 1.75rem",
         display: "flex",
         flexDirection: "column",
-        gap: "1.25rem",
-        transition: "box-shadow 0.2s ease, transform 0.2s ease",
-        height: "100%",
+        gap: "1rem",
+        // height: "100%",
+        borderTop: "3px solid #f6aab2",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        transition: "box-shadow 0.25s ease, transform 0.25s ease",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.06)";
-        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = "0 12px 28px rgba(0,0,0,0.08)";
+        e.currentTarget.style.transform = "translateY(-3px)";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)";
         e.currentTarget.style.transform = "translateY(0)";
       }}
     >
-      {/* Quote Icon */}
-      <div style={{ opacity: 1 }}>
-        <IconQuote />
-      </div>
-      
-      {/* Rating */}
+      {/* Watermark quote mark */}
+      <span
+        style={{
+          position: "absolute",
+          top: "0.5rem",
+          right: "1.25rem",
+          fontFamily: tokens.fontDisplay,
+          fontSize: "4.5rem",
+          lineHeight: 1,
+          color: tokens.secondary,
+          userSelect: "none",
+          pointerEvents: "none",
+        }}
+      >
+        "
+      </span>
+
       <StarRating rating={review.rating} />
-      
-      {/* Review Text */}
+
       <p
         style={{
-          fontSize: "0.875rem",
-          color: tokens.mutedForeground,
-          lineHeight: 1.7,
+          fontSize: "0.9375rem",
+          color: tokens.foreground,
+          lineHeight: 1.75,
           margin: 0,
           flex: 1,
+          position: "relative",
         }}
       >
         {shouldTruncate && !isExpanded
@@ -199,45 +212,42 @@ const ReviewCard = ({ review, isDesktop }) => {
             style={{
               background: "none",
               border: "none",
-              color: tokens.foreground,
+              color: "#f6aab2",
               cursor: "pointer",
               fontSize: "0.8125rem",
-              fontWeight: 500,
+              fontWeight: 600,
               fontFamily: tokens.fontBody,
               padding: 0,
-              marginLeft: "0.25rem",
-              textDecoration: "underline",
-              textUnderlineOffset: "2px",
+              marginLeft: "0.375rem",
             }}
           >
             {isExpanded ? "Show less" : "Read more"}
           </button>
         )}
       </p>
-      
-      {/* Reviewer Info */}
+
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: "0.75rem",
-          paddingTop: "0.5rem",
+          paddingTop: "1rem",
           borderTop: `1px solid ${tokens.border}`,
         }}
       >
         <div
           style={{
-            width: "40px",
-            height: "40px",
+            width: "38px",
+            height: "38px",
             borderRadius: "50%",
-            backgroundColor: tokens.secondary,
+            backgroundColor: "#fdeef2",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontFamily: tokens.fontDisplay,
-            fontSize: "0.875rem",
-            fontWeight: 600,
-            color: tokens.foreground,
+            fontSize: "0.8125rem",
+            fontWeight: 700,
+            color: "#f6aab2",
             flexShrink: 0,
           }}
         >
@@ -250,36 +260,40 @@ const ReviewCard = ({ review, isDesktop }) => {
                 .substring(0, 2)
             : "?"}
         </div>
-        <div>
+        <div style={{ minWidth: 0 }}>
           <p
             style={{
               fontWeight: 500,
               color: tokens.foreground,
               margin: 0,
-              fontSize: "0.875rem",
+              fontSize: "0.8125rem",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {review.user?.name || "Anonymous"}
           </p>
-          <div style={{ display: "flex", gap: "0.75rem", marginTop: "2px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "2px" }}>
             {review.is_verified_purchase && (
               <span
                 style={{
-                  fontSize: "0.75rem",
+                  fontSize: "0.6875rem",
                   color: "#166534",
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.25rem",
+                  gap: "0.2rem",
+                  fontWeight: 500,
                 }}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                   <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
-                Verified Purchase
+                Verified
               </span>
             )}
-            <span style={{ fontSize: "0.75rem", color: tokens.mutedForeground }}>
+            <span style={{ fontSize: "0.6875rem", color: tokens.mutedForeground }}>
               {new Date(review.created_at).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
@@ -304,6 +318,7 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
   const [activeFilter, setActiveFilter] = useState(null);
   const [sortBy, setSortBy] = useState("latest");
   const [isDesktop, setIsDesktop] = useState(false);
+  const isFirstRender = React.useRef(true);
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 768);
@@ -313,7 +328,14 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
   }, []);
 
   useEffect(() => {
-    if (!initialReviews.length && productId) {
+    // Skip fetching on initial mount if server already gave us reviews —
+    // but always fetch on every filter/sort/page change after that.
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (initialReviews.length) return;
+    }
+
+    if (productId) {
       fetchReviews();
     }
   }, [productId, currentPage, activeFilter, sortBy]);
@@ -321,21 +343,11 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
   const fetchReviews = async () => {
     setLoading(true);
     setError(null);
-    
     try {
-      const params = {
-        page: currentPage,
-        sort: sortBy,
-      };
-      
-      if (activeFilter) {
-        params.rating = activeFilter;
-      }
-      
-      const response = await axios.get(`/api/reviews/product/${productId}`, {
-        params,
-      });
-      
+      const params = { page: currentPage, sort: sortBy };
+      if (activeFilter) params.rating = activeFilter;
+
+      const response = await axios.get(`/api/reviews/product/${productId}`, { params });
       setReviews(response.data.reviews?.data || response.data.reviews);
       setStats(response.data.stats);
       setTotalPages(response.data.reviews?.last_page || 1);
@@ -357,7 +369,6 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
     setCurrentPage(1);
   };
 
-  // Calculate rating distribution percentages
   const getDistributionPercentage = (count) => {
     if (!stats?.total_reviews) return 0;
     return (count / stats.total_reviews) * 100;
@@ -368,16 +379,25 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
       style={{
         padding: isDesktop ? "6rem 0" : "4rem 0",
         borderTop: `1px solid ${tokens.border}`,
+        backgroundColor: "rgba(245,245,245,0.35)",
       }}
     >
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1rem" }}>
         {/* Section Header */}
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "3rem",
-          }}
-        >
+        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <span
+            style={{
+              display: "inline-block",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#f6aab2",
+              marginBottom: "0.75rem",
+            }}
+          >
+            Reviews
+          </span>
           <h2
             style={{
               fontFamily: tokens.fontDisplay,
@@ -389,29 +409,24 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
           >
             What The Girlies Are Saying 🌸
           </h2>
-          <p
-            style={{
-              marginTop: "0.75rem",
-              color: tokens.mutedForeground,
-              fontSize: "1rem",
-              lineHeight: 1.6,
-            }}
-          >
+          <p style={{ marginTop: "0.75rem", color: tokens.mutedForeground, fontSize: "1rem", lineHeight: 1.6 }}>
             Real reviews from real CuteBloom babes. Spoiler: they love how cute + affordable it is.
           </p>
         </div>
 
-        {/* Rating Summary */}
+        {/* Rating Summary — asymmetric hero block */}
         {stats && (
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: isDesktop ? "280px 1fr" : "1fr",
-              gap: isDesktop ? "3rem" : "2rem",
+              gridTemplateColumns: isDesktop ? "auto 1fr" : "1fr",
+              gap: isDesktop ? "3.5rem" : "2rem",
+              alignItems: "center",
               marginBottom: "3rem",
-              padding: "2rem",
-              backgroundColor: tokens.secondary,
+              padding: isDesktop ? "3rem" : "2rem 1.5rem",
+              backgroundColor: tokens.background,
               borderRadius: tokens.radius,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}
           >
             {/* Average Rating */}
@@ -419,41 +434,38 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
               style={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
+                alignItems: isDesktop ? "flex-start" : "center",
+                textAlign: isDesktop ? "left" : "center",
+                paddingRight: isDesktop ? "3.5rem" : 0,
+                borderRight: isDesktop ? `1px solid ${tokens.border}` : "none",
               }}
             >
               <p
                 style={{
                   fontFamily: tokens.fontDisplay,
-                  fontSize: "4rem",
+                  fontSize: "5rem",
                   fontWeight: 500,
                   margin: 0,
                   color: tokens.foreground,
-                  lineHeight: 1,
+                  lineHeight: 0.9,
                 }}
               >
                 {stats.average_rating}
               </p>
-              <StarRating rating={stats.average_rating} size={20} />
-              <p
-                style={{
-                  marginTop: "0.5rem",
-                  fontSize: "0.875rem",
-                  color: tokens.mutedForeground,
-                }}
-              >
-                Based on {stats.total_reviews} {stats.total_reviews === 1 ? "review" : "reviews"}
+              <div style={{ marginTop: "0.75rem" }}>
+                <StarRating rating={stats.average_rating} size={18} />
+              </div>
+              <p style={{ marginTop: "0.5rem", fontSize: "0.875rem", color: tokens.mutedForeground }}>
+                {stats.total_reviews} {stats.total_reviews === 1 ? "review" : "reviews"}
               </p>
             </div>
 
             {/* Rating Bars */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", justifyContent: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {[5, 4, 3, 2, 1].map((rating) => {
                 const count = stats.rating_distribution?.[rating] || 0;
                 const percentage = getDistributionPercentage(count);
-                
+
                 return (
                   <button
                     key={rating}
@@ -465,30 +477,31 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      padding: "0.25rem 0",
+                      padding: 0,
                       fontFamily: tokens.fontBody,
                       width: "100%",
-                      opacity: activeFilter && activeFilter !== rating ? 0.5 : 1,
+                      opacity: activeFilter && activeFilter !== rating ? 0.4 : 1,
                       transition: "opacity 0.2s ease",
                     }}
                   >
                     <span
                       style={{
-                        fontSize: "0.875rem",
+                        fontSize: "0.8125rem",
                         color: tokens.foreground,
                         fontWeight: 500,
-                        minWidth: "3rem",
-                        textAlign: "right",
+                        minWidth: "2.75rem",
+                        textAlign: "left",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {rating} ★
+                      {rating} star
                     </span>
                     <div
                       style={{
                         flex: 1,
-                        height: "8px",
-                        backgroundColor: tokens.border,
-                        borderRadius: "4px",
+                        height: "6px",
+                        backgroundColor: tokens.secondary,
+                        borderRadius: "3px",
                         overflow: "hidden",
                       }}
                     >
@@ -496,19 +509,13 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
                         style={{
                           height: "100%",
                           backgroundColor: "#f6aab2",
-                          borderRadius: "4px",
+                          borderRadius: "3px",
                           width: `${percentage}%`,
                           transition: "width 0.3s ease",
                         }}
                       />
                     </div>
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        color: tokens.mutedForeground,
-                        minWidth: "2rem",
-                      }}
-                    >
+                    <span style={{ fontSize: "0.75rem", color: tokens.mutedForeground, minWidth: "1.5rem", textAlign: "right" }}>
                       {count}
                     </span>
                   </button>
@@ -518,30 +525,22 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
           </div>
         )}
 
-        {/* Sort Controls */}
+        {/* Sort / Filter Controls */}
         {reviews.length > 0 && (
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: "1.5rem",
+              marginBottom: "1.75rem",
               flexWrap: "wrap",
               gap: "1rem",
             }}
           >
-            <p
-              style={{
-                fontSize: "0.875rem",
-                color: tokens.mutedForeground,
-                margin: 0,
-              }}
-            >
-              {activeFilter
-                ? `Showing ${activeFilter}-star reviews`
-                : "Showing all reviews"}
+            <p style={{ fontSize: "0.8125rem", color: tokens.mutedForeground, margin: 0 }}>
+              {activeFilter ? `Showing ${activeFilter}-star reviews` : "Showing all reviews"}
             </p>
-            
+
             <div style={{ display: "flex", gap: "0.5rem" }}>
               {[
                 { value: "latest", label: "Latest" },
@@ -552,14 +551,14 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
                   key={option.value}
                   onClick={() => handleSortChange(option.value)}
                   style={{
-                    padding: "0.375rem 0.75rem",
-                    fontSize: "0.8125rem",
+                    padding: "0.375rem 0.875rem",
+                    fontSize: "0.75rem",
                     fontWeight: 500,
                     fontFamily: tokens.fontBody,
-                    borderRadius: tokens.radius,
+                    borderRadius: "9999px",
                     border: `1px solid ${sortBy === option.value ? "#f6aab2" : tokens.border}`,
                     backgroundColor: sortBy === option.value ? "#f6aab2" : "transparent",
-                    color: sortBy === option.value ? tokens.background : tokens.foreground,
+                    color: sortBy === option.value ? tokens.background : tokens.mutedForeground,
                     cursor: "pointer",
                     transition: "all 0.2s ease",
                   }}
@@ -573,19 +572,13 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
 
         {/* Loading State */}
         {loading && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "4rem 1rem",
-              color: tokens.mutedForeground,
-            }}
-          >
+          <div style={{ textAlign: "center", padding: "4rem 1rem", color: tokens.mutedForeground }}>
             <div
               style={{
-                width: "40px",
-                height: "40px",
-                border: "3px solid rgba(0,0,0,0.1)",
-                borderTopColor: tokens.foreground,
+                width: "36px",
+                height: "36px",
+                border: "3px solid rgba(246,170,178,0.2)",
+                borderTopColor: "#f6aab2",
                 borderRadius: "50%",
                 animation: "spin 0.8s linear infinite",
                 margin: "0 auto 1rem",
@@ -636,38 +629,27 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
                 display: "grid",
                 gridTemplateColumns: isDesktop ? "repeat(3, 1fr)" : "1fr",
                 gap: "1.5rem",
+                alignItems: "start",
               }}
             >
               {reviews.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  review={review}
-                  isDesktop={isDesktop}
-                />
+                <ReviewCard key={review.id} review={review} isDesktop={isDesktop} />
               ))}
             </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  marginTop: "3rem",
-                }}
-              >
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", marginTop: "3rem" }}>
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   style={{
                     padding: "0.5rem",
-                    border: `1px solid ${tokens.border}`,
+                    border: "none",
                     backgroundColor: "transparent",
-                    borderRadius: tokens.radius,
+                    borderRadius: "50%",
                     cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                    opacity: currentPage === 1 ? 0.5 : 1,
+                    opacity: currentPage === 1 ? 0.35 : 1,
                     display: "flex",
                     alignItems: "center",
                     color: tokens.foreground,
@@ -675,23 +657,23 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
                 >
                   <ChevronLeft />
                 </button>
-                
+
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
                     style={{
-                      width: "36px",
-                      height: "36px",
+                      width: "32px",
+                      height: "32px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      borderRadius: tokens.radius,
-                      border: `1px solid ${page === currentPage ? tokens.foreground : tokens.border}`,
-                      backgroundColor: page === currentPage ? tokens.foreground : "transparent",
-                      color: page === currentPage ? tokens.background : tokens.foreground,
+                      borderRadius: "50%",
+                      border: "none",
+                      backgroundColor: page === currentPage ? "#f6aab2" : "transparent",
+                      color: page === currentPage ? tokens.background : tokens.mutedForeground,
                       cursor: "pointer",
-                      fontSize: "0.875rem",
+                      fontSize: "0.8125rem",
                       fontWeight: 500,
                       fontFamily: tokens.fontBody,
                       transition: "all 0.2s ease",
@@ -700,17 +682,17 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
                     {page}
                   </button>
                 ))}
-                
+
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   style={{
                     padding: "0.5rem",
-                    border: `1px solid ${tokens.border}`,
+                    border: "none",
                     backgroundColor: "transparent",
-                    borderRadius: tokens.radius,
+                    borderRadius: "50%",
                     cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-                    opacity: currentPage === totalPages ? 0.5 : 1,
+                    opacity: currentPage === totalPages ? 0.35 : 1,
                     display: "flex",
                     alignItems: "center",
                     color: tokens.foreground,
@@ -730,13 +712,10 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
               textAlign: "center",
               padding: "4rem 1.5rem",
               backgroundColor: tokens.background,
-              border: `1px solid ${tokens.border}`,
               borderRadius: tokens.radius,
+              borderTop: "3px solid #f6aab2",
             }}
           >
-            <div style={{ marginBottom: "1rem", opacity: 0.3 }}>
-              <IconQuote />
-            </div>
             <h3
               style={{
                 fontFamily: tokens.fontDisplay,
@@ -748,13 +727,7 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
             >
               No Reviews Yet
             </h3>
-            <p
-              style={{
-                fontSize: "0.875rem",
-                color: tokens.mutedForeground,
-                margin: 0,
-              }}
-            >
+            <p style={{ fontSize: "0.875rem", color: tokens.mutedForeground, margin: 0 }}>
               {activeFilter
                 ? `No ${activeFilter}-star reviews yet. Be the first to leave one!`
                 : "Be the first to review this product and share your thoughts!"}
@@ -763,7 +736,6 @@ const ReviewsSection = ({ productId, reviews: initialReviews = [], stats: initia
         )}
       </div>
 
-      {/* Spin animation */}
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }

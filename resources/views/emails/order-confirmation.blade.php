@@ -31,13 +31,13 @@
       </div>
 
       <div class="content">
-        <p>Hi {{ $order->customer_name ?? optional($order->user)->name ?? 'there' }}, we've received your order and it's being processed. Here's a summary:</p>
+        <p>Hi {{ trim($order->first_name . ' ' . $order->last_name) ?: 'there' }}, we've received your order and it's being processed. Here's a summary:</p>
 
         <table>
           @foreach ($order->items as $item)
             <tr>
               <td>
-                <div class="item-name">{{ $item->product_name }}</div>
+                <div class="item-name">{{ $item->product->name ?? 'Product' }}</div>
                 <div class="item-meta">
                   {{ collect([$item->size, $item->color])->filter()->implode(' / ') ?: '—' }} · Qty {{ $item->quantity }}
                 </div>
@@ -52,34 +52,26 @@
             <td>Subtotal</td>
             <td class="item-total">₵{{ number_format($order->subtotal, 2) }}</td>
           </tr>
-          @if ($order->discount_amount > 0)
-            <tr class="summary-row">
-              <td>Discount</td>
-              <td class="item-total">-₵{{ number_format($order->discount_amount, 2) }}</td>
-            </tr>
-          @endif
-          <tr class="summary-row">
-            <td>Delivery</td>
-            <td class="item-total">{{ $order->shipping_fee > 0 ? '₵' . number_format($order->shipping_fee, 2) : 'Free' }}</td>
-          </tr>
           <tr class="summary-total">
             <td>Total</td>
-            <td class="item-total">₵{{ number_format($order->total, 2) }}</td>
+            <td class="item-total">₵{{ number_format($order->total_amount, 2) }}</td>
           </tr>
         </table>
 
-        @if ($order->shippingAddress)
-          <p style="margin-top:24px; margin-bottom:8px; font-weight:600; color:#141414;">Delivery Address</p>
-          <p class="address">
-            {{ $order->shippingAddress->line1 }}<br>
-            @if ($order->shippingAddress->line2){{ $order->shippingAddress->line2 }}<br>@endif
-            {{ collect([$order->shippingAddress->city, $order->shippingAddress->region, $order->shippingAddress->postal_code])->filter()->implode(', ') }}<br>
-            {{ $order->shippingAddress->country }}
-          </p>
+        <p style="margin-top:24px; margin-bottom:8px; font-weight:600; color:#141414;">Delivery Address</p>
+        <p class="address">
+          {{ $order->address }}<br>
+          @if ($order->apartment){{ $order->apartment }}<br>@endif
+          {{ collect([$order->city, $order->state, $order->zip])->filter()->implode(', ') }}
+        </p>
+
+        @if ($order->notes)
+          <p style="margin-top:16px; margin-bottom:8px; font-weight:600; color:#141414;">Order Notes</p>
+          <p class="address">{{ $order->notes }}</p>
         @endif
 
         <div style="text-align:center; margin-top:32px;">
-          <a href="{{ url('/account/orders/' . $order->order_number) }}" class="btn">View Order</a>
+          <a href="{{ url('/account/orders/') }}" class="btn">View Order</a>
         </div>
       </div>
     </div>

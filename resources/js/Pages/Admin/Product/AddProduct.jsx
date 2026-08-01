@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm, router } from "@inertiajs/react";
 import AdminSidebar from "@/Components/Admin/AdminSidebar";
+import { availableColors, getColorHexes } from "@/Constants/colors";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -30,25 +31,8 @@ const tokens = {
 };
 
 const availableSizes = ["10", "12", "14", "16", "18"];
-const availableColors = [
-  { name: "Black", hex: "#1a1a1a" },
-  { name: "White", hex: "#FFFFFF" },
-  { name: "Blue", hex: "#0404ff" },
-  { name: "Camel", hex: "#C19A6B" },
-  { name: "Olive", hex: "#808000" },
-  { name: "Red", hex: "#ff0000" },
-  { name: "Sage", hex: "#9CAF88" },
-  { name: "Blush", hex: "#DE5D83" },
-];
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
-// const IconBell = () => (
-//   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-//     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-//     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-//   </svg>
-// );
-
 const IconMenu = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="3" y1="6" x2="21" y2="6" />
@@ -321,13 +305,20 @@ const AddProduct = ({ categories }) => {
   });
 
   // Purely local UI state — not sent to the server directly.
-  const [newVariant, setNewVariant] = useState({ size: "", color: "", stockQuantity: "0" });
+  const [newVariant, setNewVariant] = useState({ size: "", color: "", color2: "", stockQuantity: "0" });
   const [imagePreviews, setImagePreviews] = useState([]); // data URLs, index-aligned with data.images
   const [touched, setTouched] = useState({});
   const [saveBtnHovered, setSaveBtnHovered] = useState(false);
   const [cancelBtnHovered, setCancelBtnHovered] = useState(false);
   const [addVariantBtnHovered, setAddVariantBtnHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+
+  const getColorHexes = (colorName) => {
+    if (!colorName) return [];
+    return colorName.split("/").map(
+      (part) => availableColors.find((c) => c.name === part.trim())?.hex || tokens.border
+    );
+  };
 
   useEffect(() => {
     injectFonts();
@@ -375,15 +366,19 @@ const AddProduct = ({ categories }) => {
   // ─── Variant management ─────────────────────────────────────────────────
   const handleAddVariant = () => {
     if (newVariant.size || newVariant.color) {
+      const combinedColor = newVariant.color2
+        ? `${newVariant.color}/${newVariant.color2}`
+        : newVariant.color;
+
       setData("variants", [
         ...data.variants,
         {
           size: newVariant.size,
-          color: newVariant.color,
+          color: combinedColor,
           stock_quantity: parseInt(newVariant.stockQuantity) || 0,
         },
       ]);
-      setNewVariant({ size: "", color: "", stockQuantity: "0" });
+      setNewVariant({ size: "", color: "", color2: "", stockQuantity: "0" });
     }
   };
 
@@ -453,7 +448,7 @@ const AddProduct = ({ categories }) => {
 
     if (!isValid) return;
 
-    post("/admin/products/add"), {
+    post("/admin/products/add", {
       forceFormData: true,
       onSuccess: () => {
         reset();
@@ -461,10 +456,9 @@ const AddProduct = ({ categories }) => {
         setTouched({});
       },
       onError: () => {
-        // errors are populated automatically on `errors`; scroll user to top so they're visible
         window.scrollTo({ top: 0, behavior: "smooth" });
       },
-    };
+    });
   };
 
   const handleCancel = () => {
@@ -826,7 +820,7 @@ const AddProduct = ({ categories }) => {
                   </div>
                   <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
                     {/* Add variant form */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: "0.5rem", alignItems: "end" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr auto", gap: "0.5rem", alignItems: "end" }}>
                       <div>
                         <label style={{ ...labelStyle, fontSize: "0.75rem", marginBottom: "0.25rem" }}>Size</label>
                         <CustomSelect
@@ -843,6 +837,15 @@ const AddProduct = ({ categories }) => {
                           onChange={(val) => setNewVariant((prev) => ({ ...prev, color: val }))}
                           options={colorOptions}
                           placeholder="Color"
+                        />
+                      </div>
+                      <div>
+                        <label style={{ ...labelStyle, fontSize: "0.75rem", marginBottom: "0.25rem" }}>Color 2 (optional)</label>
+                        <CustomSelect
+                          value={newVariant.color2}
+                          onChange={(val) => setNewVariant((prev) => ({ ...prev, color2: val }))}
+                          options={colorOptions.filter((c) => c.value !== newVariant.color)}
+                          placeholder="None"
                         />
                       </div>
                       <div>
@@ -894,13 +897,21 @@ const AddProduct = ({ categories }) => {
                               <span style={{ color: tokens.mutedForeground }}>/</span>
                               <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
                                 {variant.color && (
-                                  <span
-                                    style={{
-                                      width: "14px", height: "14px", borderRadius: "50%",
-                                      backgroundColor: availableColors.find((c) => c.name === variant.color)?.hex || tokens.border,
-                                      border: "1px solid rgba(0,0,0,0.2)", flexShrink: 0,
-                                    }}
-                                  />
+                                  (() => {
+                                    const hexes = getColorHexes(variant.color);
+                                    const isTwoTone = hexes.length > 1;
+                                    return (
+                                      <span
+                                        style={{
+                                          width: "14px", height: "14px", borderRadius: "50%",
+                                          background: isTwoTone
+                                            ? `linear-gradient(90deg, ${hexes[0]} 50%, ${hexes[1]} 50%)`
+                                            : hexes[0] || tokens.border,
+                                          border: "1px solid rgba(0,0,0,0.2)", flexShrink: 0,
+                                        }}
+                                      />
+                                    );
+                                  })()
                                 )}
                                 <span style={{ color: tokens.foreground }}>
                                   {variant.color || "Any color"}

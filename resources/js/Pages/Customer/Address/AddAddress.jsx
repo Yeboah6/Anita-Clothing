@@ -257,7 +257,7 @@ const AddAddress = ({ user }) => {
                     width: isDesktop ? "40px" : "36px",
                     height: isDesktop ? "40px" : "36px",
                     borderRadius: "50%",
-                    backgroundColor: tokens.foreground,
+                    backgroundColor: "#f6aab2",
                     color: tokens.background,
                     display: "flex",
                     alignItems: "center",

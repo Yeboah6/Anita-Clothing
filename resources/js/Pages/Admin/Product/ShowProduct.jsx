@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "@/Components/Admin/AdminSidebar";
+import { availableColors, getColorHexes } from "@/Constants/colors";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -27,21 +28,6 @@ const tokens = {
   green: "#16a34a",
   destructive: "#ef4444",
 };
-
-const availableColors = [
-  { name: "Black", hex: "#1a1a1a" },
-  { name: "White", hex: "#FFFFFF" },
-  { name: "Navy", hex: "#000080" },
-  { name: "Camel", hex: "#C19A6B" },
-  { name: "Champagne", hex: "#F7E7CE" },
-  { name: "Olive", hex: "#808000" },
-  { name: "Burgundy", hex: "#800020" },
-  { name: "Sage", hex: "#9CAF88" },
-  { name: "Blush", hex: "#DE5D83" },
-];
-
-const getColorHex = (colorName) =>
-  availableColors.find((c) => c.name?.toLowerCase() === (colorName || "").toLowerCase())?.hex || null;
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const IconBell = () => (
@@ -214,12 +200,6 @@ const ShowProduct = ({ product }) => {
             {isMobile ? <IconMenu /> : <IconChevronLeft style={{ transform: sidebarCollapsed ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s ease" }} />}
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
-            {/* <button aria-label="Notifications" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: tokens.radius, border: "none", background: "transparent", cursor: "pointer", color: tokens.mutedForeground, transition: "background-color 0.15s ease" }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = tokens.secondary)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-            >
-              <IconBell />
-            </button> */}
             <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#f6aab2", color: tokens.background, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: 600, fontFamily: tokens.fontBody }}>CB</div>
           </div>
         </header>
@@ -411,14 +391,27 @@ const ShowProduct = ({ product }) => {
                         </thead>
                         <tbody>
                           {variants.map((variant) => {
-                            const colorHex = getColorHex(variant.color);
+                            const hexes = getColorHexes(variant.color);
+                            const isTwoTone = hexes.length > 1;
+
                             return (
                               <tr key={variant.id} style={{ borderBottom: `1px solid ${tokens.border}` }}>
                                 <td style={{ padding: "0.5rem 0.75rem", color: tokens.foreground }}>{variant.size || "—"}</td>
                                 <td style={{ padding: "0.5rem 0.75rem" }}>
                                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                    {colorHex && (
-                                      <span style={{ width: "16px", height: "16px", borderRadius: "50%", backgroundColor: colorHex, border: "1px solid rgba(0,0,0,0.2)", flexShrink: 0 }} />
+                                    {variant.color && (
+                                      <span
+                                        style={{
+                                          width: "16px",
+                                          height: "16px",
+                                          borderRadius: "50%",
+                                          background: isTwoTone
+                                            ? `linear-gradient(90deg, ${hexes[0]} 50%, ${hexes[1]} 50%)`
+                                            : hexes[0],
+                                          border: "1px solid rgba(0,0,0,0.2)",
+                                          flexShrink: 0,
+                                        }}
+                                      />
                                     )}
                                     <span style={{ color: tokens.foreground }}>{variant.color || "—"}</span>
                                   </div>

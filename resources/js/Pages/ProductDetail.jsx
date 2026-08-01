@@ -3,6 +3,8 @@ import axios from "axios";
 import { usePage } from "@inertiajs/react";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
+import { useCart } from "@/Context/CartContext";
+import { getColorHexes } from "@/Constants/colors";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const injectFonts = () => {
@@ -31,22 +33,8 @@ const tokens = {
   destructive: "#ef4444",
 };
 
-// Same palette used on the admin product forms — DB stores color names only,
-// hex values are resolved client-side for the swatch UI.
-const availableColors = [
-  { name: "Black", hex: "#1a1a1a" },
-  { name: "White", hex: "#FFFFFF" },
-  { name: "Navy", hex: "#000080" },
-  { name: "Camel", hex: "#C19A6B" },
-  { name: "Champagne", hex: "#F7E7CE" },
-  { name: "Olive", hex: "#808000" },
-  { name: "Burgundy", hex: "#800020" },
-  { name: "Sage", hex: "#9CAF88" },
-  { name: "Blush", hex: "#DE5D83" },
-];
-
-const getColorHex = (colorName) =>
-  availableColors.find((c) => c.name?.toLowerCase() === (colorName || "").toLowerCase())?.hex || "#cccccc";
+// const getColorHex = (colorName) =>
+//   availableColors.find((c) => c.name?.toLowerCase() === (colorName || "").toLowerCase())?.hex || "#cccccc";
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const ChevronRight = () => (
@@ -214,6 +202,7 @@ const Toast = ({ message, visible, type = "success", actionLabel, onAction }) =>
 
 // ─── ProductDetail Page ──────────────────────────────────────────────────────
 const ProductDetail = ({ product }) => {
+  const { addItem } = useCart();
 
   const { props } = usePage();
   const user = props?.auth?.user ?? null;
@@ -237,9 +226,6 @@ const ProductDetail = ({ product }) => {
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
 
   const isOutOfStock = (product.stock_quantity ?? 0) <= 0;
-  // const needsSize = sizes.length > 0;
-  // const needsColor = colors.length > 0;
-  // const canAdd = !isOutOfStock && (!needsSize || selectedSize) && (!needsColor || selectedColor);
 
   const [toastAction, setToastAction] = useState(null);
 
@@ -267,13 +253,6 @@ const ProductDetail = ({ product }) => {
   useEffect(() => {
     setIsWishlisted(!!product?.isWishlisted);
   }, [product?.id, product?.isWishlisted]);
-
-  // const showToast = (msg, type = "success") => {
-  //   setToastMessage(msg);
-  //   setToastType(type);
-  //   setToastVisible(true);
-  //   setTimeout(() => setToastVisible(false), 3000);
-  // };
 
   const handleQuantityIncrease = () => {
     setQuantity(prev => Math.min(prev + 1, 99));
@@ -332,6 +311,16 @@ const ProductDetail = ({ product }) => {
         size: selectedSize || null,
         color: selectedColor || null,
         quantity: quantity,
+      });
+
+      addItem({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        size: selectedSize || null,
+        color: selectedColor || null,
+        quantity: quantity,
+        image: images?.[0] || null,
       });
 
       showToast(`${quantity > 1 ? `${quantity}× ` : ''}${product.name} added to bag`);
@@ -519,18 +508,28 @@ const ProductDetail = ({ product }) => {
                       Color: <span style={{ fontWeight: 400, color: tokens.mutedForeground }}>{selectedColor || "Select a color"}</span>
                     </p>
                     <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                      {colors.map((colorName) => (
-                        <button key={colorName} onClick={() => setSelectedColor(colorName)}
-                          style={{
-                            width: "32px", height: "32px", borderRadius: "50%", border: "2px solid transparent",
-                            backgroundColor: getColorHex(colorName), cursor: "pointer",
-                            outline: selectedColor === colorName ? `2px solid ${tokens.foreground}` : "none",
-                            outlineOffset: "2px",
-                            transition: "outline 0.15s ease, border-color 0.15s ease",
-                            borderColor: selectedColor === colorName ? tokens.background : "transparent",
-                          }}
-                          title={colorName} aria-label={colorName} />
-                      ))}
+                      {colors.map((colorName) => {
+                        const hexes = getColorHexes(colorName);
+                        const isTwoTone = hexes.length > 1;
+                                            
+                        return (
+                          <button
+                            key={colorName}
+                            onClick={() => setSelectedColor(colorName)}
+                            style={{
+                              width: "32px", height: "32px", borderRadius: "50%", border: "2px solid transparent",
+                              background: isTwoTone
+                                ? `linear-gradient(90deg, ${hexes[0]} 50%, ${hexes[1]} 50%)`
+                                : hexes[0],
+                              cursor: "pointer",
+                              outline: selectedColor === colorName ? `2px solid ${tokens.foreground}` : "none",
+                              outlineOffset: "2px",
+                              transition: "outline 0.15s ease, border-color 0.15s ease",
+                              borderColor: selectedColor === colorName ? tokens.background : "transparent",
+                            }}
+                            title={colorName} aria-label={colorName} />
+                        );
+                      })}
                     </div>
                   </div>
                 )}
