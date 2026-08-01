@@ -108,7 +108,7 @@ class CartController extends Controller
                 'first_name' => $firstName,
                 'last_name' => $lastName,
                 'email' => $user->email ?? '',
-                'phone' => $user->phone ?? $user->mobile ?? $user->contact_number ?? '',
+                'phone' => $user->phone ?? '',
             ];
 
             $addresses = Address::where('user_id', $user->id)
@@ -206,18 +206,23 @@ public function processCheckout(Request $request)
     foreach ($validated['items'] as $item) {
         $product = Product::find($item['product_id']);
         if (!$product) {
-            return back()->withErrors(['items' => 'One or more products are no longer available.']);
+            return response()->json([
+                'success' => false,
+                'errors' => ['items' => 'One or more products are no longer available.'],
+            ], 422);
         }
-        
-        // Verify price hasn't changed
+    
         $currentPrice = floatval($product->price ?? 0);
         $discountAmount = floatval($product->discount_amount ?? 0);
         $finalPrice = $discountAmount > 0 ? $currentPrice - $discountAmount : $currentPrice;
-        
+    
         if (abs($finalPrice - $item['price']) > 0.01) {
-            return back()->withErrors(['items' => 'Prices have changed. Please review your cart.']);
+            return response()->json([
+                'success' => false,
+                'errors' => ['items' => 'Prices have changed. Please review your cart.'],
+            ], 422);
         }
-        
+    
         $subtotal += $finalPrice * $item['quantity'];
     }
     
@@ -259,8 +264,6 @@ public function processCheckout(Request $request)
         Cart::where('user_id', $user->id)->delete();
     }
     
-    // You might want to send confirmation email here
-    // Mail::to($validated['email'])->send(new OrderConfirmation($order));
     Mail::to($order->email ?? $order->user->email)->send(new OrderConfirmation($order));
     
     return response()->json([
@@ -280,15 +283,32 @@ public function processCheckout(Request $request)
             'color'      => ['nullable', 'string', 'max:50'],
             'quantity'   => ['required', 'integer', 'min:1'],
         ]);
-
+    
+        $product = Product::findOrFail($validated['product_id']);
         $userId = Auth::id();
-
+    
         $cartItem = Cart::where('user_id', $userId)
             ->where('product_id', $validated['product_id'])
             ->where('size', $validated['size'] ?? null)
             ->where('color', $validated['color'] ?? null)
             ->first();
-
+    
+        $existingQty = $cartItem->quantity ?? 0;
+        $requestedTotal = $existingQty + $validated['quantity'];
+    
+        if ($product->stock_quantity <= 0 || $requestedTotal > $product->stock_quantity) {
+            $available = max($product->stock_quantity - $existingQty, 0);
+    
+            return response()->json([
+                'message' => $available > 0
+                    ? "Only {$available} left in stock."
+                    : 'This item is currently out of stock.',
+                'out_of_stock' => $available <= 0,
+                'available' => $available,
+                'product_id' => $product->id,
+            ], 422);
+        }
+    
         if ($cartItem) {
             $cartItem->increment('quantity', $validated['quantity']);
         } else {
@@ -300,7 +320,7 @@ public function processCheckout(Request $request)
                 'quantity'   => $validated['quantity'],
             ]);
         }
-
+    
         return response()->json(['message' => 'Added to cart.']);
     }
 

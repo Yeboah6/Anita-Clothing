@@ -36,12 +36,14 @@ class CustomerOrderController extends Controller
                         }
     
                         return [
+                            'id' => $item->id,
                             'name' => $item->name,
                             'size' => $item->size,
                             'color' => $item->color,
                             'quantity' => $item->quantity,
                             'price' => $item->price,
                             'image' => $imageUrl,
+                            'is_reviewed' => $item->review !== null,
                         ];
                     }),
                 ];

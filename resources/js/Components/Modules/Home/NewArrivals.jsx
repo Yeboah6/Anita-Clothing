@@ -101,7 +101,6 @@ const ProductCard = ({ product }) => {
 // ─── NewArrivals ─────────────────────────────────────────────────────────────
 const NewArrivals = ({ products = [] }) => {
   const [btnHovered, setBtnHovered] = useState(false);
-  // const newArrivals = getNewArrivals().slice(0, 4);
 
   useEffect(() => { injectFonts(); }, []);
 
@@ -152,8 +151,7 @@ const NewArrivals = ({ products = [] }) => {
               lineHeight: 1.6,
             }}
           >
-            The latest additions to our collection, crafted with care and
-            designed to inspire.
+            New In For The Girlies ✨
           </p>
         </div>
 
@@ -184,9 +182,9 @@ const NewArrivals = ({ products = [] }) => {
               fontFamily: tokens.fontBody,
               textDecoration: "none",
               borderRadius: tokens.radius,
-              border: `1px solid ${tokens.border}`,
-              backgroundColor: btnHovered ? tokens.secondary : "transparent",
-              color: tokens.foreground,
+              border: `1px solid #f6aab2`,
+              backgroundColor: btnHovered ? "#f6aab2" : "transparent",
+              color: btnHovered ? "#fff" : tokens.foreground,
               transition: "background-color 0.2s ease",
               cursor: "pointer",
             }}

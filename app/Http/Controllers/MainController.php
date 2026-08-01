@@ -14,6 +14,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\{Auth, DB};
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use App\Mail\ContactMessage;
+use App\Models\Setting;
+use Illuminate\Support\Facades\Mail;
 
 class MainController extends Controller
 {
@@ -49,7 +52,9 @@ class MainController extends Controller
         return inertia('Home', [
             'newArrivals' => $newArrivals,
             'categories' => $categories,
-            'collections' => $collections
+            'collections' => $collections,
+            'reviews' => $this->getFeaturedReviews(),
+            'reviewStats' => $this->getReviewStats(),
         ]);
     }
 
@@ -85,37 +90,32 @@ class MainController extends Controller
     public function about()
     {
         $collections = Category::all()->count();
-        
-        // Get featured/approved reviews for the about page
+
         $reviews = Review::with('user')
-            ->where('is_approved', true)
+            ->where('status', 'approved')
             ->latest()
-            ->take(6) // Limit to 6 featured reviews
+            ->take(6)
             ->get()
             ->map(function ($review) {
                 return [
                     'id' => $review->id,
                     'rating' => $review->rating,
-                    'title' => $review->title,
                     'review' => $review->review,
-                    'is_verified_purchase' => $review->is_verified_purchase,
+                    'is_verified_purchase' => true, // every review requires a real order_item_id
                     'created_at' => $review->created_at,
                     'user' => [
-                        'name' => $review->user->first_name . ' ' . $review->user->last_name,
+                        'name' => trim(($review->user->first_name ?? '') . ' ' . ($review->user->last_name ?? ''))
+                            ?: ($review->user->name ?? 'Anonymous'),
                     ],
                 ];
             });
-        
-        // Calculate overall stats from all approved reviews
+
         $stats = [
-            'average_rating' => round(Review::where('is_approved', true)->avg('rating') ?? 0, 1),
-            'total_reviews' => Review::where('is_approved', true)->count(),
-            'rating_distribution' => Review::getRatingDistribution(), // You'll need to make this static or create a helper
+            'average_rating' => round(Review::where('status', 'approved')->avg('rating') ?? 0, 1),
+            'total_reviews' => Review::where('status', 'approved')->count(),
+            'rating_distribution' => $this->getOverallRatingDistribution(),
         ];
-        
-        // Alternative: Calculate rating distribution manually
-        $stats['rating_distribution'] = $this->getOverallRatingDistribution();
-        
+
         return inertia('About', [
             'collections' => $collections,
             'reviews' => $reviews,
@@ -259,7 +259,7 @@ class MainController extends Controller
         ];
     }
 
-    public function storeReview(Request $request): JsonResponse
+    public function storeReview(Request $request)
     {
         $validated = $request->validate([
             'orderId' => ['required'],
@@ -327,18 +327,80 @@ class MainController extends Controller
 
     }
 
+    public function contact()
+    {
+        $settings = Setting::allCached();
+ 
+        return Inertia::render('Contact', [
+            'store' => [
+                'name'    => $settings->get('store_name', ''),
+                'email'   => $settings->get('support_email', ''),
+                'phone'   => $settings->get('support_phone', ''),
+                'address' => $settings->get('store_address', ''),
+            ],
+        ]);
+    }
+ 
+    /**
+     * Route: POST /contact
+     */
+    public function submit(Request $request)
+    {
+        $validated = $request->validate([
+            'name'    => ['required', 'string', 'max:255'],
+            'email'   => ['required', 'email', 'max:255'],
+            'subject' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+ 
+        $settings = Setting::allCached();
+        $supportEmail = $settings->get('support_email');
+ 
+        if ($supportEmail) {
+            Mail::to($supportEmail)->queue(new ContactMessage($validated));
+        }
+ 
+        return back()->with('success', "Thanks — we'll get back to you shortly.");
+    }
+
         
     /**
      * Get overall rating distribution for all approved reviews.
      */
     private function getOverallRatingDistribution(): array
     {
-        $distribution = [];
-        for ($i = 5; $i >= 1; $i--) {
-            $distribution[$i] = Review::where('is_approved', true)
-                ->where('rating', $i)
-                ->count();
-        }
-        return $distribution;
+        $counts = Review::where('status', 'approved')
+            ->selectRaw('rating, count(*) as total')
+            ->groupBy('rating')
+            ->pluck('total', 'rating');
+    
+        return collect(range(1, 5))->mapWithKeys(fn ($r) => [$r => $counts[$r] ?? 0])->toArray();
+    }
+
+    private function getFeaturedReviews(int $limit = 6)
+    {
+        return Review::with('user')
+            ->where('status', 'approved')
+            ->latest()
+            ->take($limit)
+            ->get()
+            ->map(fn ($review) => [
+                'id' => $review->id,
+                'rating' => $review->rating,
+                'review' => $review->review,
+                'created_at' => $review->created_at,
+                'user' => [
+                    'name' => trim(($review->user->first_name ?? '') . ' ' . ($review->user->last_name ?? ''))
+                        ?: ($review->user->name ?? 'Anonymous'),
+                ],
+            ]);
+    }
+
+    private function getReviewStats(): array
+    {
+        return [
+            'average_rating' => round(Review::where('status', 'approved')->avg('rating') ?? 0, 1),
+            'total_reviews' => Review::where('status', 'approved')->count(),
+        ];
     }
 }

@@ -332,7 +332,7 @@ const AccountAddresses = ({ addresses = [], user }) => {
                         fontFamily: tokens.fontBody,
                         borderRadius: tokens.radius,
                         border: "none",
-                        backgroundColor: tokens.foreground,
+                        backgroundColor: "#f6aab2",
                         color: tokens.background,
                         cursor: "pointer",
                         opacity: addAddressBtnHovered ? 0.9 : 1,

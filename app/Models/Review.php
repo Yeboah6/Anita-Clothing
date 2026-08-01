@@ -40,8 +40,14 @@ class Review extends Model
         return $this->belongsTo(OrderItem::class, 'order_item_id');
     }
 
+    // public function product()
+    // {
+    //     return $this->belongsTo(Product::class, 'product_id');
+    // }
+
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
+        return $query->where('status', 'approved');
     }
 }

@@ -66,4 +66,24 @@ class Product extends Model
         return $slug;
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'product_id');
+    }
+    
+    public function approvedReviews()
+    {
+        return $this->reviews()->approved()->latest();
+    }
+    
+    public function getAverageRatingAttribute(): float
+    {
+        return round((float) $this->approvedReviews()->avg('rating'), 1);
+    }
+    
+    public function getReviewCountAttribute(): int
+    {
+        return $this->approvedReviews()->count();
+    }
+
 }

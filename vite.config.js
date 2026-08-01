@@ -25,9 +25,8 @@ export default defineConfig({
     },
     // server: {
     //     host: '0.0.0.0',
-    //     port: 5173,
+    //     hmr: {
+    //         host: '192.168.2.7' // Replace with your actual local IP (e.g., 192.168.1.50)
+    //     },
     // },
-    // hmr: {
-    //     host: '192.168.0.141'
-    // }
 });

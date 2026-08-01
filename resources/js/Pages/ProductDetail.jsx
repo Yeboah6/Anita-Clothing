@@ -75,7 +75,7 @@ const IconHeart = ({ filled }) => (
     height="18"
     viewBox="0 0 24 24"
     fill={filled ? "currentColor" : "none"}
-    stroke="currentColor"
+    stroke="#f6aab2"
     strokeWidth="1.75"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -183,17 +183,31 @@ const ProductCard = ({ product }) => {
 };
 
 // ─── Toast Component ─────────────────────────────────────────────────────────
-const Toast = ({ message, visible, type = "success" }) => {
+const Toast = ({ message, visible, type = "success", actionLabel, onAction }) => {
   if (!visible) return null;
   return (
     <div style={{
       position: "fixed", bottom: "2rem", left: "50%", transform: "translateX(-50%)", zIndex: 100,
-      backgroundColor: type === "error" ? "#ef4444" : tokens.foreground, 
+      backgroundColor: type === "error" ? "#ef4444" : tokens.foreground,
       color: tokens.background, padding: "0.75rem 1.5rem",
       borderRadius: tokens.radius, fontFamily: tokens.fontBody, fontSize: "0.875rem",
       fontWeight: 500, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", animation: "slideUp 0.3s ease",
+      display: "flex", alignItems: "center", gap: "1rem",
     }}>
-      {message}
+      <span>{message}</span>
+      {actionLabel && onAction && (
+        <button
+          onClick={onAction}
+          style={{
+            background: "none", border: "none", padding: 0,
+            color: tokens.background, textDecoration: "underline",
+            fontWeight: 600, fontSize: "0.875rem", cursor: "pointer",
+            fontFamily: tokens.fontBody, whiteSpace: "nowrap",
+          }}
+        >
+          {actionLabel}
+        </button>
+      )}
     </div>
   );
 };
@@ -222,6 +236,21 @@ const ProductDetail = ({ product }) => {
   const [isWishlisted, setIsWishlisted] = useState(!!product?.isWishlisted);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
 
+  const isOutOfStock = (product.stock_quantity ?? 0) <= 0;
+  // const needsSize = sizes.length > 0;
+  // const needsColor = colors.length > 0;
+  // const canAdd = !isOutOfStock && (!needsSize || selectedSize) && (!needsColor || selectedColor);
+
+  const [toastAction, setToastAction] = useState(null);
+
+  const showToast = (msg, type = "success", action = null) => {
+    setToastMessage(msg);
+    setToastType(type);
+    setToastAction(action);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 4000);
+  };
+
   useEffect(() => {
     injectFonts();
     const handleResize = () => setIsDesktop(window.innerWidth >= 768);
@@ -239,12 +268,12 @@ const ProductDetail = ({ product }) => {
     setIsWishlisted(!!product?.isWishlisted);
   }, [product?.id, product?.isWishlisted]);
 
-  const showToast = (msg, type = "success") => {
-    setToastMessage(msg);
-    setToastType(type);
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 3000);
-  };
+  // const showToast = (msg, type = "success") => {
+  //   setToastMessage(msg);
+  //   setToastType(type);
+  //   setToastVisible(true);
+  //   setTimeout(() => setToastVisible(false), 3000);
+  // };
 
   const handleQuantityIncrease = () => {
     setQuantity(prev => Math.min(prev + 1, 99));
@@ -276,13 +305,17 @@ const ProductDetail = ({ product }) => {
   const { category, relatedProducts = [], images = [], sizes = [], colors = [] } = product;
 
   const handleAddToBag = async () => {
-    const needsSize = sizes.length > 0;
-    const needsColor = colors.length > 0;
-    const canAdd = (!needsSize || selectedSize) && (!needsColor || selectedColor);
+    if (isOutOfStock) {
+      showToast(`${product.name} is out of stock`, "error", {
+        label: "Add to Wishlist",
+        onClick: handleToggleWishlist,
+      });
+      return;
+    }
 
-    if (!canAdd || isAddingToCart) return;
+    const canAddNow = (!needsSize || selectedSize) && (!needsColor || selectedColor);
+    if (!canAddNow || isAddingToCart) return;
 
-    // Require login before anything is added to the cart
     if (!isAuthenticated) {
       showToast("Please log in to add items to your bag", "error");
       setTimeout(() => {
@@ -304,8 +337,19 @@ const ProductDetail = ({ product }) => {
       showToast(`${quantity > 1 ? `${quantity}× ` : ''}${product.name} added to bag`);
       setQuantity(1);
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      showToast("Failed to add item to cart. Please try again.", "error");
+      const data = error.response?.data;
+      if (error.response?.status === 422 && data?.out_of_stock) {
+        showToast(data.message || `${product.name} is out of stock`, "error", {
+          label: "Add to Wishlist",
+          onClick: handleToggleWishlist,
+        });
+      } else if (error.response?.status === 422 && data?.message) {
+        // partial stock case, e.g. "Only 2 left in stock."
+        showToast(data.message, "error");
+      } else {
+        console.error("Error adding to cart:", error);
+        showToast("Failed to add item to cart. Please try again.", "error");
+      }
     } finally {
       setIsAddingToCart(false);
     }
@@ -351,7 +395,13 @@ const ProductDetail = ({ product }) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
       <Header />
-      <Toast message={toastMessage} visible={toastVisible} type={toastType} />
+      <Toast
+        message={toastMessage}
+        visible={toastVisible}
+        type={toastType}
+        actionLabel={toastAction?.label}
+        onAction={toastAction?.onClick}
+      />
       <main style={{ flex: 1 }}>
         {/* Breadcrumb */}
         <section style={{ borderBottom: `1px solid ${tokens.border}` }}>
@@ -531,13 +581,13 @@ const ProductDetail = ({ product }) => {
                 {/* Add to Bag */}
                 <button
                   onClick={handleAddToBag}
-                  disabled={(isAuthenticated && !canAdd) || isAddingToCart}
+                  disabled={(isAuthenticated && !canAdd && !isOutOfStock) || isAddingToCart}
                   style={{
                     width: "100%", height: "48px", fontSize: "0.9375rem", fontWeight: 500,
                     fontFamily: tokens.fontBody, borderRadius: tokens.radius, border: "none",
-                    backgroundColor: tokens.foreground, color: tokens.background,
-                    cursor: ((isAuthenticated && !canAdd) || isAddingToCart) ? "not-allowed" : "pointer",
-                    opacity: ((isAuthenticated && !canAdd) || isAddingToCart) ? 0.5 : 1,
+                    backgroundColor: "#f6aab2", color: tokens.background,
+                    cursor: ((isAuthenticated && !canAdd && !isOutOfStock) || isAddingToCart) ? "not-allowed" : "pointer",
+                    opacity: ((isAuthenticated && !canAdd && !isOutOfStock) || isAddingToCart) ? 0.5 : 1,
                     transition: "opacity 0.2s ease",
                     position: "relative",
                   }}
@@ -551,6 +601,8 @@ const ProductDetail = ({ product }) => {
                       }} />
                       Adding...
                     </span>
+                  ) : isOutOfStock ? (
+                    "Out of Stock — Add to Wishlist"
                   ) : !isAuthenticated ? (
                     "Log In to Add to Bag"
                   ) : !canAdd ? (
@@ -575,7 +627,7 @@ const ProductDetail = ({ product }) => {
                     fontWeight: 500,
                     fontFamily: tokens.fontBody,
                     borderRadius: tokens.radius,
-                    border: `1px solid ${tokens.foreground}`,
+                    border: `1px solid #f6aab2`,
                     backgroundColor: "transparent",
                     color: tokens.foreground,
                     cursor: isTogglingWishlist ? "default" : "pointer",

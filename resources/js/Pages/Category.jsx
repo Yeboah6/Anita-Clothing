@@ -1,3 +1,4 @@
+import SEO from '@/Components/SEO';
 import React, { useState, useEffect } from "react";
 import Header from '@/Components/Layout/Header';
 import Footer from '@/Components/Layout/Footer';
@@ -133,8 +134,6 @@ const ProductCard = ({ product }) => {
 // ─── Category Page ───────────────────────────────────────────────────────────
 const Category = ({ category, products = [] }) => {
   const slug = getSlugFromURL();
-  // const category = getCategoryBySlug(slug || "");
-  // const categoryProducts = getProductsByCategory(slug || "");
   const [breadcrumbHomeHovered, setBreadcrumbHomeHovered] = useState(false);
   const [breadcrumbCollectionsHovered, setBreadcrumbCollectionsHovered] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -157,6 +156,7 @@ const Category = ({ category, products = [] }) => {
   if (!category) {
     return (
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
+        <SEO title="Category Not Found" />
         <Header />
         <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ textAlign: "center" }}>
@@ -180,6 +180,12 @@ const Category = ({ category, products = [] }) => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: tokens.fontBody }}>
+      <SEO
+        title={category.name}
+        description={`Shop ${category.name} — ${products.length} ${products.length === 1 ? "piece" : "pieces"} at CuteBloom.`}
+        image={category.image}
+        url={`/category/${category.slug}`}
+      />
       <Header />
 
       <main style={{ flex: 1 }}>

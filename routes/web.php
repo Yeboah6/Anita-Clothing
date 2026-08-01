@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\SettingsController;
 
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\WishlistController;
@@ -33,6 +35,9 @@ Route::get('/category/{slug}', [MainController::class, 'category'])->name('categ
 Route::get('/product/{slug}', [MainController::class, 'product'])->name('product');
 
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+
+Route::get('/contact', [MainController::class, 'contact'])->name('contact');
+Route::post('/contact', [MainController::class, 'submit'])->name('contact.submit');
 
 // Webhook must be excluded from CSRF protection (see note below)
 Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
@@ -124,13 +129,20 @@ Route::middleware('auth')->group(function () {
         Route::delete('/admin/customers/{customer}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy');
         Route::put('/admin/customers/{customer}', [CustomerController::class, 'reactivate'])->name('admin.customers.reactivate');
 
-        // Route::get('/admin/categories', [CategoryController::class, 'Index']);
+        Route::get('/admin/reviews', [ReviewController::class, 'index'])->name('admin.reviews.index');
+        Route::patch('/admin/reviews/{review}/status', [ReviewController::class, 'updateStatus'])->name('admin.reviews.update-status');
+        Route::delete('/admin/reviews/{review}', [ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
 
         Route::get('/admin/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
         Route::get('/admin/payments/export', [AdminPaymentController::class, 'export'])->name('admin.payments.export');
 
         Route::get('/admin/categories/add', [CategoryController::class, 'create'])->name('admin.categories.add');
         Route::post('/admin/categories/add', [CategoryController::class, 'store'])->name('admin.categories.store');
+
+        Route::get('/admin/settings', [SettingsController::class, 'index'])->name('admin.settings');
+        Route::patch('/admin/settings/general', [SettingsController::class, 'updateGeneral'])->name('admin.settings.general');
+        Route::patch('/admin/settings/account', [SettingsController::class, 'updateAccount'])->name('admin.settings.account');
+        Route::put('/admin/settings/password', [SettingsController::class, 'updatePassword'])->name('admin.settings.password');
     });
 
 });

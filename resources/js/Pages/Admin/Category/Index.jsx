@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import { useForm } from "@inertiajs/react";
 import AdminSidebar from "@/Components/Admin/AdminSidebar";
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
@@ -29,15 +30,8 @@ const tokens = {
 };
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
-const IconBell = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-  </svg>
-);
-
 const IconMenu = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="3" y1="6" x2="21" y2="6" />
     <line x1="3" y1="12" x2="21" y2="12" />
     <line x1="3" y1="18" x2="21" y2="18" />
@@ -45,13 +39,13 @@ const IconMenu = () => (
 );
 
 const IconChevronLeft = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <polyline points="15 18 9 12 15 6" />
   </svg>
 );
 
 const IconRefresh = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f6aab2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <polyline points="23 4 23 10 17 10" />
     <polyline points="1 20 1 14 7 14" />
     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
@@ -84,28 +78,23 @@ const labelStyle = {
 };
 
 // ─── AddCategory Page ────────────────────────────────────────────────────────
-const AddCategory = () => {
+const AddCategory = ({ storeUrl = "/admin/categories/add" }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeUrl, setActiveUrl] = useState("/admin/categories/add");
 
-  // Form state
-  const [form, setForm] = useState({
+  const [touched, setTouched] = useState({});
+  const [saveBtnHovered, setSaveBtnHovered] = useState(false);
+  const [cancelBtnHovered, setCancelBtnHovered] = useState(false);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+
+  // ─── Inertia form ──────────────────────────────────────────────────────────
+  const { data, setData, post, processing, errors, isDirty, reset, clearErrors } = useForm({
     name: "",
     slug: "",
   });
 
-  // UI state
-  const [touched, setTouched] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveBtnHovered, setSaveBtnHovered] = useState(false);
-  const [cancelBtnHovered, setCancelBtnHovered] = useState(false);
-  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
-  const [slugError, setSlugError] = useState("");
-
-  // Auto-generate slug from name
   const generateSlug = (name) => {
     return name
       .toLowerCase()
@@ -142,22 +131,20 @@ const AddCategory = () => {
 
   const handleChange = (field) => (e) => {
     const value = e.target.value;
-    setForm((prev) => {
-      const updated = { ...prev, [field]: value };
-      // Auto-generate slug when name changes and slug hasn't been manually edited
-      if (field === "name" && !slugManuallyEdited) {
-        updated.slug = generateSlug(value);
-      }
-      return updated;
-    });
 
-    if (!touched[field]) setTouched((prev) => ({ ...prev, [field]: true }));
-
-    // Clear slug error when user types
-    if (field === "slug") {
-      setSlugError("");
+    if (field === "name") {
+      setData((prevData) => ({
+        ...prevData,
+        name: value,
+        slug: slugManuallyEdited ? prevData.slug : generateSlug(value),
+      }));
+    } else {
+      setData("slug", value);
       setSlugManuallyEdited(true);
     }
+
+    if (!touched[field]) setTouched((prev) => ({ ...prev, [field]: true }));
+    if (errors[field]) clearErrors(field);
   };
 
   const handleBlur = (field) => () => {
@@ -165,91 +152,41 @@ const AddCategory = () => {
   };
 
   const handleRegenerateSlug = () => {
-    setForm((prev) => ({
-      ...prev,
-      slug: generateSlug(prev.name),
-    }));
+    setData("slug", generateSlug(data.name));
     setSlugManuallyEdited(false);
-    setSlugError("");
+    clearErrors("slug");
     if (!touched.slug) setTouched((prev) => ({ ...prev, slug: true }));
   };
 
-  // Validation
-  const errors = {};
-  if (touched.name && !form.name.trim()) errors.name = "Category name is required";
-  if (touched.slug && !form.slug.trim()) errors.slug = "Slug is required";
-  if (touched.slug && form.slug.trim() && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug)) {
-    errors.slug = "Slug must contain only lowercase letters, numbers, and hyphens";
+  // Client-side validation (mirrors server rules for instant feedback)
+  const clientErrors = {};
+  if (touched.name && !data.name.trim()) clientErrors.name = "Category name is required";
+  if (touched.slug && !data.slug.trim()) clientErrors.slug = "Slug is required";
+  if (touched.slug && data.slug.trim() && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(data.slug)) {
+    clientErrors.slug = "Slug must contain only lowercase letters, numbers, and hyphens";
   }
 
-  const isValid =
-    form.name.trim() &&
-    form.slug.trim() &&
-    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug) &&
-    !slugError;
+  // Server errors take precedence once returned
+  const nameError = errors.name || clientErrors.name;
+  const slugError = errors.slug || clientErrors.slug;
 
-  const handleSubmit = async (e) => {
-      e.preventDefault();
-      setSubmitted(true);
-      setTouched({ name: true, slug: true });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setTouched({ name: true, slug: true });
 
-      // Client-side validation
-      const errors = {};
-      if (!form.name.trim()) errors.name = "Category name is required";
-      if (!form.slug.trim()) errors.slug = "Slug is required";
-      else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug))
-        errors.slug = "Slug must contain only lowercase letters, numbers, and hyphens";
+    if (!data.name.trim() || !data.slug.trim() || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(data.slug)) {
+      return;
+    }
 
-      if (Object.keys(errors).length > 0) return;
-
-      setIsSaving(true);
-      setSlugError("");
-
-      try {
-        const token = localStorage.getItem("auth_token");
-        const response = await fetch("/admin/categories/add", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: form.name.trim(),
-            slug: form.slug.trim(),
-          }),
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          // Success
-          alert("Category created successfully!");
-          setForm({ name: "", slug: "" });
-          setTouched({});
-          setSubmitted(false);
-          setSlugManuallyEdited(false);
-        } else if (data.errors) {
-          // Validation errors from server
-          if (data.errors.name) {
-            // Highlight name error
-            setTouched((prev) => ({ ...prev, name: true }));
-            console.error(data.errors.name[0]);
-          }
-          if (data.errors.slug) {
-            setSlugError(data.errors.slug[0]);
-            setTouched((prev) => ({ ...prev, slug: true }));
-          }
-        } else if (data.message) {
-          alert(data.message);
-        }
-      } catch (error) {
-        console.error("Network error:", error);
-        alert("Network error. Please try again.");
-      } finally {
-        setIsSaving(false);
-      }
-    };
+    post(storeUrl, {
+      preserveScroll: true,
+      onSuccess: () => {
+        reset();
+        setTouched({});
+        setSlugManuallyEdited(false);
+      },
+    });
+  };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: tokens.fontBody, backgroundColor: "rgba(245,245,245,0.6)" }}>
@@ -326,32 +263,12 @@ const AddCategory = () => {
           </button>
 
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
-            <button
-              aria-label="Notifications"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "36px",
-                height: "36px",
-                borderRadius: tokens.radius,
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                color: tokens.mutedForeground,
-                transition: "background-color 0.15s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = tokens.secondary)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-            >
-              <IconBell />
-            </button>
             <div
               style={{
                 width: "32px",
                 height: "32px",
                 borderRadius: "50%",
-                backgroundColor: tokens.foreground,
+                backgroundColor: "#f6aab2",
                 color: tokens.background,
                 display: "flex",
                 alignItems: "center",
@@ -361,7 +278,7 @@ const AddCategory = () => {
                 fontFamily: tokens.fontBody,
               }}
             >
-              AN
+              CB
             </div>
           </div>
         </header>
@@ -410,8 +327,9 @@ const AddCategory = () => {
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleSubmit}
-                disabled={isSaving}
+                disabled={processing || !isDirty}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -421,17 +339,17 @@ const AddCategory = () => {
                   fontFamily: tokens.fontBody,
                   borderRadius: tokens.radius,
                   border: "none",
-                  backgroundColor: tokens.foreground,
+                  backgroundColor: "#f6aab2",
                   color: tokens.background,
-                  cursor: isSaving ? "not-allowed" : "pointer",
-                  opacity: isSaving ? 0.7 : saveBtnHovered ? 0.9 : 1,
+                  cursor: processing || !isDirty ? "not-allowed" : "pointer",
+                  opacity: processing || !isDirty ? 0.6 : saveBtnHovered ? 0.9 : 1,
                   transition: "opacity 0.2s ease",
                   whiteSpace: "nowrap",
                 }}
                 onMouseEnter={() => setSaveBtnHovered(true)}
                 onMouseLeave={() => setSaveBtnHovered(false)}
               >
-                {isSaving ? "Saving..." : "Save Category"}
+                {processing ? "Saving..." : "Save Category"}
               </button>
             </div>
           </div>
@@ -462,23 +380,20 @@ const AddCategory = () => {
                     <input
                       id="name"
                       type="text"
-                      value={form.name}
+                      value={data.name}
                       onChange={handleChange("name")}
                       onBlur={handleBlur("name")}
                       placeholder="e.g. Summer Dresses"
                       style={{
                         ...inputStyle,
-                        borderColor: errors.name ? tokens.destructive : tokens.border,
+                        borderColor: nameError ? tokens.destructive : tokens.border,
                       }}
                       onFocus={(e) => {
-                        if (!errors.name) e.target.style.borderColor = tokens.foreground;
-                      }}
-                      onBlur={(e) => {
-                        if (!errors.name) e.target.style.borderColor = tokens.border;
+                        if (!nameError) e.target.style.borderColor = tokens.foreground;
                       }}
                     />
-                    {errors.name && (
-                      <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{errors.name}</p>
+                    {nameError && (
+                      <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>{nameError}</p>
                     )}
                   </div>
 
@@ -490,19 +405,16 @@ const AddCategory = () => {
                         <input
                           id="slug"
                           type="text"
-                          value={form.slug}
+                          value={data.slug}
                           onChange={handleChange("slug")}
                           onBlur={handleBlur("slug")}
                           placeholder="e.g. summer-dresses"
                           style={{
                             ...inputStyle,
-                            borderColor: (errors.slug || slugError) ? tokens.destructive : tokens.border,
+                            borderColor: slugError ? tokens.destructive : tokens.border,
                           }}
                           onFocus={(e) => {
-                            if (!errors.slug && !slugError) e.target.style.borderColor = tokens.foreground;
-                          }}
-                          onBlur={(e) => {
-                            if (!errors.slug && !slugError) e.target.style.borderColor = tokens.border;
+                            if (!slugError) e.target.style.borderColor = tokens.foreground;
                           }}
                         />
                       </div>
@@ -530,9 +442,9 @@ const AddCategory = () => {
                         <IconRefresh />
                       </button>
                     </div>
-                    {(errors.slug || slugError) && (
+                    {slugError && (
                       <p style={{ fontSize: "0.75rem", color: tokens.destructive, margin: "4px 0 0" }}>
-                        {errors.slug || slugError}
+                        {slugError}
                       </p>
                     )}
                     <p style={{ fontSize: "0.75rem", color: tokens.mutedForeground, margin: "4px 0 0" }}>
@@ -564,8 +476,8 @@ const AddCategory = () => {
                     fontWeight: 500,
                     fontFamily: tokens.fontBody,
                     borderRadius: tokens.radius,
-                    border: `1px solid ${tokens.border}`,
-                    backgroundColor: cancelBtnHovered ? tokens.secondary : "transparent",
+                    border: `1px solid #f6aab2`,
+                    backgroundColor: cancelBtnHovered ? "#f6aab2" : "transparent",
                     color: tokens.foreground,
                     cursor: "pointer",
                     transition: "background-color 0.2s ease",
@@ -578,7 +490,7 @@ const AddCategory = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSaving}
+                  disabled={processing || !isDirty}
                   style={{
                     padding: "0.5rem 1.5rem",
                     fontSize: "0.875rem",
@@ -586,16 +498,16 @@ const AddCategory = () => {
                     fontFamily: tokens.fontBody,
                     borderRadius: tokens.radius,
                     border: "none",
-                    backgroundColor: tokens.foreground,
+                    backgroundColor: "#f6aab2",
                     color: tokens.background,
-                    cursor: isSaving ? "not-allowed" : "pointer",
-                    opacity: isSaving ? 0.7 : saveBtnHovered ? 0.9 : 1,
+                    cursor: processing || !isDirty ? "not-allowed" : "pointer",
+                    opacity: processing || !isDirty ? 0.6 : saveBtnHovered ? 0.9 : 1,
                     transition: "opacity 0.2s ease",
                   }}
                   onMouseEnter={() => setSaveBtnHovered(true)}
                   onMouseLeave={() => setSaveBtnHovered(false)}
                 >
-                  {isSaving ? "Saving..." : "Save Category"}
+                  {processing ? "Saving..." : "Save Category"}
                 </button>
               </div>
             </div>
